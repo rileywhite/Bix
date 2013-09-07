@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bix.Mix.Validation
 {
-    public interface IValidates
+    public interface IValidates : IMixes
     {
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bix.Mix.Validation
 {
-    class ValidatesAttribute
+    public class ValidatesAttribute
     {
     }
 }

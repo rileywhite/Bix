@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bix.Mix
+namespace Bix.Mix.Validation
 {
-    public class MixContext
+    public interface IValidationRule<IValidates>
     {
     }
 }
