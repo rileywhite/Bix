@@ -8,7 +8,8 @@ using Bix.Mix.Validate;
 
 namespace Bix.Pix.Luffa
 {
-    internal class Validator : IValidator
+    internal class ValidationRule<TValidates> : IValidationRule<TValidates>
+        where TValidates : IValidates
     {
     }
 }

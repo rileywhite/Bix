@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Bix.Pix.Luffa")]
+[assembly: AssemblyTitle("Bix.Pix.ChiaTests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Bix.Pix.Luffa")]
+[assembly: AssemblyProduct("Bix.Pix.ChiaTests")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("8a849a5a-dae7-438f-b0ed-17fbf26f65b5")]
+[assembly: Guid("3a48647e-719c-47da-a9a0-e2ab94b8651b")]
 
 // Version information for an assembly consists of the following four values:
 //

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bix.Mix.Validation
+namespace Bix.Mix.Validate
 {
     public interface IValidates : IMixes
     {

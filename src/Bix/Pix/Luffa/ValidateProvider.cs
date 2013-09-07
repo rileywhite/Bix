@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pix
+using Bix.Mix.Validate;
+
+namespace Bix.Pix.Luffa
 {
-    class ValidationProvider
+    internal class ValidateProvider : IValidateProvider
     {
     }
 }

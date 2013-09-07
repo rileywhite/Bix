@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bix.Mix.Encapsulation
+namespace Bix.Mix.Encapsulate
 {
     public interface IEncapsulateProvider
     {

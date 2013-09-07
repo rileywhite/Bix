@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bix.Mix.Validate
+using Bix.Mix.Encapsulate;
+
+namespace Bix.Pix.Chia
 {
-    public interface IValidateProvider : IMixProvider
+    internal class Encapsulator : IEncapsulator
     {
     }
 }
