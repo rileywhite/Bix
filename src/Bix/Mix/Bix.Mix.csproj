@@ -47,6 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Encapsulate\EncapsulatedAttribute.cs" />
+    <Compile Include="Encapsulate\EncapsulatesAttribute.cs" />
     <Compile Include="Encapsulate\IEncapsulateProvider.cs" />
     <Compile Include="Encapsulate\IEncapsulates.cs" />
     <Compile Include="Encapsulate\IEncapsulator.cs" />
@@ -58,9 +60,11 @@
     <Compile Include="RequiresPostSharp.cs" />
     <Compile Include="Validate\IValidates.cs" />
     <Compile Include="Validate\IValidateProvider.cs" />
-    <Compile Include="Validate\IValidationRule.cs" />
+    <Compile Include="Validate\IValidateRule.cs" />
     <Compile Include="Validate\IValidator.cs" />
     <Compile Include="Validate\ValidatesAttribute.cs" />
+    <Compile Include="Validate\IValidateRuleSource.cs" />
+    <Compile Include="Validate\AutoRegisterValidateRulesAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

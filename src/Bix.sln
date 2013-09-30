@@ -16,7 +16,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Pix.LuffaTests", "Bix\P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Pix.Chia", "Bix\Pix\Chia\Bix.Pix.Chia.csproj", "{6C242639-4017-4F4C-824E-F84079A5B015}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Pix.ChiaTests", "Bix\Pix\ChiaTests\Bix.Pix.ChiaTests.csproj", "{ADC04C03-9D94-4800-B9C3-9BE40FD716F9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Pix.ChiaTests", "Bix\Pix\ChiaTests\Bix.Pix.ChiaTests.csproj", "{E21D6198-A359-402E-993F-93A5D7D5F17B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,10 +40,10 @@ Global
 		{6C242639-4017-4F4C-824E-F84079A5B015}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C242639-4017-4F4C-824E-F84079A5B015}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C242639-4017-4F4C-824E-F84079A5B015}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ADC04C03-9D94-4800-B9C3-9BE40FD716F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ADC04C03-9D94-4800-B9C3-9BE40FD716F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ADC04C03-9D94-4800-B9C3-9BE40FD716F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ADC04C03-9D94-4800-B9C3-9BE40FD716F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E21D6198-A359-402E-993F-93A5D7D5F17B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E21D6198-A359-402E-993F-93A5D7D5F17B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E21D6198-A359-402E-993F-93A5D7D5F17B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E21D6198-A359-402E-993F-93A5D7D5F17B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

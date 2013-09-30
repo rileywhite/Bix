@@ -23,7 +23,11 @@ using System.Threading.Tasks;
 
 namespace Bix.Mix.Validate
 {
-    public interface IValidationRule<TValidates>
+    public interface IValidateRule
+    {
+    }
+
+    public interface IValidationRule<TValidates> : IValidateRule
         where TValidates : IValidates
     {
     }
