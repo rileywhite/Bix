@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 using Bix.Mix.Validate;
 
-namespace Bix.Pix.Luffa
+namespace Bix.Picks.Luffa
 {
     internal class ValidateProvider : IValidateProvider
     {

@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 using Bix.Mix.Encapsulate;
 
-namespace Bix.Pix.Chia
+namespace Bix.Picks.Chia
 {
     internal class Encapsulator : IEncapsulator
     {

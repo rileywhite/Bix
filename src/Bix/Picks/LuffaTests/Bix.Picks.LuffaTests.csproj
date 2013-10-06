@@ -6,8 +6,8 @@
     <ProjectGuid>{510566DE-C116-4C2A-81F3-C7C6C82FF2CB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bix.Pix.LuffaTests</RootNamespace>
-    <AssemblyName>Bix.Pix.LuffaTests</AssemblyName>
+    <RootNamespace>Bix.Picks.LuffaTests</RootNamespace>
+    <AssemblyName>Bix.Picks.LuffaTests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -60,7 +60,7 @@
       <Project>{6f93ed35-44d0-46ff-9b51-d0e374104c3d}</Project>
       <Name>Bix.Mix</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Luffa\Bix.Pix.Luffa.csproj">
+    <ProjectReference Include="..\Luffa\Bix.Picks.Luffa.csproj">
       <Project>{a6523f85-9e3a-48fc-b374-6be5d1fac76e}</Project>
       <Name>Bix.Pix.Luffa</Name>
     </ProjectReference>

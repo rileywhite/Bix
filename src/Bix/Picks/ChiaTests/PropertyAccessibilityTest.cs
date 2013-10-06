@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace Bix.Pix.ChiaTests
+namespace Bix.Picks.ChiaTests
 {
     [TestClass]
     public class PropertyAccessibilityTest

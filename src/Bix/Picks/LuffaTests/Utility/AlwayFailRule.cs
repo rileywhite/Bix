@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Bix.Mix.Validate;
 
-namespace Bix.Pix.LuffaTests.Utility
+namespace Bix.Picks.LuffaTests.Utility
 {
     public class ValidationAlwaysFails : IValidates
     {

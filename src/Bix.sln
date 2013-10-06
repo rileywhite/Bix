@@ -10,13 +10,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{4093DE
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Pix.Luffa", "Bix\Pix\Luffa\Bix.Pix.Luffa.csproj", "{A6523F85-9E3A-48FC-B374-6BE5D1FAC76E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Picks.Luffa", "Bix\Picks\Luffa\Bix.Picks.Luffa.csproj", "{A6523F85-9E3A-48FC-B374-6BE5D1FAC76E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Pix.LuffaTests", "Bix\Pix\LuffaTests\Bix.Pix.LuffaTests.csproj", "{510566DE-C116-4C2A-81F3-C7C6C82FF2CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Picks.LuffaTests", "Bix\Picks\LuffaTests\Bix.Picks.LuffaTests.csproj", "{510566DE-C116-4C2A-81F3-C7C6C82FF2CB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Pix.Chia", "Bix\Pix\Chia\Bix.Pix.Chia.csproj", "{6C242639-4017-4F4C-824E-F84079A5B015}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Picks.Chia", "Bix\Picks\Chia\Bix.Picks.Chia.csproj", "{6C242639-4017-4F4C-824E-F84079A5B015}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Pix.ChiaTests", "Bix\Pix\ChiaTests\Bix.Pix.ChiaTests.csproj", "{E21D6198-A359-402E-993F-93A5D7D5F17B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Picks.ChiaTests", "Bix\Picks\ChiaTests\Bix.Picks.ChiaTests.csproj", "{E21D6198-A359-402E-993F-93A5D7D5F17B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

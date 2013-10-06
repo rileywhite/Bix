@@ -7,8 +7,8 @@
     <ProjectGuid>{6C242639-4017-4F4C-824E-F84079A5B015}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bix.Pix.Chia</RootNamespace>
-    <AssemblyName>Bix.Pix.Chia</AssemblyName>
+    <RootNamespace>Bix.Picks.Chia</RootNamespace>
+    <AssemblyName>Bix.Picks.Chia</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

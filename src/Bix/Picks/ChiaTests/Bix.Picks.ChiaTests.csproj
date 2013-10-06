@@ -6,8 +6,8 @@
     <ProjectGuid>{E21D6198-A359-402E-993F-93A5D7D5F17B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bix.Pix.ChiaTests</RootNamespace>
-    <AssemblyName>Bix.Pix.ChiaTests</AssemblyName>
+    <RootNamespace>Bix.Picks.ChiaTests</RootNamespace>
+    <AssemblyName>Bix.Picks.ChiaTests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -58,7 +58,7 @@
       <Project>{6f93ed35-44d0-46ff-9b51-d0e374104c3d}</Project>
       <Name>Bix.Mix</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Chia\Bix.Pix.Chia.csproj">
+    <ProjectReference Include="..\Chia\Bix.Picks.Chia.csproj">
       <Project>{6c242639-4017-4f4c-824e-f84079a5b015}</Project>
       <Name>Bix.Pix.Chia</Name>
     </ProjectReference>
