@@ -68,6 +68,10 @@
       <Project>{6c242639-4017-4f4c-824e-f84079a5b015}</Project>
       <Name>Bix.Picks.Chia</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MixTestTargets\Bix.Picks.MixTestTargets.csproj">
+      <Project>{e513a55d-f33b-4880-bc88-deb85aa6269f}</Project>
+      <Name>Bix.Picks.MixTestTargets</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
@@ -91,7 +95,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>"$(ProjectDir)..\..\Mixers\CecilMixer\bin\$(ConfigurationName)\Bix.Mixer.CecilMixer.exe" "$(TargetPath)" "Bix.Picks.ChiaTests.PropertyAccessibilityTest/EncapsulatesTestType"</PostBuildEvent>
+    <PostBuildEvent>"$(ProjectDir)..\..\Mixers\CecilMixer\bin\$(ConfigurationName)\Bix.Mixer.CecilMixer.exe" "$(TargetDir)Bix.Picks.MixTestTargets.dll" "Bix.Picks.MixTestTargets.EncapsulatesTestType"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

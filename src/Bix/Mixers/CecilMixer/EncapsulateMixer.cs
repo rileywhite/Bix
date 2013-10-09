@@ -17,6 +17,7 @@
 
 using Bix.Mix.Encapsulate;
 using Mono.Cecil;
+using Mono.Cecil.Pdb;
 using System;
 
 namespace Bix.Mixer.CecilMixer
@@ -25,11 +26,18 @@ namespace Bix.Mixer.CecilMixer
     {
         public void AddEncapsulation(string assemblyPath, string classFullName)
         {
-            var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
-            var type = assembly.MainModule.GetType(classFullName);
-            var mixAssembly = AssemblyDefinition.ReadAssembly(typeof(IEncapsulates).Assembly.Location);
-            type.Interfaces.Add(assembly.MainModule.Import(mixAssembly.MainModule.GetType(typeof(IEncapsulates).FullName)));
-            assembly.Write(assemblyPath);
+            var typeModule = ModuleDefinition.ReadModule(assemblyPath);
+            var type = typeModule.GetType(classFullName);
+            var bixModule = ModuleDefinition.ReadModule(typeof(IEncapsulates).Assembly.Location);
+
+            // add interface to type
+            type.Interfaces.Add(typeModule.Import(typeof(IEncapsulates)));
+
+            // create inner DTO
+            TypeDefinition dtoType = new TypeDefinition(string.Format("{0}/{1}", type.Namespace, type.Name), "Dto", TypeAttributes.NestedPublic | TypeAttributes.Class, typeModule.Import(typeof(object)));
+            type.NestedTypes.Add(dtoType);
+
+            typeModule.Write(assemblyPath, new WriterParameters { SymbolWriterProvider = new PdbWriterProvider() });
         }
     }
 }
