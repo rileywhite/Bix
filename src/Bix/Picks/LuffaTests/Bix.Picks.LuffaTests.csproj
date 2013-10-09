@@ -62,7 +62,7 @@
     </ProjectReference>
     <ProjectReference Include="..\Luffa\Bix.Picks.Luffa.csproj">
       <Project>{a6523f85-9e3a-48fc-b374-6be5d1fac76e}</Project>
-      <Name>Bix.Pix.Luffa</Name>
+      <Name>Bix.Picks.Luffa</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

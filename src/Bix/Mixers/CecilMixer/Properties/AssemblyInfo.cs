@@ -22,11 +22,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Bix.Picks.LuffaTests")]
+[assembly: AssemblyTitle("Bix.Mixer.CecilMixer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Bix.Picks.LuffaTests")]
+[assembly: AssemblyProduct("Bix.Mixer.CecilMixer")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -37,7 +37,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("2fa15363-9271-4833-b3d9-80b404ff21e3")]
+[assembly: Guid("30cfc55f-7af9-4fa2-9e9e-08c6078a2884")]
 
 // Version information for an assembly consists of the following four values:
 //

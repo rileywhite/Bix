@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// ValidationRuleTest.cs
+// EncapsulateMixer.cs
 // Copyright 2013 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,21 @@
 // limitations under the License.
 /***************************************************************************/
 
+using Bix.Mix.Encapsulate;
+using Mono.Cecil;
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace LuffaTests
+namespace Bix.Mixer.CecilMixer
 {
-    [TestClass]
-    public class ValidationRuleTest
+    internal class EncapsulateMixer
     {
+        public void AddEncapsulation(string assemblyPath, string classFullName)
+        {
+            var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
+            var type = assembly.MainModule.GetType(classFullName);
+            var mixAssembly = AssemblyDefinition.ReadAssembly(typeof(IEncapsulates).Assembly.Location);
+            type.Interfaces.Add(assembly.MainModule.Import(mixAssembly.MainModule.GetType(typeof(IEncapsulates).FullName)));
+            assembly.Write(assemblyPath);
+        }
     }
 }

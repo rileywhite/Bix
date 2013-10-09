@@ -16,6 +16,8 @@
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -54,13 +56,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Mixers\CecilMixer\Bix.Mixer.CecilMixer.csproj">
+      <Project>{f62bc726-dec3-4e9c-b992-95fb66e6d582}</Project>
+      <Name>Bix.Mixer.CecilMixer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Mix\Bix.Mix.csproj">
       <Project>{6f93ed35-44d0-46ff-9b51-d0e374104c3d}</Project>
       <Name>Bix.Mix</Name>
     </ProjectReference>
     <ProjectReference Include="..\Chia\Bix.Picks.Chia.csproj">
       <Project>{6c242639-4017-4f4c-824e-f84079a5b015}</Project>
-      <Name>Bix.Pix.Chia</Name>
+      <Name>Bix.Picks.Chia</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
@@ -83,6 +89,10 @@
   </Choose>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>"$(ProjectDir)..\..\Mixers\CecilMixer\bin\$(ConfigurationName)\Bix.Mixer.CecilMixer.exe" "$(TargetPath)" "Bix.Picks.ChiaTests.PropertyAccessibilityTest/EncapsulatesTestType"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

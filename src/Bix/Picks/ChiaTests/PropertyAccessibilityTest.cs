@@ -9,7 +9,6 @@ namespace Bix.Picks.ChiaTests
     {
         #region Test Type
 
-        [Encapsulates]
         public class EncapsulatesTestType
         {
             [Encapsulated]

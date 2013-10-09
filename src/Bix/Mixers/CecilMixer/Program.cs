@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// ValidationRuleTest.cs
+// Program.cs
 // Copyright 2013 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +16,19 @@
 /***************************************************************************/
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace LuffaTests
+namespace Bix.Mixer.CecilMixer
 {
-    [TestClass]
-    public class ValidationRuleTest
+    /// <summary>
+    /// For now this is impemented as an exe. Still need to think this through,
+    /// but it seems likely to change.
+    /// </summary>
+    class Program
     {
+        public static int Main(string[] args)
+        {
+            new EncapsulateMixer().AddEncapsulation(args[0], args[1]);
+            return 0;
+        }
     }
 }
