@@ -19,6 +19,7 @@ using Bix.Mix.Encapsulate;
 using Mono.Cecil;
 using Mono.Cecil.Pdb;
 using System;
+using System.Linq;
 
 namespace Bix.Mixer.CecilMixer
 {
@@ -35,6 +36,10 @@ namespace Bix.Mixer.CecilMixer
 
             // create inner DTO
             TypeDefinition dtoType = new TypeDefinition(string.Format("{0}/{1}", type.Namespace, type.Name), "Dto", TypeAttributes.NestedPublic | TypeAttributes.Class, typeModule.Import(typeof(object)));
+            //foreach (var property in dtoType.Properties)
+            //{
+            //    if(property.CustomAttributes.SingleOrDefault(attribute => attribute
+            //}
             type.NestedTypes.Add(dtoType);
 
             typeModule.Write(assemblyPath, new WriterParameters { SymbolWriterProvider = new PdbWriterProvider() });

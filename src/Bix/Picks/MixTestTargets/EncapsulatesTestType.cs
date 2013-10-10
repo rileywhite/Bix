@@ -22,6 +22,8 @@ namespace Bix.Picks.MixTestTargets
 {
     public class EncapsulatesTestType
     {
+        #region Encapsulated
+
         [Encapsulated]
         public int PublicGetPublicSet { get; set; }
         [Encapsulated]
@@ -112,5 +114,69 @@ namespace Bix.Picks.MixTestTargets
         private int protectedInternalSet;
         [Encapsulated]
         protected internal int ProtectedInternalSet { set { this.protectedInternalSet = value; } }
+
+        #endregion
+
+        #region Not Encapsulated
+
+        public int PublicGetPublicSetNotEncapsulated { get; set; }
+        public int PublicGetPrivateSetNotEncapsulated { get; private set; }
+        public int PublicGetInternalSetNotEncapsulated { get; internal set; }
+        public int PublicGetProtectedSetNotEncapsulated { get; protected set; }
+        public int PublicGetProtectedInternalSetNotEncapsulated { get; protected internal set; }
+
+        public int PrivateGetPublicSetNotEncapsulated { private get; set; }
+        private int PrivateGetPrivateSetNotEncapsulated { get; set; }
+        internal int PrivateGetInternalSetNotEncapsulated { private get; set; }
+        protected int PrivateGetProtectedSetNotEncapsulated { private get; set; }
+        protected internal int PrivateGetProtectedInternalSetNotEncapsulated { private get; set; }
+
+        public int InternalGetPublicSetNotEncapsulated { internal get; set; }
+        internal int InternalGetPrivateSetNotEncapsulated { get; private set; }
+        internal int InternalGetInternalSetNotEncapsulated { get; set; }
+        protected internal int InternalGetProtectedInternalSetNotEncapsulated { internal get; set; }
+
+        public int ProtectedGetPublicSetNotEncapsulated { protected get; set; }
+        protected int ProtectedGetPrivateSetNotEncapsulated { get; private set; }
+        protected int ProtectedGetProtectedSetNotEncapsulated { get; set; }
+        protected internal int ProtectedGetProtectedInternalSetNotEncapsulated { protected get; set; }
+
+        public int ProtectedInternalGetPublicSetNotEncapsulated { protected internal get; set; }
+        protected internal int ProtectedInternalGetPrivateSetNotEncapsulated { get; private set; }
+        protected internal int ProtectedInternalGetInternalSetNotEncapsulated { get; internal set; }
+        protected internal int ProtectedInternalGetProtectedSetNotEncapsulated { get; protected set; }
+        protected internal int ProtectedInternalGetProtectedInternalSetNotEncapsulated { get; set; }
+
+        private int publicGetNotEncapsulated;
+        public int PublicGetNotEncapsulated { get { return this.publicGetNotEncapsulated; } }
+
+        private int privateGetNotEncapsulated;
+        private int PrivateGetNotEncapsulated { get { return this.privateGetNotEncapsulated; } }
+
+        private int internalGetNotEncapsulated;
+        internal int InternalGetNotEncapsulated { get { return this.internalGetNotEncapsulated; } }
+
+        private int protectedGetNotEncapsulated;
+        protected int ProtectedGetNotEncapsulated { get { return this.protectedGetNotEncapsulated; } }
+
+        private int protectedInternalGetNotEncapsulated;
+        protected internal int ProtectedInternalGetNotEncapsulated { get { return this.protectedInternalGetNotEncapsulated; } }
+
+        private int publicSetNotEncapsulated;
+        public int PublicSetNotEncapsulated { set { this.publicSetNotEncapsulated = value; } }
+
+        private int privateSetNotEncapsulated;
+        private int PrivateSetNotEncapsulated { set { this.privateSetNotEncapsulated = value; } }
+
+        private int internalSetNotEncapsulated;
+        internal int InternalSetNotEncapsulated { set { this.internalSetNotEncapsulated = value; } }
+
+        private int protectedSetNotEncapsulated;
+        protected int ProtectedSetNotEncapsulated { set { this.protectedSetNotEncapsulated = value; } }
+
+        private int protectedInternalSetNotEncapsulated;
+        protected internal int ProtectedInternalSetNotEncapsulated { set { this.protectedInternalSetNotEncapsulated = value; } }
+
+        #endregion
     }
 }
