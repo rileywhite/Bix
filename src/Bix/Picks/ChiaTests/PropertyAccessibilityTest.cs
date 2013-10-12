@@ -41,7 +41,7 @@ namespace Bix.Picks.ChiaTests
         }
 
         [TestMethod]
-        public void CorrectPropertiesAreRepresentedInDto()
+        public void CorrectPropertiesAreRepresentedAndAreReadWriteInDto()
         {
             Type dtoType = typeof(EncapsulatesTestType).GetNestedType("Dto");
             Assert.AreEqual(33, dtoType.GetProperties().Length);
