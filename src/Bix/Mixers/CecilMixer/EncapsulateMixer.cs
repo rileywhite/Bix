@@ -15,6 +15,7 @@
 // limitations under the License.
 /***************************************************************************/
 
+using Bix.Mix;
 using Bix.Mix.Encapsulate;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -22,6 +23,7 @@ using Mono.Cecil.Pdb;
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 
 namespace Bix.Mixers.CecilMixer
 {
@@ -31,9 +33,47 @@ namespace Bix.Mixers.CecilMixer
         {
             var typeModule = ModuleDefinition.ReadModule(assemblyPath);
             var type = typeModule.GetType(classFullName);
+            var voidTypeReference = typeModule.Import(typeof(void));
+            var iEncapsulatesTypeReference = typeModule.Import(typeof(IEncapsulates));
+            var iMixesTypeReference = typeModule.Import(typeof(IMixes));
+            var iSerializableTypeReference = typeModule.Import(typeof(ISerializable));
+            var objectTypeReference = typeModule.Import(typeof(object));
 
             // add interface to type
-            type.Interfaces.Add(typeModule.Import(typeof(IEncapsulates)));
+            type.Interfaces.Add(iEncapsulatesTypeReference);
+            type.Interfaces.Add(iMixesTypeReference);
+            type.Interfaces.Add(iSerializableTypeReference);
+            
+            // add serialization methods
+            var getObjectDataMethod = new MethodDefinition(
+                "System.Runtime.Serialization.ISerializable.GetObjectData",
+                MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final,
+                voidTypeReference);
+            getObjectDataMethod.Parameters.Add(new ParameterDefinition("info", ParameterAttributes.None, typeModule.Import(typeof(SerializationInfo))));
+            getObjectDataMethod.Parameters.Add(new ParameterDefinition("context", ParameterAttributes.None, typeModule.Import(typeof(StreamingContext))));
+            getObjectDataMethod.Overrides.Add(typeModule.Import(typeof(ISerializable).GetMethod("GetObjectData", new Type[] { typeof(SerializationInfo), typeof(StreamingContext) })));
+            var ilProcessor = getObjectDataMethod.Body.GetILProcessor();
+            ilProcessor.Append(Instruction.Create(OpCodes.Nop));
+            ilProcessor.Append(Instruction.Create(OpCodes.Ret));
+            getObjectDataMethod.DeclaringType = type;
+            type.Methods.Add(getObjectDataMethod);
+
+            var serializationConstructor = new MethodDefinition(
+                ".ctor",
+                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
+                voidTypeReference);
+            serializationConstructor.Parameters.Add(new ParameterDefinition("info", ParameterAttributes.None, typeModule.Import(typeof(SerializationInfo))));
+            serializationConstructor.Parameters.Add(new ParameterDefinition("context", ParameterAttributes.None, typeModule.Import(typeof(StreamingContext))));
+            ilProcessor = serializationConstructor.Body.GetILProcessor();
+            ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
+            ilProcessor.Append(Instruction.Create(OpCodes.Call, typeModule.Import(typeof(object).GetConstructor(new Type[0]))));
+            ilProcessor.Append(Instruction.Create(OpCodes.Nop));
+            ilProcessor.Append(Instruction.Create(OpCodes.Nop));
+            ilProcessor.Append(Instruction.Create(OpCodes.Nop));
+            ilProcessor.Append(Instruction.Create(OpCodes.Ret));
+            serializationConstructor.DeclaringType = type;
+            type.Methods.Add(serializationConstructor);
+
 
             // create inner DTO
             var dtoType = new TypeDefinition(string.Format("{0}/{1}", type.Namespace, type.Name), "Dto", TypeAttributes.NestedPublic | TypeAttributes.Class, typeModule.Import(typeof(object)));
@@ -43,7 +83,7 @@ namespace Bix.Mixers.CecilMixer
                 if (property.CustomAttributes.Any(attribute => attribute.AttributeType.Resolve() == encapsulatedAttributeType))
                 {
                     var dtoField = new FieldDefinition(
-                        string.Format("fieldFor{0}_{1}", property.Name, Guid.NewGuid().ToString("N")),
+                        string.Format("k__{0}_{1}", property.Name, Guid.NewGuid().ToString("N")),
                         FieldAttributes.Private | FieldAttributes.SpecialName,
                         property.PropertyType);
                     dtoField.DeclaringType = dtoType;
@@ -56,8 +96,8 @@ namespace Bix.Mixers.CecilMixer
                         MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
                         property.PropertyType);
                     dtoPropertyGetter.DeclaringType = dtoType;
-                    var ilProcessor = dtoPropertyGetter.Body.GetILProcessor();
-                    ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0)); // this
+                    ilProcessor = dtoPropertyGetter.Body.GetILProcessor();
+                    ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
                     ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, dtoField));
                     ilProcessor.Append(Instruction.Create(OpCodes.Ret));
                     dtoProperty.GetMethod = dtoPropertyGetter;

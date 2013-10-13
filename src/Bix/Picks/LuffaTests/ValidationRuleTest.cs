@@ -18,7 +18,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace LuffaTests
+namespace Bix.Picks.LuffaTests
 {
     [TestClass]
     public class ValidationRuleTest

@@ -7,8 +7,8 @@
     <ProjectGuid>{E513A55D-F33B-4880-BC88-DEB85AA6269F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bix.Picks.MixTestTargets</RootNamespace>
-    <AssemblyName>Bix.Picks.MixTestTargets</AssemblyName>
+    <RootNamespace>Bix.Mixers.MixerTestTargets</RootNamespace>
+    <AssemblyName>Bix.Mixers.MixerTestTargets</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
