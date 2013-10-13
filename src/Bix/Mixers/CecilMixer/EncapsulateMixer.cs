@@ -38,6 +38,7 @@ namespace Bix.Mixers.CecilMixer
             var iMixesTypeReference = typeModule.Import(typeof(IMixes));
             var iSerializableTypeReference = typeModule.Import(typeof(ISerializable));
             var objectTypeReference = typeModule.Import(typeof(object));
+            var compilerGeneratedAttributeConstructorReference = typeModule.Import(typeof(CompilerGeneratedAttribute).GetConstructor(new Type[0]));
 
             // add interface to type
             type.Interfaces.Add(iEncapsulatesTypeReference);
@@ -53,7 +54,6 @@ namespace Bix.Mixers.CecilMixer
             getObjectDataMethod.Parameters.Add(new ParameterDefinition("context", ParameterAttributes.None, typeModule.Import(typeof(StreamingContext))));
             getObjectDataMethod.Overrides.Add(typeModule.Import(typeof(ISerializable).GetMethod("GetObjectData", new Type[] { typeof(SerializationInfo), typeof(StreamingContext) })));
             var ilProcessor = getObjectDataMethod.Body.GetILProcessor();
-            ilProcessor.Append(Instruction.Create(OpCodes.Nop));
             ilProcessor.Append(Instruction.Create(OpCodes.Ret));
             getObjectDataMethod.DeclaringType = type;
             type.Methods.Add(getObjectDataMethod);
@@ -67,9 +67,6 @@ namespace Bix.Mixers.CecilMixer
             ilProcessor = serializationConstructor.Body.GetILProcessor();
             ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
             ilProcessor.Append(Instruction.Create(OpCodes.Call, typeModule.Import(typeof(object).GetConstructor(new Type[0]))));
-            ilProcessor.Append(Instruction.Create(OpCodes.Nop));
-            ilProcessor.Append(Instruction.Create(OpCodes.Nop));
-            ilProcessor.Append(Instruction.Create(OpCodes.Nop));
             ilProcessor.Append(Instruction.Create(OpCodes.Ret));
             serializationConstructor.DeclaringType = type;
             type.Methods.Add(serializationConstructor);
@@ -83,9 +80,10 @@ namespace Bix.Mixers.CecilMixer
                 if (property.CustomAttributes.Any(attribute => attribute.AttributeType.Resolve() == encapsulatedAttributeType))
                 {
                     var dtoField = new FieldDefinition(
-                        string.Format("k__{0}_{1}", property.Name, Guid.NewGuid().ToString("N")),
-                        FieldAttributes.Private | FieldAttributes.SpecialName,
+                        string.Format("<{0}>k__BackingField", property.Name),
+                        FieldAttributes.Private,
                         property.PropertyType);
+                    dtoField.CustomAttributes.Add(new CustomAttribute(compilerGeneratedAttributeConstructorReference));
                     dtoField.DeclaringType = dtoType;
                     dtoType.Fields.Add(dtoField);
                     var dtoProperty = new PropertyDefinition(property.Name, PropertyAttributes.None, property.PropertyType);
