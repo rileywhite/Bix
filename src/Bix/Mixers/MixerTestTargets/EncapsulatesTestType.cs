@@ -18,7 +18,7 @@
 using Bix.Mix.Encapsulate;
 using System;
 
-namespace Bix.Picks.MixTestTargets
+namespace Bix.Mixers.MixerTestTargets
 {
     public class EncapsulatesTestType
     {

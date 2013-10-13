@@ -17,7 +17,7 @@
 
 using System;
 
-namespace Bix.Mixer.CecilMixer
+namespace Bix.Mixers.CecilMixer
 {
     /// <summary>
     /// For now this is impemented as an exe. Still need to think this through,

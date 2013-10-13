@@ -16,7 +16,6 @@
 /***************************************************************************/
 
 using Bix.Mix.Encapsulate;
-using Bix.Picks.MixTestTargets;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
@@ -25,70 +24,6 @@ namespace Bix.Picks.ChiaTests
     [TestClass]
     public class PropertyAccessibilityTest
     {
-        [TestMethod]
-        public void IEncapsulatesIsImplemented()
-        {
-            Assert.AreEqual(
-                typeof(EncapsulatesTestType).GetInterface(typeof(IEncapsulates).FullName),
-                typeof(IEncapsulates),
-                "Couldn't find IEncapsulates interface in list of test type's interfaces");
-        }
 
-        [TestMethod]
-        public void InnerDtoTypeExists()
-        {
-            Assert.IsNotNull(typeof(EncapsulatesTestType).GetNestedType("Dto"));
-        }
-
-        [TestMethod]
-        public void CorrectPropertiesAreRepresentedAndAreReadWriteInDto()
-        {
-            Type dtoType = typeof(EncapsulatesTestType).GetNestedType("Dto");
-            Assert.AreEqual(33, dtoType.GetProperties().Length);
-            var propertyNames = new string[]
-            {
-                "PublicGetPublicSet",
-                "PublicGetPrivateSet",
-                "PublicGetInternalSet",
-                "PublicGetProtectedSet",
-                "PublicGetProtectedInternalSet",
-                "PrivateGetPublicSet",
-                "PrivateGetPrivateSet",
-                "PrivateGetInternalSet",
-                "PrivateGetProtectedSet",
-                "PrivateGetProtectedInternalSet",
-                "InternalGetPublicSet",
-                "InternalGetPrivateSet",
-                "InternalGetInternalSet",
-                "InternalGetProtectedInternalSet",
-                "ProtectedGetPublicSet",
-                "ProtectedGetPrivateSet",
-                "ProtectedGetProtectedSet",
-                "ProtectedGetProtectedInternalSet",
-                "ProtectedInternalGetPublicSet",
-                "ProtectedInternalGetPrivateSet",
-                "ProtectedInternalGetInternalSet",
-                "ProtectedInternalGetProtectedSet",
-                "ProtectedInternalGetProtectedInternalSet",
-                "PublicGet",
-                "PrivateGet",
-                "InternalGet",
-                "ProtectedGet",
-                "ProtectedInternalGet",
-                "PublicSet",
-                "PrivateSet",
-                "InternalSet",
-                "ProtectedSet",
-                "ProtectedInternalSet"
-            };
-
-            foreach (var propertyName in propertyNames)
-            {
-                var property = dtoType.GetProperty(propertyName);
-                Assert.IsNotNull(property);
-                Assert.IsTrue(property.CanRead);
-                Assert.IsTrue(property.CanWrite);
-            }
-        }
     }
 }

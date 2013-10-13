@@ -21,8 +21,9 @@ using Mono.Cecil.Cil;
 using Mono.Cecil.Pdb;
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
-namespace Bix.Mixer.CecilMixer
+namespace Bix.Mixers.CecilMixer
 {
     internal class EncapsulateMixer
     {

@@ -47,8 +47,15 @@
       <Project>{6f93ed35-44d0-46ff-9b51-d0e374104c3d}</Project>
       <Name>Bix.Mix</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CecilMixer\Bix.Mixers.CecilMixer.csproj">
+      <Project>{f62bc726-dec3-4e9c-b992-95fb66e6d582}</Project>
+      <Name>Bix.Mixers.CecilMixer</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>"$(TargetDir)Bix.Mixers.CecilMixer.exe" "$(TargetPath)" "Bix.Mixers.MixerTestTargets.EncapsulatesTestType"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
