@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Mixers.CecilMixerTest",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Mixers.MixerTestTargets", "Bix\Mixers\MixerTestTargets\Bix.Mixers.MixerTestTargets.csproj", "{E513A55D-F33B-4880-BC88-DEB85AA6269F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Mixers.MixerTestTargetsReference", "Bix\Mixers\MixerTestTargetsReference\Bix.Mixers.MixerTestTargetsReference.csproj", "{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{E513A55D-F33B-4880-BC88-DEB85AA6269F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E513A55D-F33B-4880-BC88-DEB85AA6269F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E513A55D-F33B-4880-BC88-DEB85AA6269F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
