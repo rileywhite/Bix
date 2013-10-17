@@ -234,11 +234,11 @@ namespace Bix.Mixers.MixerTestTargets
 
         #region Reference for ISerializable Implementation
 
-        public EncapsulatesTestType(SerializationInfo info, StreamingContext context)
+        private EncapsulatesTestType(SerializationInfo info, StreamingContext context)
         {
         }
 
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
         }
 
