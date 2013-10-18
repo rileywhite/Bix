@@ -40,6 +40,46 @@ namespace Bix.Mixers.CecilMixerTest.Utility
             return sortedLeft.Count.CompareTo(sortedRight.Count);   // items are same up to length of shorter list
         }
 
+        private static Comparison<CustomAttribute> customAttributeComparison = new Comparison<CustomAttribute>(
+            (left, right) =>
+            {
+                return left.AttributeType.FullName.CompareTo(right.AttributeType.FullName);
+            });
+        public static Comparison<CustomAttribute> CustomAttributeComparison
+        {
+            get { return customAttributeComparison; }
+        }
+
+        //private static Comparison<CustomAttributeNamedArgument> customAttributeNamedArgumentComparison = new Comparison<CustomAttributeNamedArgument>(
+        //    (left, right) =>
+        //    {
+        //        return left.Name.CompareTo(right.Name);
+        //    });
+        //public static Comparison<CustomAttributeNamedArgument> CustomAttributeNamedArgumentComparison
+        //{
+        //    get { return customAttributeNamedArgumentComparison; }
+        //}
+
+        private static Comparison<ModuleDefinition> moduleComparison = new Comparison<ModuleDefinition>(
+            (left, right) =>
+            {
+                return left.Name.Replace("Reference", "").CompareTo(right.Name.Replace("Reference", ""));
+            });
+        public static Comparison<ModuleDefinition> ModuleComparison
+        {
+            get { return moduleComparison; }
+        }
+
+        private static Comparison<TypeDefinition> typeComparison = new Comparison<TypeDefinition>(
+            (left, right) =>
+            {
+                return left.FullName.CompareTo(right.FullName);
+            });
+        public static Comparison<TypeDefinition> TypeComparison
+        {
+            get { return typeComparison; }
+        }
+
         private static Comparison<MethodDefinition> methodComparison = new Comparison<MethodDefinition>(
             (left, right) =>
             {
@@ -85,30 +125,26 @@ namespace Bix.Mixers.CecilMixerTest.Utility
             get { return propertyComparison; }
         }
 
-        private static Comparison<CustomAttribute> customAttributeComparison = new Comparison<CustomAttribute>(
+        private static Comparison<FieldDefinition> fieldComparison = new Comparison<FieldDefinition>(
             (left, right) =>
             {
-                return left.AttributeType.FullName.CompareTo(right.AttributeType.FullName);
+                if (left.DeclaringType.FullName != right.DeclaringType.FullName)
+                {
+                    return left.DeclaringType.FullName.CompareTo(right.DeclaringType.FullName);
+                };
+
+                if (left.FieldType.FullName != right.FieldType.FullName)
+                {
+                    return left.FieldType.FullName.CompareTo(right.FieldType.FullName);
+                }
+
+                if (left.Name != right.Name) { return left.Name.CompareTo(right.Name); }
+
+                return left.CustomAttributes.CompareTo(right.CustomAttributes, Comparisons.CustomAttributeComparison);
             });
-        public static Comparison<CustomAttribute> CustomAttributeComparison
+        public static Comparison<FieldDefinition> FieldComparison
         {
-            get { return customAttributeComparison; }
-        }
-
-        //private static Comparison<CustomAttributeNamedArgument> customAttributeNamedArgumentComparison = new Comparison<CustomAttributeNamedArgument>(
-        //    (left, right) =>
-        //    {
-        //        return left.Name.CompareTo(right.Name);
-        //    });
-        //public static Comparison<CustomAttributeNamedArgument> CustomAttributeNamedArgumentComparison
-        //{
-        //    get { return customAttributeNamedArgumentComparison; }
-        //}
-
-        internal static int ModuleComparison(ModuleDefinition left, ModuleDefinition right)
-        {
-            // this comparison removes differences due to "Reference" in the filename
-            return left.Name.Replace("Reference", "").CompareTo(right.Name.Replace("Reference", ""));
+            get { return fieldComparison; }
         }
     }
 }

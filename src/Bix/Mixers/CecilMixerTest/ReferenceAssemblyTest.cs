@@ -40,55 +40,157 @@ namespace CecilMixerTest
             {
                 Assert.Fail("Did not find expected module {0} in mixed assembly", sortedExpected[sortedActual.Count].FullyQualifiedName);
             }
+
+            if (sortedExpected.Count < sortedActual.Count)
+            {
+                Assert.Fail("Found extra module {0} in mixed assembly", sortedActual[sortedExpected.Count].FullyQualifiedName);
+            }
         }
 
         private static void AssertEquality(ModuleDefinition expected, ModuleDefinition actual)
         {
-            foreach (var expectedType in expected.Types)
-            {
-                var mixedType = actual.GetType(expectedType.FullName);
-                Assert.IsNotNull(mixedType);
-                Assert.AreEqual(expectedType.FullName, mixedType.FullName);
-
-                var sortedReferenceAttributes = expectedType.CustomAttributes.ToList();
-                sortedReferenceAttributes.Sort(Comparisons.CustomAttributeComparison);
-
-                AssertEquality(expectedType, mixedType);
-            }
-
-            Assert.AreEqual(
-                expected.Types.Count,
-                actual.Types.Count,
-                string.Format("Reference assembly has {0} types. Mixed assembly has {1} types.", expected.Types.Count, actual.Types.Count));
+            AssertEquality(expected.Types, actual.Types);
         }
 
-        private static void AssertEquality(TypeDefinition expected, TypeDefinition actual)
+        private static void AssertEquality(IEnumerable<TypeDefinition> expected, IEnumerable<TypeDefinition> actual)
         {
-            var sortedExpected = expected.Methods.ToList();
-            sortedExpected.Sort(Comparisons.MethodComparison);
-            var sortedActual = actual.Methods.ToList();
-            sortedActual.Sort(Comparisons.MethodComparison);
+            var sortedExpected = expected.ToList();
+            sortedExpected.Sort(Comparisons.TypeComparison);
+            var sortedActual = actual.ToList();
+            sortedActual.Sort(Comparisons.TypeComparison);
 
-            for (var i = 0; i < sortedExpected.Count; i++)
+            for (var i = 0; i < sortedExpected.Count && i < sortedActual.Count; i++)
             {
-                var referenceMethod = sortedExpected[i];
-                Assert.IsTrue(
-                    i < sortedActual.Count,
-                    string.Format("Could not find mixed method {0}.{1}", expected.FullName, GetMethodSignatureString(referenceMethod)));
-                var mixedMethod = sortedActual[i];
-                Assert.AreEqual(
-                    GetMethodSignatureString(referenceMethod),
-                    GetMethodSignatureString(mixedMethod),
-                    "Did not find mixed method {0}.{1}", expected.FullName, GetMethodSignatureString(referenceMethod));
+                AssertEquality(sortedExpected[i], sortedActual[i]);
+            }
+
+            if (sortedExpected.Count > sortedActual.Count)
+            {
+                Assert.Fail("Did not find expected type {0} in mixed assembly", sortedExpected[sortedActual.Count].FullName);
             }
 
             if (sortedExpected.Count < sortedActual.Count)
             {
-                Assert.Fail(string.Format(
-                    "Found extra mixed method {0}.{1}",
-                    expected.FullName,
-                    GetMethodSignatureString(sortedActual[sortedExpected.Count])));
+                Assert.Fail("Found extra type {0} in mixed assembly", sortedActual[sortedExpected.Count].FullName);
             }
+        }
+
+        private static void AssertEquality(TypeDefinition expected, TypeDefinition actual)
+        {
+            AssertEquality(expected.Methods, actual.Methods);
+            AssertEquality(expected.Fields, actual.Fields);
+        }
+
+        private static void AssertEquality(IEnumerable<MethodDefinition> expected, IEnumerable<MethodDefinition> actual)
+        {
+            var sortedExpected = expected.ToList();
+            sortedExpected.Sort(Comparisons.MethodComparison);
+            var sortedActual = actual.ToList();
+            sortedActual.Sort(Comparisons.MethodComparison);
+
+            for (var i = 0; i < sortedExpected.Count && i < sortedActual.Count; i++)
+            {
+                AssertEquality(sortedExpected[i], sortedActual[i]);
+            }
+
+            if (sortedExpected.Count > sortedActual.Count)
+            {
+                Assert.Fail("Did not find expected method {0} in type {1} of mixed assembly", sortedExpected[sortedActual.Count].FullName, sortedExpected[sortedActual.Count].DeclaringType.FullName);
+            }
+
+            if (sortedExpected.Count < sortedActual.Count)
+            {
+                Assert.Fail("Found extra method {0} in type {1} of mixed assembly", sortedActual[sortedExpected.Count].FullName, sortedActual[sortedExpected.Count].DeclaringType.FullName);
+            }
+        }
+
+        private static void AssertEquality(MethodDefinition expected, MethodDefinition actual)
+        {
+            // TODO
+        }
+
+        private static void AssertEquality(IEnumerable<PropertyDefinition> expected, IEnumerable<PropertyDefinition> actual)
+        {
+            var sortedExpected = expected.ToList();
+            sortedExpected.Sort(Comparisons.PropertyComparison);
+            var sortedActual = actual.ToList();
+            sortedActual.Sort(Comparisons.PropertyComparison);
+
+            for (var i = 0; i < sortedExpected.Count && i < sortedActual.Count; i++)
+            {
+                AssertEquality(sortedExpected[i], sortedActual[i]);
+            }
+
+            if (sortedExpected.Count > sortedActual.Count)
+            {
+                Assert.Fail("Did not find expected property {0} in type {1} of mixed assembly", sortedExpected[sortedActual.Count].FullName, sortedExpected[sortedActual.Count].DeclaringType.FullName);
+            }
+
+            if (sortedExpected.Count < sortedActual.Count)
+            {
+                Assert.Fail("Found extra propery {0} in type {1} of mixed assembly", sortedActual[sortedExpected.Count].FullName, sortedActual[sortedExpected.Count].DeclaringType.FullName);
+            }
+        }
+
+        private static void AssertEquality(PropertyDefinition expected, PropertyDefinition actual)
+        {
+            // TODO
+        }
+
+        private static void AssertEquality(IEnumerable<FieldDefinition> expected, IEnumerable<FieldDefinition> actual)
+        {
+            var sortedExpected = expected.ToList();
+            sortedExpected.Sort(Comparisons.FieldComparison);
+            var sortedActual = actual.ToList();
+            sortedActual.Sort(Comparisons.FieldComparison);
+
+            for (var i = 0; i < sortedExpected.Count && i < sortedActual.Count; i++)
+            {
+                AssertEquality(sortedExpected[i], sortedActual[i]);
+            }
+
+            if (sortedExpected.Count > sortedActual.Count)
+            {
+                Assert.Fail("Did not find expected field {0} in type {1} of mixed assembly", sortedExpected[sortedActual.Count].FullName, sortedExpected[sortedActual.Count].DeclaringType.FullName);
+            }
+
+            if (sortedExpected.Count < sortedActual.Count)
+            {
+                Assert.Fail("Found extra field {0} in type {1} of mixed assembly", sortedActual[sortedExpected.Count].FullName, sortedActual[sortedExpected.Count].DeclaringType.FullName);
+            }
+        }
+
+        private static void AssertEquality(FieldDefinition expected, FieldDefinition actual)
+        {
+            // TODO
+        }
+
+        private static void AssertEquality(IEnumerable<CustomAttribute> expected, IEnumerable<CustomAttribute> actual, MemberReference attributeTarget)
+        {
+            var sortedExpected = expected.ToList();
+            sortedExpected.Sort(Comparisons.CustomAttributeComparison);
+            var sortedActual = actual.ToList();
+            sortedActual.Sort(Comparisons.CustomAttributeComparison);
+
+            for (var i = 0; i < sortedExpected.Count && i < sortedActual.Count; i++)
+            {
+                AssertEquality(sortedExpected[i], sortedActual[i]);
+            }
+
+            if (sortedExpected.Count > sortedActual.Count)
+            {
+                Assert.Fail("Did not find expected attribute {0} for target {1} of mixed assembly", sortedExpected[sortedActual.Count].AttributeType, attributeTarget.FullName);
+            }
+
+            if (sortedExpected.Count < sortedActual.Count)
+            {
+                Assert.Fail("Found extra attribute {0} in type {1} of mixed assembly", sortedActual[sortedExpected.Count].AttributeType, attributeTarget.FullName);
+            }
+        }
+
+        private static void AssertEquality(CustomAttribute expected, CustomAttribute actual)
+        {
+            // TODO
         }
 
         private static string GetMethodSignatureString(MethodDefinition method)
