@@ -50,15 +50,30 @@ namespace Bix.Mixers.CecilMixerTest.Utility
             get { return customAttributeComparison; }
         }
 
-        //private static Comparison<CustomAttributeNamedArgument> customAttributeNamedArgumentComparison = new Comparison<CustomAttributeNamedArgument>(
-        //    (left, right) =>
-        //    {
-        //        return left.Name.CompareTo(right.Name);
-        //    });
-        //public static Comparison<CustomAttributeNamedArgument> CustomAttributeNamedArgumentComparison
-        //{
-        //    get { return customAttributeNamedArgumentComparison; }
-        //}
+        public static Comparison<CustomAttributeNamedArgument> customAttributeNamedArgumentComparison = new Comparison<CustomAttributeNamedArgument>(
+            (left, right) =>
+            {
+                if (left.Name != right.Name)
+                {
+                    return left.Name.CompareTo(right.Name);
+                }
+                if (left.Argument.Type.FullName != right.Argument.Type.FullName)
+                {
+                    return left.Argument.Type.FullName.CompareTo(right.Argument.Type.FullName);
+                }
+                if (left.Argument.Value != null && right.Argument.Value != null)
+                {
+                    // unknown type...be as consistent as possible within appdomain even if arbitrary
+                    return left.Argument.Value.GetHashCode().CompareTo(right.Argument.Value.GetHashCode());
+                }
+                if (left.Argument.Value == null && right.Argument.Value == null) { return 0; }
+                if (left.Argument.Value == null) { return -1; }
+                return 1;
+            });
+        public static Comparison<CustomAttributeNamedArgument> CustomAttributeNamedArgumentComparison
+        {
+            get { return customAttributeNamedArgumentComparison; }
+        }
 
         private static Comparison<ModuleDefinition> moduleComparison = new Comparison<ModuleDefinition>(
             (left, right) =>

@@ -64,7 +64,7 @@ namespace Bix.Mixers.CecilMixer
 
             var serializationConstructor = new MethodDefinition(
                 ".ctor",
-                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
+                MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
                 voidTypeReference);
             serializationConstructor.Parameters.Add(new ParameterDefinition("info", ParameterAttributes.None, serializationInfoTypeReference));
             serializationConstructor.Parameters.Add(new ParameterDefinition("context", ParameterAttributes.None, streamingContextTypeReference));
