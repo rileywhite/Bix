@@ -20,6 +20,7 @@ using System;
 
 namespace Bix.Mixers.MixerTestTargets
 {
+    [Encapsulates]
     public class EncapsulatesTestType
     {
         #region Encapsulated

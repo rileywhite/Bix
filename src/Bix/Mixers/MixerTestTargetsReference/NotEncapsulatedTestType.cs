@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Program.cs
+// EncapsulatesTestType.cs
 // Copyright 2013 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,20 +15,20 @@
 // limitations under the License.
 /***************************************************************************/
 
+using Bix.Mix.Encapsulate;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Bix.Mixers.CecilMixer
+namespace Bix.Mixers.MixerTestTargets
 {
-    /// <summary>
-    /// For now this is impemented as an exe. Still need to think this through,
-    /// but it seems likely to change.
-    /// </summary>
-    class Program
+    // no encapsulates attribute
+    public class NotEncapsulatedTestType
     {
-        public static int Main(string[] args)
-        {
-            new EncapsulateMixer().AddEncapsulation(args[0]);
-            return 0;
-        }
+        [Encapsulated]
+        public int PublicGetPublicSet { get; set; }
+        public int PublicGetPublicSet2 { get; set; }
     }
 }
