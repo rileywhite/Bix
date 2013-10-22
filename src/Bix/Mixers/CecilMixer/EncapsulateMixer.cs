@@ -21,6 +21,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Pdb;
 using System;
+using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -37,6 +38,7 @@ namespace Bix.Mixers.CecilMixer
         private TypeReference ObjectTypeReference { get; set; }
         private TypeReference SerializationInfoTypeReference { get; set; }
         private TypeReference StreamingContextTypeReference { get; set; }
+        private TypeReference ReadOnlyCollectionOfIMixerTypeReference { get; set; }
 
         private TypeReference EncapsulatesAttributeType { get; set; }
         private TypeDefinition EncapsulatedAttributeType { get; set; }
@@ -48,17 +50,7 @@ namespace Bix.Mixers.CecilMixer
         {
             var typeModule = ModuleDefinition.ReadModule(assemblyPath);
 
-            this.VoidTypeReference = typeModule.Import(typeof(void));
-            this.IEncapsulatesTypeReference = typeModule.Import(typeof(IEncapsulates));
-            this.IMixesTypeReference = typeModule.Import(typeof(IMixes));
-            this.ISerializableTypeReference = typeModule.Import(typeof(ISerializable));
-            this.ObjectTypeReference = typeModule.Import(typeof(object));
-            this.SerializationInfoTypeReference = typeModule.Import(typeof(SerializationInfo));
-            this.StreamingContextTypeReference = typeModule.Import(typeof(StreamingContext));
-            this.EncapsulatesAttributeType = typeModule.Import(typeof(EncapsulatesAttribute)).Resolve();
-            this.EncapsulatedAttributeType = typeModule.Import(typeof(EncapsulatedAttribute)).Resolve();
-            this.ObjectConstructorReference = typeModule.Import(typeof(object).GetConstructor(new Type[0]));
-            this.CompilerGeneratedAttributeConstructorReference = typeModule.Import(typeof(CompilerGeneratedAttribute).GetConstructor(new Type[0]));
+            Initialize(typeModule);
 
             var originalTypes = new List<TypeDefinition>(typeModule.Types);
             foreach (var type in originalTypes)
@@ -74,14 +66,72 @@ namespace Bix.Mixers.CecilMixer
             typeModule.Write(assemblyPath, new WriterParameters { SymbolWriterProvider = new PdbWriterProvider() });
         }
 
+        private void Initialize(ModuleDefinition typeModule)
+        {
+            this.VoidTypeReference = typeModule.Import(typeof(void));
+            this.IEncapsulatesTypeReference = typeModule.Import(typeof(IEncapsulates));
+            this.IMixesTypeReference = typeModule.Import(typeof(IMixes));
+            this.ISerializableTypeReference = typeModule.Import(typeof(ISerializable));
+            this.ObjectTypeReference = typeModule.Import(typeof(object));
+            this.SerializationInfoTypeReference = typeModule.Import(typeof(SerializationInfo));
+            this.StreamingContextTypeReference = typeModule.Import(typeof(StreamingContext));
+            this.ReadOnlyCollectionOfIMixerTypeReference = typeModule.Import(typeof(ReadOnlyCollection<IMixer>));
+
+            this.EncapsulatesAttributeType = typeModule.Import(typeof(EncapsulatesAttribute)).Resolve();
+            this.EncapsulatedAttributeType = typeModule.Import(typeof(EncapsulatedAttribute)).Resolve();
+
+            this.ObjectConstructorReference = typeModule.Import(typeof(object).GetConstructor(new Type[0]));
+            this.CompilerGeneratedAttributeConstructorReference = typeModule.Import(typeof(CompilerGeneratedAttribute).GetConstructor(new Type[0]));
+        }
+
         private void AddEncapsulation(ModuleDefinition typeModule, TypeDefinition type)
         {
-            // add interface to type
-            type.Interfaces.Add(this.IEncapsulatesTypeReference);
+            this.AddIMixes(typeModule, type);
+            this.AddISerializable(typeModule, type);
+            this.AddIEncapsulates(typeModule, type);
+        }
+
+        private void AddIMixes(ModuleDefinition typeModule, TypeDefinition type)
+        {
             type.Interfaces.Add(this.IMixesTypeReference);
+
+            var mixersField = new FieldDefinition(
+                "mixers",
+                FieldAttributes.Private | FieldAttributes.SpecialName,
+                this.ReadOnlyCollectionOfIMixerTypeReference);
+            mixersField.CustomAttributes.Add(new CustomAttribute(this.CompilerGeneratedAttributeConstructorReference));
+            type.Fields.Add(mixersField);
+
+            var mixersGetter = new MethodDefinition(
+                "Bix.Mix.IMixes.get_Mixers",
+                MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.SpecialName,
+                this.ReadOnlyCollectionOfIMixerTypeReference);
+            mixersGetter.Overrides.Add(typeModule.Import(typeof(IMixes).GetProperty("Mixers").GetGetMethod()));
+            mixersGetter.Body.Variables.Add(new VariableDefinition(this.ReadOnlyCollectionOfIMixerTypeReference));
+            mixersGetter.Body.InitLocals = true;
+            var ilProcessor = mixersGetter.Body.GetILProcessor();
+            ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
+            ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, mixersField));
+            ilProcessor.Append(Instruction.Create(OpCodes.Stloc_0));
+            Instruction weird = Instruction.Create(OpCodes.Ldloc_0);
+            ilProcessor.Append(Instruction.Create(OpCodes.Br_S, weird));
+            ilProcessor.Append(weird);
+            ilProcessor.Append(Instruction.Create(OpCodes.Ret));
+            type.Methods.Add(mixersGetter);
+
+            var mixersProperty = new PropertyDefinition(
+                "Bix.Mix.IMixes.Mixers",
+                PropertyAttributes.None,
+                this.ReadOnlyCollectionOfIMixerTypeReference);
+            mixersProperty.CustomAttributes.Add(new CustomAttribute(this.CompilerGeneratedAttributeConstructorReference));
+            mixersProperty.GetMethod = mixersGetter;
+            type.Properties.Add(mixersProperty);
+        }
+
+        private void AddISerializable(ModuleDefinition typeModule, TypeDefinition type)
+        {
             type.Interfaces.Add(this.ISerializableTypeReference);
 
-            // add serialization methods
             var getObjectDataMethod = new MethodDefinition(
                 "System.Runtime.Serialization.ISerializable.GetObjectData",
                 MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final,
@@ -106,7 +156,11 @@ namespace Bix.Mixers.CecilMixer
             ilProcessor.Append(Instruction.Create(OpCodes.Ret));
             serializationConstructor.DeclaringType = type;
             type.Methods.Add(serializationConstructor);
+        }
 
+        private void AddIEncapsulates(ModuleDefinition typeModule, TypeDefinition type)
+        {
+            type.Interfaces.Add(this.IEncapsulatesTypeReference);
 
             // create inner DTO
             var dtoType = new TypeDefinition(string.Empty, "Dto", TypeAttributes.NestedPublic | TypeAttributes.Class, this.ObjectTypeReference);
@@ -114,7 +168,7 @@ namespace Bix.Mixers.CecilMixer
                 ".ctor",
                 MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
                 this.VoidTypeReference);
-            ilProcessor = dtoConstructor.Body.GetILProcessor();
+            var ilProcessor = dtoConstructor.Body.GetILProcessor();
             ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
             ilProcessor.Append(Instruction.Create(OpCodes.Call, this.ObjectConstructorReference));
             ilProcessor.Append(Instruction.Create(OpCodes.Ret));
@@ -166,6 +220,7 @@ namespace Bix.Mixers.CecilMixer
                     property.CustomAttributes.Remove(encapsulatedAttribute);
                 }
             }
+
             type.NestedTypes.Add(dtoType);
         }
     }

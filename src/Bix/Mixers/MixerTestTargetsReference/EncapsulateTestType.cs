@@ -15,15 +15,18 @@
 // limitations under the License.
 /***************************************************************************/
 
+using Bix.Mix;
 using Bix.Mix.Encapsulate;
 using System;
+using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Bix.Mixers.MixerTestTargets
 {
     public class EncapsulatesTestType : IEncapsulates
     {
-        #region
+        #region Construction
 
         // empty constructor is in pre-mixed type by default
         public EncapsulatesTestType() { }
@@ -207,6 +210,19 @@ namespace Bix.Mixers.MixerTestTargets
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
+        }
+
+        #endregion
+
+        #region Reference for IMixes Implementation
+
+        [CompilerGenerated]
+        [SpecialName]
+        private ReadOnlyCollection<IMixer> mixers = new ReadOnlyCollection<IMixer>(new IMixer[0]);
+        [CompilerGenerated]
+        ReadOnlyCollection<IMixer> IMixes.Mixers
+        {
+            get { return this.mixers; }
         }
 
         #endregion

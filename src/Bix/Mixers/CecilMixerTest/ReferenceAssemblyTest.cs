@@ -204,7 +204,10 @@ namespace CecilMixerTest
                 Assert.Fail(string.Format("Expected method {0} in type {1} but found none of mixed assembly", expected.FullName, expected.DeclaringType));
             }
 
-            Assert.AreEqual(expected.FullName, actual.FullName);
+            Assert.AreEqual(
+                expected.FullName,
+                actual.FullName,
+                string.Format("Expected method named {0}, but found method {1} in mixed assembly", expected.FullName, actual.FullName));
             Assert.AreEqual(expected.DeclaringType.FullName, actual.DeclaringType.FullName);
             AssertEquality(expected.Parameters, actual.Parameters, actual);
             Assert.AreEqual(expected.ReturnType.FullName, actual.ReturnType.FullName);
@@ -286,6 +289,8 @@ namespace CecilMixerTest
                 Assert.Fail(string.Format("Expected method body but found none on method {0} in type {1} of mixed assembly", expected.Method.FullName, expected.Method.DeclaringType.FullName));
             }
 
+            AssertEquality(expected.Variables, actual.Variables, actual.Method.FullName);
+
             int actualIndex = 0;
             int expectedIndex = 0;
             while(expectedIndex < expected.Instructions.Count && actualIndex < actual.Instructions.Count)
@@ -306,6 +311,45 @@ namespace CecilMixerTest
                 ++actualIndex;
                 ++expectedIndex;
             }
+        }
+
+        private static void AssertEquality(IEnumerable<VariableDefinition> expected, IEnumerable<VariableDefinition> actual, string methodName)
+        {
+            var expectedList = expected.ToList();
+            var actualList = actual.ToList();
+
+            for (var i = 0; i < expectedList.Count && i < actualList.Count; i++)
+            {
+                AssertEquality(expectedList[i], actualList[i]);
+            }
+
+            if (expectedList.Count > actualList.Count)
+            {
+                Assert.Fail(
+                    "Did not find expected variable {0} {1} at index {2} in method {3} of mixed assembly",
+                    expectedList[actualList.Count].VariableType.FullName,
+                    expectedList[actualList.Count].Name,
+                    expectedList[actualList.Count].Index,
+                    methodName);
+            }
+
+            if (expectedList.Count < actualList.Count)
+            {
+                Assert.Fail(
+                    "Found extra variable {0} {1} at index {2} in method {3} of mixed assembly",
+                    actualList[expectedList.Count].VariableType.FullName,
+                    actualList[expectedList.Count].Name,
+                    actualList[expectedList.Count].Index,
+                    methodName);
+            }
+        }
+
+        private static void AssertEquality(VariableDefinition expected, VariableDefinition actual, string methodName)
+        {
+            Assert.AreEqual(expected.Index, actual.Index);
+            Assert.AreEqual(expected.IsPinned, actual.IsPinned);
+            Assert.AreEqual(expected.Name, actual.Name);
+            Assert.AreEqual(expected.VariableType.FullName, actual.VariableType.FullName);
         }
 
         private static void AssertEquality(Instruction expected, Instruction actual)
