@@ -11,14 +11,16 @@ namespace CecilMixerTest
     [TestClass]
     public class ReferenceAssemblyTest
     {
-        private static readonly string ReferenceAssemblyName = "Bix.Mixers.MixerTestTargetsReference.dll";
-        private static readonly string MixedAssemblyName = "Bix.Mixers.MixerTestTargets.dll";
+        private static readonly string ReferenceAssemblyName = "Bix.Mixers.MixerTestTargetsReference";
+        private static readonly string ReferenceMainModuleName = string.Format("{0}.dll", ReferenceAssemblyName);
+        private static readonly string MixedAssemblyName = "Bix.Mixers.MixerTestTargets";
+        private static readonly string MixedMainModuleName = string.Format("{0}.dll", MixedAssemblyName);
 
         [TestMethod]
         public void ReferenceTest()
         {
-            var referenceAssembly = AssemblyDefinition.ReadAssembly(ReferenceAssemblyName);
-            var mixedAssembly = AssemblyDefinition.ReadAssembly(MixedAssemblyName);
+            var referenceAssembly = AssemblyDefinition.ReadAssembly(ReferenceMainModuleName);
+            var mixedAssembly = AssemblyDefinition.ReadAssembly(MixedMainModuleName);
 
             AssertEquality(referenceAssembly, mixedAssembly);
         }
@@ -26,6 +28,7 @@ namespace CecilMixerTest
         private static void AssertEquality(AssemblyDefinition expected, AssemblyDefinition actual)
         {
             AssertEquality(expected.Modules, actual.Modules);
+            AssertEquality(expected.CustomAttributes, actual.CustomAttributes, actual.FullName);
         }
 
         private static void AssertEquality(IEnumerable<ModuleDefinition> expected, IEnumerable<ModuleDefinition> actual)
@@ -162,7 +165,7 @@ namespace CecilMixerTest
                 AssertEquality(expected.Events, actual.Events);
                 AssertEquality(expected.GenericParameters, actual.GenericParameters, actual);
                 AssertEquality(expected.SecurityDeclarations, actual.SecurityDeclarations);
-                AssertEquality(expected.CustomAttributes, actual.CustomAttributes, actual);
+                AssertEquality(expected.CustomAttributes, actual.CustomAttributes, actual.FullName);
             }
         }
 
@@ -265,7 +268,7 @@ namespace CecilMixerTest
 
                 AssertEquality(expected.SecurityDeclarations, actual.SecurityDeclarations);
                 AssertEquality(expected.GenericParameters, actual.GenericParameters, actual);
-                AssertEquality(expected.CustomAttributes, actual.CustomAttributes, actual);
+                AssertEquality(expected.CustomAttributes, actual.CustomAttributes, actual.FullName);
 
                 AssertEquality(expected.Body, actual.Body);
             }
@@ -283,19 +286,30 @@ namespace CecilMixerTest
                 Assert.Fail(string.Format("Expected method body but found none on method {0} in type {1} of mixed assembly", expected.Method.FullName, expected.Method.DeclaringType.FullName));
             }
 
-            int actualI = 0;
-            int expectedI = 0;
-            for (; expectedI < expected.Instructions.Count && actualI < actual.Instructions.Count; expectedI++)
+            int actualIndex = 0;
+            int expectedIndex = 0;
+            while(expectedIndex < expected.Instructions.Count && actualIndex < actual.Instructions.Count)
             {
-                if (expected.Instructions[expectedI].OpCode == OpCodes.Nop) { continue; }
-                AssertEquality(expected.Instructions[expectedI], actual.Instructions[actualI]);
-                ++actualI;
+                if (expected.Instructions[expectedIndex].OpCode == OpCodes.Nop)
+                {
+                    ++expectedIndex;
+                    continue;
+                }
+
+                if (actual.Instructions[actualIndex].OpCode == OpCodes.Nop)
+                {
+                    ++actualIndex;
+                    continue;
+                }
+
+                AssertEquality(expected.Instructions[expectedIndex], actual.Instructions[actualIndex]);
+                ++actualIndex;
+                ++expectedIndex;
             }
         }
 
         private static void AssertEquality(Instruction expected, Instruction actual)
         {
-            Assert.AreEqual(expected.Offset, actual.Offset);
             Assert.AreEqual(expected.OpCode, actual.OpCode);
             if (expected.Operand == null && actual.Operand == null) { return; }
             AssertEquality(expected.Operand as dynamic, actual.Operand as dynamic);
@@ -339,7 +353,7 @@ namespace CecilMixerTest
             Assert.AreEqual(expected.IsRuntimeSpecialName, actual.IsRuntimeSpecialName);
             Assert.AreEqual(expected.IsSpecialName, actual.IsSpecialName);
 
-            AssertEquality(expected.CustomAttributes, actual.CustomAttributes, actual);
+            AssertEquality(expected.CustomAttributes, actual.CustomAttributes, actual.FullName);
         }
 
         private static void AssertEquality(IEnumerable<FieldDefinition> expected, IEnumerable<FieldDefinition> actual)
@@ -390,10 +404,10 @@ namespace CecilMixerTest
             Assert.AreEqual(expected.IsStatic, actual.IsStatic);
             Assert.AreEqual(expected.Offset, actual.Offset);
 
-            AssertEquality(expected.CustomAttributes, actual.CustomAttributes, actual);
+            AssertEquality(expected.CustomAttributes, actual.CustomAttributes, actual.FullName);
         }
 
-        private static void AssertEquality(IEnumerable<CustomAttribute> expected, IEnumerable<CustomAttribute> actual, MemberReference attributeTarget)
+        private static void AssertEquality(IEnumerable<CustomAttribute> expected, IEnumerable<CustomAttribute> actual, string attributeTargetName)
         {
             var sortedExpected = expected.ToList();
             sortedExpected.Sort(Comparisons.CustomAttributeComparison);
@@ -402,33 +416,33 @@ namespace CecilMixerTest
 
             for (var i = 0; i < sortedExpected.Count && i < sortedActual.Count; i++)
             {
-                AssertEquality(sortedExpected[i], sortedActual[i], attributeTarget);
+                AssertEquality(sortedExpected[i], sortedActual[i], attributeTargetName);
             }
 
             if (sortedExpected.Count > sortedActual.Count)
             {
-                Assert.Fail("Did not find expected attribute {0} for target {1} of mixed assembly", sortedExpected[sortedActual.Count].AttributeType, attributeTarget.FullName);
+                Assert.Fail("Did not find expected attribute {0} for target {1} of mixed assembly", sortedExpected[sortedActual.Count].AttributeType, attributeTargetName);
             }
 
             if (sortedExpected.Count < sortedActual.Count)
             {
-                Assert.Fail("Found extra attribute {0} in type {1} of mixed assembly", sortedActual[sortedExpected.Count].AttributeType, attributeTarget.FullName);
+                Assert.Fail("Found extra attribute {0} in type {1} of mixed assembly", sortedActual[sortedExpected.Count].AttributeType, attributeTargetName);
             }
         }
 
-        private static void AssertEquality(CustomAttribute expected, CustomAttribute actual, MemberReference attributeTarget)
+        private static void AssertEquality(CustomAttribute expected, CustomAttribute actual, string attributeTargetName)
         {
             Assert.AreEqual(
                 expected.AttributeType.FullName,
                 actual.AttributeType.FullName,
-                string.Format("Expected attribute of type {0} but found type {1} for {2}", expected.AttributeType.FullName, actual.AttributeType.FullName, attributeTarget.FullName));
-            AssertEquality(expected.Properties, actual.Properties, attributeTarget);
+                string.Format("Expected attribute of type {0} but found type {1} for {2}", expected.AttributeType.FullName, actual.AttributeType.FullName, attributeTargetName));
+            AssertEquality(expected.Properties, actual.Properties, attributeTargetName);
         }
 
         private static void AssertEquality(
             IEnumerable<CustomAttributeNamedArgument> expected,
             IEnumerable<CustomAttributeNamedArgument> actual,
-            MemberReference attributeTarget)
+            string attributeTargetName)
         {
             var sortedExpected = expected.ToList();
             sortedExpected.Sort(Comparisons.CustomAttributeNamedArgumentComparison);
@@ -437,44 +451,34 @@ namespace CecilMixerTest
 
             for (var i = 0; i < sortedExpected.Count && i < sortedActual.Count; i++)
             {
-                AssertEquality(sortedExpected[i], sortedActual[i], attributeTarget);
+                AssertEquality(sortedExpected[i], sortedActual[i], attributeTargetName);
             }
 
             if (sortedExpected.Count > sortedActual.Count)
             {
-                Assert.Fail("Did not find expected attribute named argument [{0}][{1}] for target {2} of mixed assembly", sortedExpected[sortedActual.Count].Name, sortedExpected[sortedActual.Count].Argument, attributeTarget.FullName);
+                Assert.Fail("Did not find expected attribute named argument [{0}][{1}] for target {2} of mixed assembly", sortedExpected[sortedActual.Count].Name, sortedExpected[sortedActual.Count].Argument, attributeTargetName);
             }
 
             if (sortedExpected.Count < sortedActual.Count)
             {
-                Assert.Fail("Found extra attribute named argument [{0}][{1}] in type {2} of mixed assembly", sortedActual[sortedExpected.Count].Name, sortedActual[sortedExpected.Count].Argument, attributeTarget.FullName);
+                Assert.Fail("Found extra attribute named argument [{0}][{1}] in type {2} of mixed assembly", sortedActual[sortedExpected.Count].Name, sortedActual[sortedExpected.Count].Argument, attributeTargetName);
             }
         }
 
         private static void AssertEquality(
             CustomAttributeNamedArgument expected,
             CustomAttributeNamedArgument actual,
-            MemberReference attributeTarget)
+            string attributeTargetName)
         {
             Assert.AreEqual(
                 expected.Name,
                 actual.Name,
-                string.Format("Looking for custom attribute named argument with name {0} but found {1} for target {2} of mixed assembly", expected.Name, actual.Name, attributeTarget.FullName));
+                string.Format("Looking for custom attribute named argument with name {0} but found {1} for target {2} of mixed assembly", expected.Name, actual.Name, attributeTargetName));
 
             AssertEquality(expected.Argument.Type.Resolve(), actual.Argument.Type.Resolve());
             if (expected.Argument.Value != null && actual.Argument.Value != null)
             {
-                // this probably needs a better test, but for now this is it
-                Assert.AreEqual(
-                    expected.Argument.Value,
-                    actual.Argument.Value,
-                    string.Format(
-                    "Looking for custom attribute named argument [{0}][{1}] but found [{2}][{3}] for target {4} of mixed assembly",
-                    expected.Name,
-                    expected.Argument.Value.ToString(),
-                    actual.Name,
-                    actual.Argument.Value.ToString(),
-                    attributeTarget.FullName));
+                AssertEquality(expected.Argument.Value as dynamic, actual.Argument.Value as dynamic);
             }
             else
             {
@@ -532,7 +536,7 @@ namespace CecilMixerTest
             Assert.AreEqual(expected.IsReturnValue, actual.IsReturnValue);
             Assert.AreEqual(expected.Sequence, actual.Sequence);
 
-            AssertEquality(expected.CustomAttributes, actual.CustomAttributes, itemWithParameters);
+            AssertEquality(expected.CustomAttributes, actual.CustomAttributes, itemWithParameters.FullName);
         }
 
         private static void AssertEquality(IEnumerable<GenericParameter> expected, IEnumerable<GenericParameter> actual, MemberReference itemWithParameters)
