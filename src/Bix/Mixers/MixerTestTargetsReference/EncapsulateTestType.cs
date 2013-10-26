@@ -26,12 +26,7 @@ namespace Bix.Mixers.MixerTestTargets
 {
     public class EncapsulatesTestType : IEncapsulates
     {
-        #region Construction
-
-        // empty constructor is in pre-mixed type by default
         public EncapsulatesTestType() { }
-
-        #endregion
 
         #region Copied code with attributes removed
 
@@ -218,7 +213,7 @@ namespace Bix.Mixers.MixerTestTargets
 
         [CompilerGenerated]
         [SpecialName]
-        private ReadOnlyCollection<IMixer> mixers = new ReadOnlyCollection<IMixer>(new IMixer[0]);
+        private ReadOnlyCollection<IMixer> mixers;
         [CompilerGenerated]
         ReadOnlyCollection<IMixer> IMixes.Mixers
         {

@@ -15,6 +15,7 @@
 // limitations under the License.
 /***************************************************************************/
 
+using Mono.Cecil;
 using System;
 
 namespace Bix.Mixers.CecilMixer
@@ -27,7 +28,9 @@ namespace Bix.Mixers.CecilMixer
     {
         public static int Main(string[] args)
         {
-            new EncapsulateMixer().AddEncapsulation(args[0]);
+            var typeModule = ModuleDefinition.ReadModule(args[0]);
+            new MixMixer().AddMixing(args[0], typeModule);
+            new EncapsulateMixer().AddEncapsulation(args[0], typeModule);
             return 0;
         }
     }
