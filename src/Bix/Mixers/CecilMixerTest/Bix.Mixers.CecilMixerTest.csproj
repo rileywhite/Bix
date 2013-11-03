@@ -13,6 +13,8 @@
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,9 +32,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Cecil">
@@ -74,16 +73,16 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Mix\Bix.Mix.csproj">
-      <Project>{6f93ed35-44d0-46ff-9b51-d0e374104c3d}</Project>
+      <Project>{6F93ED35-44D0-46FF-9B51-D0E374104C3D}</Project>
       <Name>Bix.Mix</Name>
     </ProjectReference>
     <ProjectReference Include="..\MixerTestTargetsReference\Bix.Mixers.MixerTestTargetsReference.csproj">
-      <Project>{2e7b13fd-a725-4fc1-a283-20eb369ad3ba}</Project>
+      <Project>{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}</Project>
       <Name>Bix.Mixers.MixerTestTargetsReference</Name>
       <Aliases>reference</Aliases>
     </ProjectReference>
     <ProjectReference Include="..\MixerTestTargets\Bix.Mixers.MixerTestTargets.csproj">
-      <Project>{e513a55d-f33b-4880-bc88-deb85aa6269f}</Project>
+      <Project>{E513A55D-F33B-4880-BC88-DEB85AA6269F}</Project>
       <Name>Bix.Mixers.MixerTestTargets</Name>
     </ProjectReference>
   </ItemGroup>

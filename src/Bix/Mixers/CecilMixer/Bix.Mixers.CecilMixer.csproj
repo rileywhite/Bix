@@ -13,6 +13,8 @@
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,9 +32,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Cecil">
@@ -66,7 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Mix\Bix.Mix.csproj">
-      <Project>{6f93ed35-44d0-46ff-9b51-d0e374104c3d}</Project>
+      <Project>{6F93ED35-44D0-46FF-9B51-D0E374104C3D}</Project>
       <Name>Bix.Mix</Name>
     </ProjectReference>
   </ItemGroup>
