@@ -1,20 +1,20 @@
 ﻿using Bix.Mix.Encapsulate;
 using Bix.Mixers.MixerTestTargets;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 
 namespace Bix.Mixers.CecilMixerTest.EncapsulateTests
 {
-    [TestClass]
+    [TestFixture]
     public class DtoTest
     {
-        [TestMethod]
+        [Test]
         public void DtoTypeCreatedCorrectly()
         {
             Assert.IsNotNull(typeof(EncapsulatesTestType).GetNestedType("Dto"));
         }
 
-        [TestMethod]
+        [Test]
         public void CorrectPropertiesAreRepresentedAndAreReadWriteInDto()
         {
             Type dtoType = typeof(EncapsulatesTestType).GetNestedType("Dto");

@@ -25,7 +25,7 @@ using Bix.Mix.Validate;
 
 namespace Bix.Picks.Luffa
 {
-    internal class ValidateProvider : IValidateProvider
-    {
-    }
+    //internal class ValidateProvider : IValidateProvider
+    //{
+    //}
 }

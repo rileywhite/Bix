@@ -21,11 +21,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Bix.Mix;
 using Bix.Mix.Encapsulate;
 
 namespace Bix.Picks.Chia
 {
     internal class EncapsulateProvider : IEncapsulateProvider
     {
+        public InitializeResult Initialize(IEncapsulates encapsulates)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

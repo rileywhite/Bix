@@ -23,7 +23,8 @@ using System.Threading.Tasks;
 
 namespace Bix.Mix.Encapsulate
 {
-    public interface IEncapsulateProvider
+    public interface IEncapsulateProvider : IMixProvider
     {
+        InitializeResult Initialize(IEncapsulates encapsulates);
     }
 }

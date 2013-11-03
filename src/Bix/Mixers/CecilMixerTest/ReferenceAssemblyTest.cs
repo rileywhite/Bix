@@ -1,14 +1,14 @@
 ﻿using Bix.Mixers.CecilMixerTest.Utility;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace CecilMixerTest
 {
-    [TestClass]
+    [TestFixture]
     public class ReferenceAssemblyTest
     {
         private static readonly string ReferenceAssemblyName = "Bix.Mixers.MixerTestTargetsReference";
@@ -16,7 +16,7 @@ namespace CecilMixerTest
         private static readonly string MixedAssemblyName = "Bix.Mixers.MixerTestTargets";
         private static readonly string MixedMainModuleName = string.Format("{0}.dll", MixedAssemblyName);
 
-        [TestMethod]
+        [Test]
         public void ReferenceTest()
         {
             var referenceAssembly = AssemblyDefinition.ReadAssembly(ReferenceMainModuleName);

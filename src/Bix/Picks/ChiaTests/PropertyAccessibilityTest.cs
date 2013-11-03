@@ -16,12 +16,12 @@
 /***************************************************************************/
 
 using Bix.Mix.Encapsulate;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 
 namespace Bix.Picks.ChiaTests
 {
-    [TestClass]
+    [TestFixture]
     public class PropertyAccessibilityTest
     {
 

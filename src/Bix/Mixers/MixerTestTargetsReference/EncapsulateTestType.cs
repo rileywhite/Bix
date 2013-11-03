@@ -18,7 +18,9 @@
 using Bix.Mix;
 using Bix.Mix.Encapsulate;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
@@ -26,7 +28,28 @@ namespace Bix.Mixers.MixerTestTargets
 {
     public class EncapsulatesTestType : IEncapsulates
     {
-        public EncapsulatesTestType() { }
+        public EncapsulatesTestType()
+        {
+            this.InitializeBix();
+        }
+
+        #region Bix Initialization
+
+        [CompilerGenerated]
+        [SpecialName]
+        private void InitializeBix()
+        {
+            MixContext.SetFor(this);
+            MixContext mixContext = MixContext.GetFrom(this);
+            List<IMixer> mixers = new List<IMixer>();
+
+            ((IEncapsulates)this).InitializeResult = mixContext.Get<IEncapsulateProvider>().Initialize(this);
+            mixers.Add(((IEncapsulates)this).Encapsulator);
+
+            ((IMixes)this).Mixers = mixers.AsReadOnly();
+        }
+
+        #endregion
 
         #region Copied code with attributes removed
 
@@ -211,14 +234,23 @@ namespace Bix.Mixers.MixerTestTargets
 
         #region Reference for IMixes Implementation
 
+        MixContext IMixes.MixContext { get; set; }
+
         [CompilerGenerated]
-        [SpecialName]
-        private ReadOnlyCollection<IMixer> mixers;
+        ReadOnlyCollection<IMixer> IMixes.Mixers { get; set; }
+
         [CompilerGenerated]
-        ReadOnlyCollection<IMixer> IMixes.Mixers
-        {
-            get { return this.mixers; }
-        }
+        InitializeResult IMixes.InitializeResult { get; set; }
+
+        #endregion
+
+        #region Reference for IEncapsulates Implementation
+
+        [CompilerGenerated]
+        InitializeResult IEncapsulates.InitializeResult { get; set; }
+
+        [CompilerGenerated]
+        IEncapsulator IEncapsulates.Encapsulator { get; set; }
 
         #endregion
     }

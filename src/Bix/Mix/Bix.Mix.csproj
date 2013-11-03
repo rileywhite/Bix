@@ -51,6 +51,7 @@
     <Compile Include="IMixer.cs" />
     <Compile Include="IMixes.cs" />
     <Compile Include="IMixProvider.cs" />
+    <Compile Include="InitializeResult.cs" />
     <Compile Include="MixContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Validate\IValidates.cs" />

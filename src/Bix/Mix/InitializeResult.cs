@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// "IMixes".cs
+// "InitializeResult".cs
 // Copyright 2013 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,15 +16,22 @@
 /***************************************************************************/
 
 using System;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
+using System.Diagnostics;
+using System.Diagnostics.Contracts;
 
 namespace Bix.Mix
 {
-    public interface IMixes : ISerializable
+    public class InitializeResult
     {
-        MixContext MixContext { get; set; }
-        InitializeResult InitializeResult { get; set; }
-        ReadOnlyCollection<IMixer> Mixers { get; set; }
+        public InitializeResult(Stopwatch stopwatch)
+        {
+            Contract.Assert(stopwatch != null);
+            Contract.Assert(!stopwatch.IsRunning);
+            Contract.Assert(stopwatch.Elapsed >= TimeSpan.Zero);
+
+            this.InitializeTime = stopwatch.Elapsed;
+        }
+
+        public TimeSpan InitializeTime { get; set; }
     }
 }

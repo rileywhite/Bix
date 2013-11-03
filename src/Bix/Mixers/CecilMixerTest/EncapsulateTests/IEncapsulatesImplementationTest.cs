@@ -1,16 +1,16 @@
 ﻿using Bix.Mix;
 using Bix.Mix.Encapsulate;
 using Bix.Mixers.MixerTestTargets;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using System.Runtime.Serialization;
 
 namespace CecilMixerTest.EncapsulateTests
 {
-    [TestClass]
+    [TestFixture]
     public class IEncapsulatesImplementationTest
     {
-        [TestMethod]
+        [Test]
         public void IEncapsulatesIsImplemented()
         {
             Assert.AreEqual(
