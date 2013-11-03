@@ -83,6 +83,8 @@ namespace Bix.Mixers.MixerTestTargets
         protected internal int ProtectedInternalGetProtectedSet { get; protected set; }
         protected internal int ProtectedInternalGetProtectedInternalSet { get; set; }
 
+		#pragma warning disable 0649
+
         private int publicGet;
         public int PublicGet { get { return this.publicGet; } }
 
