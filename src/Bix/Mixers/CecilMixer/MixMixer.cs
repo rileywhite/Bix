@@ -21,7 +21,8 @@ namespace Bix.Mixers.CecilMixer
         private TypeReference StreamingContextTypeReference { get; set; }
         private TypeReference ReadOnlyCollectionOfIMixerTypeReference { get; set; }
 
-        private TypeReference EncapsulatesAttributeType { get; set; }
+        private TypeReference ObjectType { get; set; }
+        private TypeReference MixesAttributeBaseType { get; set; }
 
         private MethodReference ObjectConstructorReference { get; set; }
         private MethodReference CompilerGeneratedAttributeConstructorReference { get; set; }
@@ -33,8 +34,18 @@ namespace Bix.Mixers.CecilMixer
             var originalTypes = new List<TypeDefinition>(typeModule.Types);
             foreach (var type in originalTypes)
             {
-                var encapsulatesAttribute = type.CustomAttributes.SingleOrDefault(customAttribute => customAttribute.AttributeType.Resolve() == this.EncapsulatesAttributeType);
-                if (encapsulatesAttribute != null)
+                if(type.CustomAttributes.Any(
+                    customAttribute =>
+                    {
+                        var attributeType = customAttribute.AttributeType.Resolve();
+                        while (attributeType != this.ObjectType &&
+                            attributeType != this.MixesAttributeBaseType &&
+                            attributeType.BaseType != null)
+                        {
+                            attributeType = attributeType.BaseType.Resolve();
+                        }
+                        return attributeType == this.MixesAttributeBaseType;
+                    }))
                 {
                     this.AddIMixes(typeModule, type);
                     this.AddISerializable(typeModule, type);
@@ -53,7 +64,8 @@ namespace Bix.Mixers.CecilMixer
             this.StreamingContextTypeReference = typeModule.Import(typeof(StreamingContext));
             this.ReadOnlyCollectionOfIMixerTypeReference = typeModule.Import(typeof(ReadOnlyCollection<IMixer>));
 
-            this.EncapsulatesAttributeType = typeModule.Import(typeof(EncapsulatesAttribute)).Resolve();
+            this.ObjectType = typeModule.Import(typeof(object)).Resolve();
+            this.MixesAttributeBaseType = typeModule.Import(typeof(MixesAttributeBase)).Resolve();
 
             this.ObjectConstructorReference = typeModule.Import(typeof(object).GetConstructor(new Type[0]));
             this.CompilerGeneratedAttributeConstructorReference = typeModule.Import(typeof(CompilerGeneratedAttribute).GetConstructor(new Type[0]));

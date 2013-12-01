@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Bix.Mix.Encapsulate
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class EncapsulatesAttribute : Attribute
+    public sealed class EncapsulatesAttribute : MixesAttributeBase
     {
     }
 }

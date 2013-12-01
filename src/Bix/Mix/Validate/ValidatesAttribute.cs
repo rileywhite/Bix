@@ -23,7 +23,8 @@ using System.Threading.Tasks;
 
 namespace Bix.Mix.Validate
 {
-    public class ValidatesAttribute
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class ValidatesAttribute : MixesAttributeBase
     {
     }
 }
