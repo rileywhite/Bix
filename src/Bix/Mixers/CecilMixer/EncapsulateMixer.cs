@@ -31,24 +31,14 @@ namespace Bix.Mixers.CecilMixer
 {
     internal class EncapsulateMixer
     {
-        private TypeReference VoidTypeReference { get; set; }
-        private TypeReference IEncapsulatesTypeReference { get; set; }
-        private TypeReference ObjectTypeReference { get; set; }
-
-        private TypeReference EncapsulatesAttributeType { get; set; }
-        private TypeDefinition EncapsulatedAttributeType { get; set; }
-
-        private MethodReference ObjectConstructorReference { get; set; }
-        private MethodReference CompilerGeneratedAttributeConstructorReference { get; set; }
-
         public void AddEncapsulation(string modulePath, ModuleDefinition typeModule)
         {
-            Initialize(typeModule);
-
             var originalTypes = new List<TypeDefinition>(typeModule.Types);
             foreach (var type in originalTypes)
             {
-                var encapsulatesAttribute = type.CustomAttributes.SingleOrDefault(customAttribute => customAttribute.AttributeType.Resolve() == this.EncapsulatesAttributeType);
+                var encapsulatesAttribute = type.CustomAttributes.SingleOrDefault(
+                    customAttribute => customAttribute.AttributeType.Resolve() == typeModule.Import(typeof(EncapsulatesAttribute)).Resolve());
+
                 if (encapsulatesAttribute != null)
                 {
                     AddEncapsulation(typeModule, type);
@@ -59,19 +49,6 @@ namespace Bix.Mixers.CecilMixer
             typeModule.Write(modulePath, new WriterParameters { SymbolWriterProvider = new PdbWriterProvider() });
         }
 
-        private void Initialize(ModuleDefinition typeModule)
-        {
-            this.VoidTypeReference = typeModule.Import(typeof(void));
-            this.IEncapsulatesTypeReference = typeModule.Import(typeof(IEncapsulates));
-            this.ObjectTypeReference = typeModule.Import(typeof(object));
-
-            this.EncapsulatesAttributeType = typeModule.Import(typeof(EncapsulatesAttribute)).Resolve();
-            this.EncapsulatedAttributeType = typeModule.Import(typeof(EncapsulatedAttribute)).Resolve();
-
-            this.ObjectConstructorReference = typeModule.Import(typeof(object).GetConstructor(new Type[0]));
-            this.CompilerGeneratedAttributeConstructorReference = typeModule.Import(typeof(CompilerGeneratedAttribute).GetConstructor(new Type[0]));
-        }
-
         private void AddEncapsulation(ModuleDefinition typeModule, TypeDefinition type)
         {
             this.AddIEncapsulates(typeModule, type);
@@ -79,68 +56,41 @@ namespace Bix.Mixers.CecilMixer
 
         private void AddIEncapsulates(ModuleDefinition typeModule, TypeDefinition type)
         {
-            type.Interfaces.Add(this.IEncapsulatesTypeReference);
+            type.Interfaces.Add(typeModule.Import(typeof(IEncapsulates)));
 
-            // create inner DTO
-            var dtoType = new TypeDefinition(string.Empty, "Dto", TypeAttributes.NestedPublic | TypeAttributes.Class, this.ObjectTypeReference);
-            var dtoConstructor = new MethodDefinition(
+            AddDataTransferObject(typeModule, type);
+
+            var mixersProperty = type.ImplementAutoPropertyExplicitly(typeof(IEncapsulates).GetProperty("Encapsulator"));
+            mixersProperty.MarkAsCompilerGenerated();
+        }
+
+        private static void AddDataTransferObject(ModuleDefinition typeModule, TypeDefinition type)
+        {
+            var dtoType = new TypeDefinition(string.Empty, "Dto", TypeAttributes.NestedPublic | TypeAttributes.Class, typeModule.Import(typeof(object)));
+            type.NestedTypes.Add(dtoType);
+            dtoType.AddMethod(
                 ".ctor",
-                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
-                this.VoidTypeReference);
-            var ilProcessor = dtoConstructor.Body.GetILProcessor();
-            ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
-            ilProcessor.Append(Instruction.Create(OpCodes.Call, this.ObjectConstructorReference));
-            ilProcessor.Append(Instruction.Create(OpCodes.Ret));
-            dtoConstructor.DeclaringType = dtoType;
-            dtoType.Methods.Add(dtoConstructor);
+                null,
+                ilProcessor =>
+                {
+                    ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
+                    ilProcessor.Append(Instruction.Create(OpCodes.Call, typeModule.ImportConstructor(typeof(object))));
+                    ilProcessor.Append(Instruction.Create(OpCodes.Ret));
+                },
+                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
+
+            var encapsulatesAttributeType = typeModule.Import(typeof(EncapsulatedAttribute)).Resolve();
             foreach (var property in type.Properties)
             {
-                var encapsulatedAttribute = property.CustomAttributes.SingleOrDefault(customAttribute => customAttribute.AttributeType.Resolve() == this.EncapsulatedAttributeType);
+                var encapsulatedAttribute = property.CustomAttributes.SingleOrDefault(
+                    customAttribute => customAttribute.AttributeType.Resolve() == encapsulatesAttributeType);
+
                 if (encapsulatedAttribute != null)
                 {
-                    var dtoField = new FieldDefinition(
-                        string.Format("<{0}>k__BackingField", property.Name),
-                        FieldAttributes.Private,
-                        property.PropertyType);
-                    dtoField.CustomAttributes.Add(new CustomAttribute(this.CompilerGeneratedAttributeConstructorReference));
-                    dtoField.DeclaringType = dtoType;
-                    dtoType.Fields.Add(dtoField);
-                    var dtoProperty = new PropertyDefinition(property.Name, PropertyAttributes.None, property.PropertyType);
-                    dtoProperty.DeclaringType = dtoType;
-
-                    var dtoPropertyGetter = new MethodDefinition(
-                        string.Format("get_{0}", property.Name),
-                        MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
-                        property.PropertyType);
-                    dtoPropertyGetter.DeclaringType = dtoType;
-                    ilProcessor = dtoPropertyGetter.Body.GetILProcessor();
-                    ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
-                    ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, dtoField));
-                    ilProcessor.Append(Instruction.Create(OpCodes.Ret));
-                    dtoProperty.GetMethod = dtoPropertyGetter;
-                    dtoType.Methods.Add(dtoPropertyGetter);
-
-                    var dtoPropertySetter = new MethodDefinition(
-                        string.Format("set_{0}", property.Name),
-                        MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
-                        typeModule.Import(typeof(void)));
-                    dtoPropertySetter.Parameters.Add(new ParameterDefinition("value", ParameterAttributes.In, property.PropertyType));
-                    dtoPropertySetter.DeclaringType = dtoType;
-                    ilProcessor = dtoPropertySetter.Body.GetILProcessor();
-                    ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
-                    ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_1));
-                    ilProcessor.Append(Instruction.Create(OpCodes.Stfld, dtoField));
-                    ilProcessor.Append(Instruction.Create(OpCodes.Ret));
-                    dtoProperty.SetMethod = dtoPropertySetter;
-                    dtoType.Methods.Add(dtoPropertySetter);
-
-                    dtoType.Properties.Add(dtoProperty);
-
+                    dtoType.AddAutoProperty(property.Name, property.PropertyType);
                     property.CustomAttributes.Remove(encapsulatedAttribute);
                 }
             }
-
-            type.NestedTypes.Add(dtoType);
         }
     }
 }

@@ -28,28 +28,28 @@ namespace Bix.Mix
     /// Currently serves as a point for all items to get mix provider info. This will
     /// likely be expanded with/replaced by some sort of IoC.
     /// </summary>
-    public class MixContext
-    {
-        private static MixContext Instance { get; set; }
+    //public class MixContext
+    //{
+    //    private static MixContext Instance { get; set; }
 
-        public static void SetFor(IMixes mixes)
-        {
-            Contract.Assert(mixes != null);
-            Contract.Ensures(mixes.MixContext != null);
-            mixes.MixContext = Instance;
-        }
+    //    public static void SetFor(IMixes mixes)
+    //    {
+    //        Contract.Assert(mixes != null);
+    //        Contract.Ensures(mixes.MixContext != null);
+    //        mixes.MixContext = Instance;
+    //    }
 
-        public static MixContext GetFrom(IMixes mixes)
-        {
-            Contract.Assert(mixes != null);
-            return mixes.MixContext;
-        }
+    //    public static MixContext GetFrom(IMixes mixes)
+    //    {
+    //        Contract.Assert(mixes != null);
+    //        return mixes.MixContext;
+    //    }
 
-        public TMixProvider Get<TMixProvider>()
-            where TMixProvider : IMixProvider
-        {
-            Contract.Ensures(Contract.Result<TMixProvider>() != null);
-            throw new NotImplementedException();
-        }
-    }
+    //    public TMixProvider Get<TMixProvider>()
+    //        where TMixProvider : IMixProvider
+    //    {
+    //        Contract.Ensures(Contract.Result<TMixProvider>() != null);
+    //        throw new NotImplementedException();
+    //    }
+    //}
 }
