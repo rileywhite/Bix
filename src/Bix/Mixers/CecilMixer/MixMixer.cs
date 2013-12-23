@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using ParameterInfo = System.Reflection.ParameterInfo;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
@@ -58,17 +59,12 @@ namespace Bix.Mixers.CecilMixer
             var serializationInfoTypeReference = typeModule.Import(typeof(SerializationInfo));
             var streamingContextTypeReference = typeModule.Import(typeof(StreamingContext));
 
-            var getObjectDataMethod = type.AddMethod(
-                "System.Runtime.Serialization.ISerializable.GetObjectData",
-                voidTypeReference,
+            var getObjectDataMethod = type.ImplementMethodExplicitly(
+                typeof(ISerializable).GetMethod("GetObjectData", new Type[] { typeof(SerializationInfo), typeof(StreamingContext) }),
                 ilProcessor =>
                 {
                     ilProcessor.Append(Instruction.Create(OpCodes.Ret));
-                },
-                MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final);
-            getObjectDataMethod.Parameters.Add(new ParameterDefinition("info", ParameterAttributes.None, serializationInfoTypeReference));
-            getObjectDataMethod.Parameters.Add(new ParameterDefinition("context", ParameterAttributes.None, streamingContextTypeReference));
-            getObjectDataMethod.Overrides.Add(typeModule.Import(typeof(ISerializable).GetMethod("GetObjectData", new Type[] { typeof(SerializationInfo), typeof(StreamingContext) })));
+                });
 
             var serializationConstructor = type.AddMethod(
                 ".ctor",
@@ -79,6 +75,7 @@ namespace Bix.Mixers.CecilMixer
                     ilProcessor.Append(Instruction.Create(OpCodes.Call, typeModule.ImportConstructor(typeof(object))));
                     ilProcessor.Append(Instruction.Create(OpCodes.Ret));
                 },
+                new ParameterInfo[] { },
                 MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
             serializationConstructor.Parameters.Add(new ParameterDefinition("info", ParameterAttributes.None, serializationInfoTypeReference));
             serializationConstructor.Parameters.Add(new ParameterDefinition("context", ParameterAttributes.None, streamingContextTypeReference));

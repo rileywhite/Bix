@@ -77,7 +77,8 @@ namespace Bix.Mixers.CecilMixer
                     ilProcessor.Append(Instruction.Create(OpCodes.Call, typeModule.ImportConstructor(typeof(object))));
                     ilProcessor.Append(Instruction.Create(OpCodes.Ret));
                 },
-                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
+                parameters: null,
+                methodAttributes: MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
 
             var encapsulatesAttributeType = typeModule.Import(typeof(EncapsulatedAttribute)).Resolve();
             foreach (var property in type.Properties)

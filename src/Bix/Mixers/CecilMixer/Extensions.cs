@@ -3,6 +3,8 @@ using Mono.Cecil.Cil;
 using System;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using MethodInfo = System.Reflection.MethodInfo;
+using ParameterInfo = System.Reflection.ParameterInfo;
 using PropertyInfo = System.Reflection.PropertyInfo;
 using System.Runtime.CompilerServices;
 
@@ -86,7 +88,7 @@ namespace Bix.Mixers.CecilMixer
                     string.Format("get_{0}", name),
                     propertyType,
                     getterMethodBuilder,
-                    getterMethodAttributes);
+                    methodAttributes: getterMethodAttributes);
             }
 
             MethodDefinition setterMethod;
@@ -97,7 +99,7 @@ namespace Bix.Mixers.CecilMixer
                     string.Format("set_{0}", name),
                     null,
                     setterMethodBuilder,
-                    setterMethodAttributes);
+                    methodAttributes: setterMethodAttributes);
                 setterMethod.Parameters.Add(new ParameterDefinition("value", ParameterAttributes.None, propertyType));
             }
 
@@ -222,7 +224,7 @@ namespace Bix.Mixers.CecilMixer
                     string.Format("{0}.{1}.{2}", interfacePropertyInfo.DeclaringType.Namespace, interfacePropertyInfo.DeclaringType.Name, interfacePropertyInfo.GetMethod.Name),
                     propertyType,
                     getterMethodBuilder,
-                    MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.SpecialName);
+                    methodAttributes: MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.SpecialName);
                 getterMethod.Overrides.Add(target.Module.Import(interfacePropertyInfo.GetMethod));
             }
 
@@ -234,7 +236,7 @@ namespace Bix.Mixers.CecilMixer
                     string.Format("{0}.{1}.{2}", interfacePropertyInfo.DeclaringType.Namespace, interfacePropertyInfo.DeclaringType.Name, interfacePropertyInfo.SetMethod.Name),
                     target.Module.Import(typeof(void)),
                     setterMethodBuilder,
-                    MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.SpecialName);
+                    methodAttributes: MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.SpecialName);
                 setterMethod.Parameters.Add(new ParameterDefinition("value", ParameterAttributes.None, propertyType));
                 setterMethod.Overrides.Add(target.Module.Import(interfacePropertyInfo.SetMethod));
             }
@@ -246,11 +248,72 @@ namespace Bix.Mixers.CecilMixer
                 setterMethod);
         }
 
+        public static MethodDefinition ImplementMethodExplicitly(
+            this TypeDefinition target,
+            MethodInfo interfaceMethodInfo,
+            Action<ILProcessor> methodBuilder)
+        {
+            Contract.Assert(target != null);
+            Contract.Assert(target.Module != null);
+            Contract.Assert(interfaceMethodInfo != null);
+            Contract.Assert(interfaceMethodInfo.DeclaringType != null);
+            Contract.Assert(interfaceMethodInfo.DeclaringType.IsInterface);
+            Contract.Assert(methodBuilder != null);
+            Contract.Ensures(Contract.Result<MethodDefinition>() != null);
+
+            var method = target.AddMethod(
+                string.Format("{0}.{1}.{2}", interfaceMethodInfo.DeclaringType.Namespace, interfaceMethodInfo.DeclaringType.Name, interfaceMethodInfo.Name),
+                target.Module.Import(interfaceMethodInfo.ReturnType),
+                methodBuilder,
+                interfaceMethodInfo.GetParameters(),
+                MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final);
+
+            method.Overrides.Add(target.Module.Import(interfaceMethodInfo));
+
+            return method;
+        }
+
         public static MethodDefinition AddMethod(
             this TypeDefinition target,
             string name,
             TypeReference returnType,
             Action<ILProcessor> bodyBuilder,
+            ParameterInfo[] parameterInfos = null,
+            MethodAttributes methodAttributes = MethodAttributes.Public)
+        {
+            return AddMethod(
+                target,
+                name,
+                returnType,
+                bodyBuilder,
+                (parameterInfos ?? new ParameterInfo[0]).ToParameterDefinitionsForModule(target.Module),
+                methodAttributes);
+        }
+
+        public static ParameterDefinition[] ToParameterDefinitionsForModule(this ParameterInfo[] parameters, ModuleDefinition module)
+        {
+            Contract.Assert(module != null);
+
+            if (parameters == null) { return null; }
+            ParameterDefinition[] parameterDefinitions = new ParameterDefinition[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++ )
+            {
+                if (parameters[i] == null) { throw new ArgumentException("Cannot convert null parameter info to a parameter definition", "parameters"); }
+
+                // TODO more work will have to be done here (e.g. for parameters...maybe other stuff?)
+                var parameterDefinition = new ParameterDefinition(parameters[i].Name, ParameterAttributes.None, module.Import(parameters[i].ParameterType));
+
+                parameterDefinitions[i] = parameterDefinition;
+            }
+            return parameterDefinitions;
+        }
+
+        public static MethodDefinition AddMethod(
+            this TypeDefinition target,
+            string name,
+            TypeReference returnType,
+            Action<ILProcessor> bodyBuilder,
+            ParameterDefinition[] parameters,
             MethodAttributes methodAttributes = MethodAttributes.Public)
         {
             Contract.Assert(target != null);
@@ -258,17 +321,24 @@ namespace Bix.Mixers.CecilMixer
             Contract.Assert(!string.IsNullOrWhiteSpace(name));
             Contract.Assert(bodyBuilder != null);
             Contract.Ensures(Contract.Result<MethodDefinition>() != null);
-            
+
             returnType = returnType ?? target.Module.Import(typeof(void));
 
             var method = new MethodDefinition(
                 name,
                 methodAttributes,
                 returnType);
+
             method.DeclaringType = target;
-            target.Methods.Add(method);
+
+            if (parameters != null) foreach (var parameter in parameters)
+                {
+                    method.Parameters.Add(parameter);
+                }
 
             bodyBuilder(method.Body.GetILProcessor());
+
+            target.Methods.Add(method);
 
             return method;
         }
