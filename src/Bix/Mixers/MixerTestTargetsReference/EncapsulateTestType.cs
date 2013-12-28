@@ -236,8 +236,6 @@ namespace Bix.Mixers.MixerTestTargets
 
         #region Reference for IMixes Implementation
 
-        //MixContext IMixes.MixContext { get; set; }
-
         [CompilerGenerated]
         ReadOnlyCollection<IMixer> IMixes.Mixers { get; set; }
 

@@ -251,20 +251,19 @@ namespace Bix.Mixers.CecilMixer
         public static MethodDefinition ImplementMethodExplicitly(
             this TypeDefinition target,
             MethodInfo interfaceMethodInfo,
-            Action<ILProcessor> methodBuilder)
+            Action<ILProcessor> bodyBuilder)
         {
             Contract.Assert(target != null);
             Contract.Assert(target.Module != null);
             Contract.Assert(interfaceMethodInfo != null);
             Contract.Assert(interfaceMethodInfo.DeclaringType != null);
             Contract.Assert(interfaceMethodInfo.DeclaringType.IsInterface);
-            Contract.Assert(methodBuilder != null);
             Contract.Ensures(Contract.Result<MethodDefinition>() != null);
 
             var method = target.AddMethod(
                 string.Format("{0}.{1}.{2}", interfaceMethodInfo.DeclaringType.Namespace, interfaceMethodInfo.DeclaringType.Name, interfaceMethodInfo.Name),
                 target.Module.Import(interfaceMethodInfo.ReturnType),
-                methodBuilder,
+                bodyBuilder,
                 interfaceMethodInfo.GetParameters(),
                 MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final);
 
@@ -273,12 +272,40 @@ namespace Bix.Mixers.CecilMixer
             return method;
         }
 
+        public static MethodDefinition AddPublicConstructor(
+            this TypeDefinition target,
+            Action<ILProcessor> bodyBuilder,
+            ParameterDefinition[] parameters = null)
+        {
+            return AddMethod(
+                target,
+                ".ctor",
+                null,
+                bodyBuilder,
+                parameters,
+                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
+        }
+
+        public static MethodDefinition AddPrivateConstructor(
+            this TypeDefinition target,
+            Action<ILProcessor> bodyBuilder,
+            ParameterDefinition[] parameters = null)
+        {
+            return AddMethod(
+                target,
+                ".ctor",
+                null,
+                bodyBuilder,
+                parameters,
+                MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
+        }
+
         public static MethodDefinition AddMethod(
             this TypeDefinition target,
             string name,
             TypeReference returnType,
             Action<ILProcessor> bodyBuilder,
-            ParameterInfo[] parameterInfos = null,
+            ParameterInfo[] parameterInfos,
             MethodAttributes methodAttributes = MethodAttributes.Public)
         {
             return AddMethod(
@@ -290,30 +317,12 @@ namespace Bix.Mixers.CecilMixer
                 methodAttributes);
         }
 
-        public static ParameterDefinition[] ToParameterDefinitionsForModule(this ParameterInfo[] parameters, ModuleDefinition module)
-        {
-            Contract.Assert(module != null);
-
-            if (parameters == null) { return null; }
-            ParameterDefinition[] parameterDefinitions = new ParameterDefinition[parameters.Length];
-            for (int i = 0; i < parameters.Length; i++ )
-            {
-                if (parameters[i] == null) { throw new ArgumentException("Cannot convert null parameter info to a parameter definition", "parameters"); }
-
-                // TODO more work will have to be done here (e.g. for parameters...maybe other stuff?)
-                var parameterDefinition = new ParameterDefinition(parameters[i].Name, ParameterAttributes.None, module.Import(parameters[i].ParameterType));
-
-                parameterDefinitions[i] = parameterDefinition;
-            }
-            return parameterDefinitions;
-        }
-
         public static MethodDefinition AddMethod(
             this TypeDefinition target,
             string name,
             TypeReference returnType,
             Action<ILProcessor> bodyBuilder,
-            ParameterDefinition[] parameters,
+            ParameterDefinition[] parameters = null,
             MethodAttributes methodAttributes = MethodAttributes.Public)
         {
             Contract.Assert(target != null);
@@ -370,6 +379,24 @@ namespace Bix.Mixers.CecilMixer
             Contract.Assert(item.CustomAttributes != null);
 
             item.CustomAttributes.Add(new CustomAttribute(item.Module.ImportConstructor(typeof(CompilerGeneratedAttribute))));
+        }
+
+        public static ParameterDefinition[] ToParameterDefinitionsForModule(this ParameterInfo[] parameters, ModuleDefinition module)
+        {
+            Contract.Assert(module != null);
+
+            if (parameters == null) { return null; }
+            ParameterDefinition[] parameterDefinitions = new ParameterDefinition[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i] == null) { throw new ArgumentException("Cannot convert null parameter info to a parameter definition", "parameters"); }
+
+                // TODO more work will have to be done here (e.g. for parameters...maybe other stuff?)
+                var parameterDefinition = new ParameterDefinition(parameters[i].Name, ParameterAttributes.None, module.Import(parameters[i].ParameterType));
+
+                parameterDefinitions[i] = parameterDefinition;
+            }
+            return parameterDefinitions;
         }
     }
 }

@@ -34,10 +34,11 @@ namespace Bix.Mixers.CecilMixer
         public void AddEncapsulation(string modulePath, ModuleDefinition typeModule)
         {
             var originalTypes = new List<TypeDefinition>(typeModule.Types);
+            var encapsulatesAttributeType = typeModule.Import(typeof(EncapsulatesAttribute)).Resolve();
             foreach (var type in originalTypes)
             {
                 var encapsulatesAttribute = type.CustomAttributes.SingleOrDefault(
-                    customAttribute => customAttribute.AttributeType.Resolve() == typeModule.Import(typeof(EncapsulatesAttribute)).Resolve());
+                    customAttribute => customAttribute.AttributeType.Resolve() == encapsulatesAttributeType);
 
                 if (encapsulatesAttribute != null)
                 {
@@ -68,23 +69,19 @@ namespace Bix.Mixers.CecilMixer
         {
             var dtoType = new TypeDefinition(string.Empty, "Dto", TypeAttributes.NestedPublic | TypeAttributes.Class, typeModule.Import(typeof(object)));
             type.NestedTypes.Add(dtoType);
-            dtoType.AddMethod(
-                ".ctor",
-                null,
+            dtoType.AddPublicConstructor(
                 ilProcessor =>
                 {
                     ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
                     ilProcessor.Append(Instruction.Create(OpCodes.Call, typeModule.ImportConstructor(typeof(object))));
                     ilProcessor.Append(Instruction.Create(OpCodes.Ret));
-                },
-                parameters: null,
-                methodAttributes: MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
+                });
 
-            var encapsulatesAttributeType = typeModule.Import(typeof(EncapsulatedAttribute)).Resolve();
+            var encapsulatedAttributeType = typeModule.Import(typeof(EncapsulatedAttribute)).Resolve();
             foreach (var property in type.Properties)
             {
                 var encapsulatedAttribute = property.CustomAttributes.SingleOrDefault(
-                    customAttribute => customAttribute.AttributeType.Resolve() == encapsulatesAttributeType);
+                    customAttribute => customAttribute.AttributeType.Resolve() == encapsulatedAttributeType);
 
                 if (encapsulatedAttribute != null)
                 {

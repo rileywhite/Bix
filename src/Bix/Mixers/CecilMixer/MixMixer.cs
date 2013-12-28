@@ -15,7 +15,7 @@ namespace Bix.Mixers.CecilMixer
 {
     internal class MixMixer
     {
-        internal void AddMixing(string modulePath, ModuleDefinition typeModule)
+        public void AddMixing(string modulePath, ModuleDefinition typeModule)
         {
             var objectType = typeModule.Import(typeof(object)).Resolve();
             var mixesAttributeBaseType = typeModule.Import(typeof(MixesAttributeBase)).Resolve();
@@ -59,26 +59,21 @@ namespace Bix.Mixers.CecilMixer
             var serializationInfoTypeReference = typeModule.Import(typeof(SerializationInfo));
             var streamingContextTypeReference = typeModule.Import(typeof(StreamingContext));
 
-            var getObjectDataMethod = type.ImplementMethodExplicitly(
+            type.ImplementMethodExplicitly(
                 typeof(ISerializable).GetMethod("GetObjectData", new Type[] { typeof(SerializationInfo), typeof(StreamingContext) }),
                 ilProcessor =>
                 {
                     ilProcessor.Append(Instruction.Create(OpCodes.Ret));
                 });
 
-            var serializationConstructor = type.AddMethod(
-                ".ctor",
-                voidTypeReference,
+            type.AddPrivateConstructor(
                 ilProcessor =>
                 {
                     ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
                     ilProcessor.Append(Instruction.Create(OpCodes.Call, typeModule.ImportConstructor(typeof(object))));
                     ilProcessor.Append(Instruction.Create(OpCodes.Ret));
                 },
-                new ParameterInfo[] { },
-                MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
-            serializationConstructor.Parameters.Add(new ParameterDefinition("info", ParameterAttributes.None, serializationInfoTypeReference));
-            serializationConstructor.Parameters.Add(new ParameterDefinition("context", ParameterAttributes.None, streamingContextTypeReference));
+                new ParameterDefinition[] { new ParameterDefinition("info", ParameterAttributes.None, serializationInfoTypeReference), new ParameterDefinition("context", ParameterAttributes.None, streamingContextTypeReference) });
         }
     }
 }

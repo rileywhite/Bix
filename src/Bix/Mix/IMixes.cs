@@ -23,8 +23,6 @@ namespace Bix.Mix
 {
     public interface IMixes : ISerializable
     {
-        //MixContext MixContext { get; set; }
-        //InitializeResult InitializeResult { get; set; }
         ReadOnlyCollection<IMixer> Mixers { get; set; }
     }
 }
