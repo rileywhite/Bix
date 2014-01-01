@@ -34,14 +34,14 @@ namespace Bix.Mix
 
     //    public static void SetFor(IMixes mixes)
     //    {
-    //        Contract.Assert(mixes != null);
+    //        Contract.Requires(mixes != null);
     //        Contract.Ensures(mixes.MixContext != null);
     //        mixes.MixContext = Instance;
     //    }
 
     //    public static MixContext GetFrom(IMixes mixes)
     //    {
-    //        Contract.Assert(mixes != null);
+    //        Contract.Requires(mixes != null);
     //        return mixes.MixContext;
     //    }
 

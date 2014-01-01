@@ -8,7 +8,7 @@ using ParameterInfo = System.Reflection.ParameterInfo;
 using PropertyInfo = System.Reflection.PropertyInfo;
 using System.Runtime.CompilerServices;
 
-namespace Bix.Mixers.CecilMixer
+namespace Bix.Mixers.CecilMixer.Core
 {
     internal static class Extensions
     {
@@ -18,10 +18,10 @@ namespace Bix.Mixers.CecilMixer
             TypeReference fieldType,
             FieldAttributes fieldAttributes = FieldAttributes.Private)
         {
-            Contract.Assert(target != null);
-            Contract.Assert(target.Module != null);
-            Contract.Assert(!string.IsNullOrWhiteSpace(name));
-            Contract.Assert(fieldType != null);
+            Contract.Requires(target != null);
+            Contract.Requires(target.Module != null);
+            Contract.Requires(!string.IsNullOrWhiteSpace(name));
+            Contract.Requires(fieldType != null);
             Contract.Ensures(Contract.Result<FieldDefinition>() != null);
 
             var field = new FieldDefinition(name, fieldAttributes, fieldType);
@@ -36,10 +36,10 @@ namespace Bix.Mixers.CecilMixer
             string name,
             TypeReference propertyType)
         {
-            Contract.Assert(target != null);
-            Contract.Assert(target.Module != null);
-            Contract.Assert(!string.IsNullOrWhiteSpace(name));
-            Contract.Assert(propertyType != null);
+            Contract.Requires(target != null);
+            Contract.Requires(target.Module != null);
+            Contract.Requires(!string.IsNullOrWhiteSpace(name));
+            Contract.Requires(propertyType != null);
             Contract.Ensures(Contract.Result<PropertyDefinition>() != null);
 
             var field = target.AddField(
@@ -74,10 +74,10 @@ namespace Bix.Mixers.CecilMixer
             Action<ILProcessor> setterMethodBuilder = null,
             MethodAttributes setterMethodAttributes = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig)
         {
-            Contract.Assert(target != null);
-            Contract.Assert(!string.IsNullOrWhiteSpace(name));
-            Contract.Assert(propertyType != null);
-            Contract.Assert(getterMethodBuilder != null || setterMethodBuilder != null);
+            Contract.Requires(target != null);
+            Contract.Requires(!string.IsNullOrWhiteSpace(name));
+            Contract.Requires(propertyType != null);
+            Contract.Requires(getterMethodBuilder != null || setterMethodBuilder != null);
             Contract.Ensures(Contract.Result<PropertyDefinition>() != null);
 
             MethodDefinition getterMethod;
@@ -114,11 +114,11 @@ namespace Bix.Mixers.CecilMixer
             MethodDefinition setterMethod = null,
             PropertyAttributes propertyAttributes = PropertyAttributes.None)
         {
-            Contract.Assert(target != null);
-            Contract.Assert(target.Module != null);
-            Contract.Assert(!string.IsNullOrWhiteSpace(name));
-            Contract.Assert(propertyType != null);
-            Contract.Assert(getterMethod != null || setterMethod != null);
+            Contract.Requires(target != null);
+            Contract.Requires(target.Module != null);
+            Contract.Requires(!string.IsNullOrWhiteSpace(name));
+            Contract.Requires(propertyType != null);
+            Contract.Requires(getterMethod != null || setterMethod != null);
             Contract.Ensures(Contract.Result<PropertyDefinition>() != null);
 
             PropertyDefinition property = new PropertyDefinition(name, propertyAttributes, propertyType);
@@ -135,11 +135,11 @@ namespace Bix.Mixers.CecilMixer
             this TypeDefinition target,
             PropertyInfo interfacePropertyInfo)
         {
-            Contract.Assert(target != null);
-            Contract.Assert(target.Module != null);
-            Contract.Assert(interfacePropertyInfo != null);
-            Contract.Assert(interfacePropertyInfo.DeclaringType != null);
-            Contract.Assert(interfacePropertyInfo.DeclaringType.IsInterface);
+            Contract.Requires(target != null);
+            Contract.Requires(target.Module != null);
+            Contract.Requires(interfacePropertyInfo != null);
+            Contract.Requires(interfacePropertyInfo.DeclaringType != null);
+            Contract.Requires(interfacePropertyInfo.DeclaringType.IsInterface);
             Contract.Ensures(Contract.Result<PropertyDefinition>() != null);
 
             var propertyType = target.Module.Import(interfacePropertyInfo.PropertyType);
@@ -204,14 +204,14 @@ namespace Bix.Mixers.CecilMixer
             Action<ILProcessor> getterMethodBuilder = null,
             Action<ILProcessor> setterMethodBuilder = null)
         {
-            Contract.Assert(target != null);
-            Contract.Assert(target.Module != null);
-            Contract.Assert(interfacePropertyInfo != null);
-            Contract.Assert(interfacePropertyInfo.DeclaringType != null);
-            Contract.Assert(interfacePropertyInfo.DeclaringType.IsInterface);
-            Contract.Assert((interfacePropertyInfo.GetMethod == null) == (getterMethodBuilder == null));
-            Contract.Assert((interfacePropertyInfo.SetMethod == null) == (setterMethodBuilder == null));
-            Contract.Assert(getterMethodBuilder != null || setterMethodBuilder != null);
+            Contract.Requires(target != null);
+            Contract.Requires(target.Module != null);
+            Contract.Requires(interfacePropertyInfo != null);
+            Contract.Requires(interfacePropertyInfo.DeclaringType != null);
+            Contract.Requires(interfacePropertyInfo.DeclaringType.IsInterface);
+            Contract.Requires((interfacePropertyInfo.GetMethod == null) == (getterMethodBuilder == null));
+            Contract.Requires((interfacePropertyInfo.SetMethod == null) == (setterMethodBuilder == null));
+            Contract.Requires(getterMethodBuilder != null || setterMethodBuilder != null);
             Contract.Ensures(Contract.Result<PropertyDefinition>() != null);
 
             var propertyType = target.Module.Import(interfacePropertyInfo.PropertyType);
@@ -253,11 +253,11 @@ namespace Bix.Mixers.CecilMixer
             MethodInfo interfaceMethodInfo,
             Action<ILProcessor> bodyBuilder)
         {
-            Contract.Assert(target != null);
-            Contract.Assert(target.Module != null);
-            Contract.Assert(interfaceMethodInfo != null);
-            Contract.Assert(interfaceMethodInfo.DeclaringType != null);
-            Contract.Assert(interfaceMethodInfo.DeclaringType.IsInterface);
+            Contract.Requires(target != null);
+            Contract.Requires(target.Module != null);
+            Contract.Requires(interfaceMethodInfo != null);
+            Contract.Requires(interfaceMethodInfo.DeclaringType != null);
+            Contract.Requires(interfaceMethodInfo.DeclaringType.IsInterface);
             Contract.Ensures(Contract.Result<MethodDefinition>() != null);
 
             var method = target.AddMethod(
@@ -325,10 +325,10 @@ namespace Bix.Mixers.CecilMixer
             ParameterDefinition[] parameters = null,
             MethodAttributes methodAttributes = MethodAttributes.Public)
         {
-            Contract.Assert(target != null);
-            Contract.Assert(target.Module != null);
-            Contract.Assert(!string.IsNullOrWhiteSpace(name));
-            Contract.Assert(bodyBuilder != null);
+            Contract.Requires(target != null);
+            Contract.Requires(target.Module != null);
+            Contract.Requires(!string.IsNullOrWhiteSpace(name));
+            Contract.Requires(bodyBuilder != null);
             Contract.Ensures(Contract.Result<MethodDefinition>() != null);
 
             returnType = returnType ?? target.Module.Import(typeof(void));
@@ -354,14 +354,12 @@ namespace Bix.Mixers.CecilMixer
 
         public static MethodReference ImportConstructor(this ModuleDefinition module, Type target, params Type[] argumentTypes)
         {
-            Contract.Assert(module != null);
-            Contract.Assert(target != null);
+            Contract.Requires(module != null);
+            Contract.Requires(target != null);
+            Contract.Requires(argumentTypes == null || !argumentTypes.Any(argumentType => argumentType == null));
             Contract.Ensures(Contract.Result<MethodReference>() != null);
 
-            argumentTypes = argumentTypes ?? new Type[0];
-            Contract.Assert(!argumentTypes.Any(argumentType => argumentType == null));
-
-            var constructor = target.GetConstructor(argumentTypes);
+            var constructor = target.GetConstructor(argumentTypes ?? new Type[0]);
             if(constructor == null)
             {
                 var exception = new ArgumentException("No constructor with the provided arguments could be found", "argumentTypes");
@@ -374,16 +372,16 @@ namespace Bix.Mixers.CecilMixer
         public static void MarkAsCompilerGenerated<TModuleMember>(this TModuleMember item)
             where TModuleMember : MemberReference, ICustomAttributeProvider
         {
-            Contract.Assert(item != null);
-            Contract.Assert(item.Module != null);
-            Contract.Assert(item.CustomAttributes != null);
+            Contract.Requires(item != null);
+            Contract.Requires(item.Module != null);
+            Contract.Requires(item.CustomAttributes != null);
 
             item.CustomAttributes.Add(new CustomAttribute(item.Module.ImportConstructor(typeof(CompilerGeneratedAttribute))));
         }
 
         public static ParameterDefinition[] ToParameterDefinitionsForModule(this ParameterInfo[] parameters, ModuleDefinition module)
         {
-            Contract.Assert(module != null);
+            Contract.Requires(module != null);
 
             if (parameters == null) { return null; }
             ParameterDefinition[] parameterDefinitions = new ParameterDefinition[parameters.Length];

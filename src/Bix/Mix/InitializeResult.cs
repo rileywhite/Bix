@@ -25,9 +25,12 @@ namespace Bix.Mix
     {
         public InitializeResult(Stopwatch stopwatch)
         {
-            Contract.Assert(stopwatch != null);
-            Contract.Assert(!stopwatch.IsRunning);
-            Contract.Assert(stopwatch.Elapsed >= TimeSpan.Zero);
+            Contract.Requires(stopwatch != null);
+            Contract.Requires(stopwatch != null);
+            Contract.Requires(!stopwatch.IsRunning);
+            Contract.Requires(stopwatch.Elapsed >= TimeSpan.Zero);
+
+            Contract.Ensures(this.InitializeTime >= TimeSpan.Zero);
 
             this.InitializeTime = stopwatch.Elapsed;
         }

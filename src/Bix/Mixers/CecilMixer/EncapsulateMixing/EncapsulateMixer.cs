@@ -17,6 +17,7 @@
 
 using Bix.Mix;
 using Bix.Mix.Encapsulate;
+using Bix.Mixers.CecilMixer.Core;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Pdb;
@@ -27,11 +28,11 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
-namespace Bix.Mixers.CecilMixer
+namespace Bix.Mixers.CecilMixer.EncapsulateMixing
 {
     internal class EncapsulateMixer
     {
-        public void AddEncapsulation(string modulePath, ModuleDefinition typeModule)
+        public void Mix(string modulePath, ModuleDefinition typeModule)
         {
             var originalTypes = new List<TypeDefinition>(typeModule.Types);
             var encapsulatesAttributeType = typeModule.Import(typeof(EncapsulatesAttribute)).Resolve();
@@ -42,7 +43,7 @@ namespace Bix.Mixers.CecilMixer
 
                 if (encapsulatesAttribute != null)
                 {
-                    AddEncapsulation(typeModule, type);
+                    AddEncapsulation(type);
                     type.CustomAttributes.Remove(encapsulatesAttribute);
                 }
             }
@@ -50,23 +51,23 @@ namespace Bix.Mixers.CecilMixer
             typeModule.Write(modulePath, new WriterParameters { SymbolWriterProvider = new PdbWriterProvider() });
         }
 
-        private void AddEncapsulation(ModuleDefinition typeModule, TypeDefinition type)
+        private void AddEncapsulation(TypeDefinition type)
         {
-            this.AddIEncapsulates(typeModule, type);
+            this.AddIEncapsulates(type);
         }
 
-        private void AddIEncapsulates(ModuleDefinition typeModule, TypeDefinition type)
+        private void AddIEncapsulates(TypeDefinition type)
         {
-            type.Interfaces.Add(typeModule.Import(typeof(IEncapsulates)));
-
-            AddDataTransferObject(typeModule, type);
-
-            var mixersProperty = type.ImplementAutoPropertyExplicitly(typeof(IEncapsulates).GetProperty("Encapsulator"));
-            mixersProperty.MarkAsCompilerGenerated();
+            new InterfaceMixCommand<IEncapsulates, EncapsulateTemplate>(type).Mix();
+            //type.Interfaces.Add(typeModule.Import(typeof(IEncapsulates)));
+            //var mixersProperty = type.ImplementAutoPropertyExplicitly(typeof(IEncapsulates).GetProperty("Encapsulator"));
+            //mixersProperty.MarkAsCompilerGenerated();
+            AddDataTransferObject(type);
         }
 
-        private static void AddDataTransferObject(ModuleDefinition typeModule, TypeDefinition type)
+        private static void AddDataTransferObject(TypeDefinition type)
         {
+            var typeModule = type.Module;
             var dtoType = new TypeDefinition(string.Empty, "Dto", TypeAttributes.NestedPublic | TypeAttributes.Class, typeModule.Import(typeof(object)));
             type.NestedTypes.Add(dtoType);
             dtoType.AddPublicConstructor(

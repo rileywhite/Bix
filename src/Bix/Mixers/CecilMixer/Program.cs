@@ -29,8 +29,8 @@ namespace Bix.Mixers.CecilMixer
         public static int Main(string[] args)
         {
             var typeModule = ModuleDefinition.ReadModule(args[0]);
-            new MixMixer().AddMixing(args[0], typeModule);
-            new EncapsulateMixer().AddEncapsulation(args[0], typeModule);
+            new CommonMixing.MixMixer().AddMixing(args[0], typeModule);
+            new EncapsulateMixing.EncapsulateMixer().Mix(args[0], typeModule);
             return 0;
         }
     }

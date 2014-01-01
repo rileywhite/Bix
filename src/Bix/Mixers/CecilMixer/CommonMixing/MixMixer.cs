@@ -1,5 +1,6 @@
 ﻿using Bix.Mix;
 using Bix.Mix.Encapsulate;
+using Bix.Mixers.CecilMixer.Core;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Pdb;
@@ -11,7 +12,7 @@ using ParameterInfo = System.Reflection.ParameterInfo;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
-namespace Bix.Mixers.CecilMixer
+namespace Bix.Mixers.CecilMixer.CommonMixing
 {
     internal class MixMixer
     {
