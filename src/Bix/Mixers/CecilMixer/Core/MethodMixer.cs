@@ -1,5 +1,7 @@
 ﻿using Mono.Cecil;
+using Mono.Cecil.Cil;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Reflection;
 
@@ -87,19 +89,273 @@ namespace Bix.Mixers.CecilMixer.Core
             //};
             this.Target.ReturnType = this.Source.ReferencingModule.Import(this.Source.MemberDefinition.ReturnType);
 
-            foreach(var parameter in this.Source.MemberInfo.GetParameters().ToParameterDefinitionsForModule(this.Source.ReferencingModule))
+            foreach (var parameter in this.Source.MemberInfo.GetParameters().ToParameterDefinitionsForModule(this.Source.ReferencingModule))
             {
                 // TODO process parameter type in case they are mixed types
                 this.Target.Parameters.Add(parameter);
             }
 
-            //this.Target.Body = this.Source.MemberDefinition;
+            Contract.Assert(this.Target.Parameters.Count == this.Source.MemberDefinition.Parameters.Count);
+
+            var parameterOperandReplacementMap = new Dictionary<ParameterDefinition, ParameterDefinition>(this.Source.MemberDefinition.Parameters.Count);
+            for (int i = 0; i < this.Source.MemberDefinition.Parameters.Count; i++)
+            {
+                // verifying same name should be sufficient since name must be unique within a parameter list
+                Contract.Assert(this.Target.Parameters[i].Name == this.Source.MemberDefinition.Parameters[i].Name);
+
+                parameterOperandReplacementMap.Add(this.Source.MemberDefinition.Parameters[i], this.Target.Parameters[i]);
+            }
+
+            if (this.Source.MemberDefinition.HasBody)
+            {
+                this.CloneBody(this.Source.MemberDefinition.Body, this.Target.Body, parameterOperandReplacementMap);
+            }
+
             //this.Target.CustomAttributes = this.Source.MemberDefinition;
             //this.Target.GenericParameters = this.Source.MemberDefinition;
             //this.Target.SecurityDeclarations = this.Source.MemberDefinition;
 
             this.IsMixed = true;
             Contract.Assert(this.Target.FullName == this.Source.MemberDefinition.FullName);
+        }
+
+        private void CloneBody(
+            Mono.Cecil.Cil.MethodBody sourceBody,
+            Mono.Cecil.Cil.MethodBody targetBody,
+            Dictionary<ParameterDefinition, ParameterDefinition> parameterOperandReplacementMap)
+        {
+            Contract.Requires(sourceBody != null);
+            Contract.Requires(targetBody != null);
+            Contract.Requires(parameterOperandReplacementMap != null);
+
+            targetBody.InitLocals = sourceBody.InitLocals;
+
+            // TODO not sure about this
+            targetBody.LocalVarToken = new MetadataToken(
+                sourceBody.LocalVarToken.TokenType,
+                sourceBody.LocalVarToken.RID);
+
+            targetBody.MaxStackSize = sourceBody.MaxStackSize;
+
+            // TODO this one may be tough to get right
+            targetBody.Scope = sourceBody.Scope;
+
+            var variableOperandReplacementMap = new Dictionary<VariableDefinition, VariableDefinition>(sourceBody.Variables.Count);
+            foreach (var sourceVariable in sourceBody.Variables)
+            {
+                var targetVariable = new VariableDefinition(
+                    sourceVariable.Name,
+                    // TODO may need to replace with mixed type
+                    this.Source.ReferencingModule.Import(sourceVariable.VariableType));
+
+                variableOperandReplacementMap.Add(sourceVariable, targetVariable);
+
+                targetBody.Variables.Add(targetVariable);
+            }
+
+            var instructionOperandReplacementMap = new Dictionary<Instruction, Instruction>(sourceBody.Instructions.Count);
+            var ilProcessor = targetBody.GetILProcessor();
+            foreach (var sourceInstruction in sourceBody.Instructions)
+            {
+                Instruction targetInstruction;
+                if (sourceInstruction.Operand == null)
+                {
+                    targetInstruction = ilProcessor.Create(sourceInstruction.OpCode);
+                }
+                else
+                {
+                    targetInstruction = this.CreateInstructionWithOperand(ilProcessor, sourceInstruction.OpCode, (dynamic)sourceInstruction.Operand);
+                }
+                targetInstruction.Offset = sourceInstruction.Offset;
+
+                ilProcessor.Append(targetInstruction);
+                instructionOperandReplacementMap.Add(sourceInstruction, targetInstruction);
+            }
+
+            foreach (var targetInstruction in targetBody.Instructions)
+            {
+                if (TryReplaceParameterOperand(parameterOperandReplacementMap, targetInstruction)) { continue; }
+                if (TryReplaceThisReferenceOperand(sourceBody.ThisParameter, targetBody.ThisParameter, targetInstruction)) { continue; }
+                if (TryReplaceVariableOperand(variableOperandReplacementMap, targetInstruction)) { continue; }
+                if (TryReplaceInstructionOperand(instructionOperandReplacementMap, targetInstruction)) { continue; }
+                if (TryReplaceInstructionsOperand(instructionOperandReplacementMap, targetInstruction)) { continue; }
+            }
+        }
+
+        private bool TryReplaceParameterOperand(Dictionary<ParameterDefinition, ParameterDefinition> parameterOperandReplacementMap, Instruction targetInstruction)
+        {
+            Contract.Requires(parameterOperandReplacementMap != null);
+            Contract.Requires(targetInstruction != null);
+
+            var parameterOperand = targetInstruction.Operand as ParameterDefinition;
+            if (parameterOperand != null)
+            {
+                ParameterDefinition replacementParameterOperand;
+                if (parameterOperandReplacementMap.TryGetValue(parameterOperand, out replacementParameterOperand))
+                {
+                    targetInstruction.Operand = replacementParameterOperand;
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryReplaceThisReferenceOperand(ParameterDefinition sourceThis, ParameterDefinition targetThis, Instruction targetInstruction)
+        {
+            Contract.Requires(targetInstruction != null);
+            if (targetInstruction.Operand == sourceThis)
+            {
+                targetInstruction.Operand = targetThis;
+                return true;
+            }
+            else { return false; }
+        }
+
+        private bool TryReplaceVariableOperand(Dictionary<VariableDefinition, VariableDefinition> variableOperandReplacementMap, Instruction targetInstruction)
+        {
+            Contract.Requires(variableOperandReplacementMap != null);
+            Contract.Requires(targetInstruction != null);
+
+            var variableOperand = targetInstruction.Operand as VariableDefinition;
+            if (variableOperand != null)
+            {
+                VariableDefinition replacementVariableOperand;
+                if (variableOperandReplacementMap.TryGetValue(variableOperand, out replacementVariableOperand))
+                {
+                    targetInstruction.Operand = replacementVariableOperand;
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryReplaceInstructionOperand(Dictionary<Instruction, Instruction> instructionOperandReplacementMap, Instruction targetInstruction)
+        {
+            Contract.Requires(instructionOperandReplacementMap != null);
+            Contract.Requires(targetInstruction != null);
+
+            var instructionOperand = targetInstruction.Operand as Instruction;
+            if (instructionOperand != null)
+            {
+                Instruction replacementInstructionOperand;
+                if (instructionOperandReplacementMap.TryGetValue(instructionOperand, out replacementInstructionOperand))
+                {
+                    targetInstruction.Operand = replacementInstructionOperand;
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryReplaceInstructionsOperand(Dictionary<Instruction, Instruction> instructionOperandReplacementMap, Instruction targetInstruction)
+        {
+            Contract.Requires(instructionOperandReplacementMap != null);
+            Contract.Requires(targetInstruction != null);
+
+            var instructionsOperand = targetInstruction.Operand as Instruction[];
+            if (instructionsOperand != null)
+            {
+                for (int i = 0; i < instructionsOperand.Length; i++)
+                {
+                    Instruction replacementInstructionOperand;
+                    if (instructionOperandReplacementMap.TryGetValue(instructionsOperand[i], out replacementInstructionOperand))
+                    {
+                        instructionsOperand[i] = replacementInstructionOperand;
+                    }
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, object unsupportedOperand)
+        {
+            if (unsupportedOperand == null) { return ilProcessor.Create(opCode); }
+
+            throw new NotSupportedException(
+                string.Format("Unsupported operand of type in instruction to be cloned: {0}", unsupportedOperand.GetType().FullName));
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, byte value)
+        {
+            return ilProcessor.Create(opCode, value);
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, CallSite site)
+        {
+            throw new NotImplementedException();
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, double value)
+        {
+            return ilProcessor.Create(opCode, value);
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, FieldReference field)
+        {
+            // TODO replace field reference with mixed version of field reference if needed
+            return ilProcessor.Create(opCode, this.Source.ReferencingModule.Import(field));
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, float value)
+        {
+            return ilProcessor.Create(opCode, value);
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, Instruction target)
+        {
+            return ilProcessor.Create(opCode, target);
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, Instruction[] targets)
+        {
+            return ilProcessor.Create(opCode, targets);
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, int value)
+        {
+            return ilProcessor.Create(opCode, value);
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, long value)
+        {
+            return ilProcessor.Create(opCode, value);
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, MethodReference method)
+        {
+            // TODO replace method reference with mixed version of method reference if needed
+            return ilProcessor.Create(opCode, this.Source.ReferencingModule.Import(method));
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, ParameterDefinition parameter)
+        {
+            return ilProcessor.Create(opCode, parameter);
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, sbyte value)
+        {
+            return ilProcessor.Create(opCode, value);
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, string value)
+        {
+            return ilProcessor.Create(opCode, value);
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, TypeReference type)
+        {
+            // TODO replace type reference with mixed version of yfl. reference if needed
+            return ilProcessor.Create(opCode, this.Source.ReferencingModule.Import(type));
+        }
+
+        private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, VariableDefinition variable)
+        {
+            return ilProcessor.Create(opCode, variable);
         }
     }
 }
