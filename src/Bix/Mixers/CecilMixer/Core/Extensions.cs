@@ -436,7 +436,6 @@ namespace Bix.Mixers.CecilMixer.Core
         {
             Contract.Requires(member != null);
 
-
             var method = member as System.Reflection.MethodInfo;
             if (method == null)
             {
