@@ -40,25 +40,25 @@ namespace Bix.Mixers.CecilMixer.Core
             {
                 if (this.Source.MemberDefinition.GetMethod != null &&
                     this.Target.GetMethod == null &&
-                    method.FullName == Source.MemberDefinition.GetMethod.FullName)
+                    method.SignatureEquals(this.Source.MemberDefinition.GetMethod))
                 {
-                    this.Target.GetMethod = this.Source.MemberDefinition.GetMethod;
+                    this.Target.GetMethod = method;
                 }
 
                 if (this.Source.MemberDefinition.SetMethod != null &&
                     this.Target.SetMethod == null &&
-                    method.FullName == this.Source.MemberDefinition.SetMethod.FullName)
+                    method.SignatureEquals(this.Source.MemberDefinition.SetMethod))
                 {
-                    this.Target.SetMethod = this.Source.MemberDefinition.SetMethod;
+                    this.Target.SetMethod = method;
                 }
 
                 for (int i = 0; i < this.Source.MemberDefinition.OtherMethods.Count; i++)
                 {
                     if (this.Target.OtherMethods[i] != null &&
                         this.Target.OtherMethods[i] == null &&
-                        method.FullName == this.Source.MemberDefinition.OtherMethods[i].FullName)
+                        method.SignatureEquals(this.Source.MemberDefinition.OtherMethods[i]))
                     {
-                        this.Target.OtherMethods[i] = this.Source.MemberDefinition.OtherMethods[i];
+                        this.Target.OtherMethods[i] = method;
                     }
                 }
             }
@@ -68,15 +68,9 @@ namespace Bix.Mixers.CecilMixer.Core
 
             this.IsMixed = true;
 
-            Contract.Assert(this.Target.FullName == this.Source.MemberDefinition.FullName);
+            Contract.Assert(this.Target.SignatureEquals(this.Source.MemberDefinition));
             Contract.Assert((this.Target.GetMethod == null) == (this.Source.MemberDefinition.GetMethod == null));
-            Contract.Assert(
-                this.Source.MemberDefinition.GetMethod == null ||
-                this.Target.GetMethod.FullName == this.Source.MemberDefinition.GetMethod.FullName);
             Contract.Assert((this.Target.SetMethod == null) == (this.Source.MemberDefinition.SetMethod == null));
-            Contract.Assert(
-                this.Source.MemberDefinition.SetMethod == null ||
-                this.Target.SetMethod.FullName == this.Source.MemberDefinition.SetMethod.FullName);
             for (int i = 0; i < this.Source.MemberDefinition.OtherMethods.Count; i++)
             {
                 Contract.Assert(

@@ -116,7 +116,7 @@ namespace Bix.Mixers.CecilMixer.Core
             //this.Target.SecurityDeclarations = this.Source.MemberDefinition;
 
             this.IsMixed = true;
-            Contract.Assert(this.Target.FullName == this.Source.MemberDefinition.FullName);
+            Contract.Assert(this.Target.SignatureEquals(this.Source.MemberDefinition));
         }
 
         private void CloneBody(

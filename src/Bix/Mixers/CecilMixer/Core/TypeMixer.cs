@@ -58,8 +58,6 @@ namespace Bix.Mixers.CecilMixer.Core
             this.Target.IsUnicodeClass = this.Source.MemberDefinition.IsUnicodeClass;
             this.Target.IsValueType = this.Source.MemberDefinition.IsValueType;
             this.Target.IsWindowsRuntime = this.Source.MemberDefinition.IsWindowsRuntime;
-            this.Target.Name = this.Source.MemberDefinition.Name;
-            this.Target.Namespace = this.Source.MemberDefinition.Namespace;
             this.Target.PackingSize = this.Source.MemberDefinition.PackingSize;
             this.Target.Scope = this.Source.MemberDefinition.Scope;
 

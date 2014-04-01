@@ -417,5 +417,19 @@ namespace Bix.Mixers.CecilMixer.Core
 
             foreach (var mixer in mixers) { mixer.Mix(); }
         }
+
+        public static bool SignatureEquals(this MethodDefinition left, MethodDefinition right)
+        {
+            if (left == null || right == null) { return left == null && right == null; }
+
+            return left.FullName.Replace(left.DeclaringType.FullName + "::", string.Empty) == right.FullName.Replace(right.DeclaringType.FullName + "::", string.Empty);
+        }
+
+        public static bool SignatureEquals(this PropertyDefinition left, PropertyDefinition right)
+        {
+            if (left == null || right == null) { return left == null && right == null; }
+
+            return left.FullName.Replace(left.DeclaringType.FullName + "::", string.Empty) == right.FullName.Replace(right.DeclaringType.FullName + "::", string.Empty);
+        }
     }
 }
