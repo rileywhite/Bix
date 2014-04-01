@@ -17,6 +17,11 @@ namespace Bix.Mixers.CecilMixer.Core
             Contract.Ensures(this.Target != null);
             Contract.Ensures(this.Source != null);
 
+            if (source.MemberInfo.IsSkipped())
+            {
+                throw new InvalidOperationException("Cannot mix a skipped member");
+            }
+
             this.Target = target;
             this.Source = source;
         }

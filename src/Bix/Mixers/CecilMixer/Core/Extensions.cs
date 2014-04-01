@@ -431,5 +431,33 @@ namespace Bix.Mixers.CecilMixer.Core
 
             return left.FullName.Replace(left.DeclaringType.FullName + "::", string.Empty) == right.FullName.Replace(right.DeclaringType.FullName + "::", string.Empty);
         }
+
+        public static bool IsSkipped(this System.Reflection.MemberInfo member)
+        {
+            Contract.Requires(member != null);
+
+
+            var method = member as System.Reflection.MethodInfo;
+            if (method == null)
+            {
+                return Attribute.IsDefined(member, typeof(SkipAttribute));
+            }
+            else { return method.IsSkipped(); }
+        }
+
+        public static bool IsSkipped(this System.Reflection.MethodInfo method)
+        {
+            Contract.Requires(method != null);
+
+            if (Attribute.IsDefined(method, typeof(SkipAttribute))) { return true; }
+
+            return method.DeclaringType.GetProperties(
+                System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.Static |
+                System.Reflection.BindingFlags.NonPublic).Any(
+                property =>
+                    (property.GetMethod == method || property.SetMethod == method) &&
+                    property.IsSkipped());
+        }
     }
 }

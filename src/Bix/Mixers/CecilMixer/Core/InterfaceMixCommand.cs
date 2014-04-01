@@ -63,10 +63,10 @@ namespace Bix.Mixers.CecilMixer.Core
             Contract.Requires(!this.IsMixed);
             Contract.Ensures(this.IsMixed);
 
-            this.IsMixed = true;
-
             //this.Target.Interfaces.Add(this.InterfaceType.MemberDefinition);
             new TypeMixer(this.Target, this.Source).Mix();
+
+            this.IsMixed = true;
         }
     }
 }

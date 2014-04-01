@@ -77,7 +77,7 @@ namespace Bix.Mixers.CecilMixer.Core
             var voidReference = this.Target.Module.Import(typeof(void));
 
             foreach (var source in from type in this.Source.MemberInfo.GetNestedTypes()
-                                   where !Attribute.IsDefined(type, typeof(SkipAttribute))
+                                   where !type.IsSkipped()
                                    select new TypeWithRespectToModule(type, this.Target.Module))
             {
                 var target = new TypeDefinition(
@@ -90,7 +90,7 @@ namespace Bix.Mixers.CecilMixer.Core
             }
 
             foreach (var source in from field in this.Source.MemberInfo.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                                   where !Attribute.IsDefined(field, typeof(SkipAttribute))
+                                   where !field.IsSkipped()
                                    select new FieldWithRespectToModule(field, this.Target.Module))
             {
                 var target = new FieldDefinition(source.MemberInfo.Name, 0, voidReference);
@@ -99,8 +99,7 @@ namespace Bix.Mixers.CecilMixer.Core
             }
 
             foreach (var source in from method in this.Source.MemberInfo.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                                   where !Attribute.IsDefined(method, typeof(SkipAttribute)) &&
-                                         !method.IsConstructor
+                                   where !method.IsConstructor && !method.IsSkipped()
                                    select new MethodWithRespectToModule(method, this.Target.Module))
             {
                 var target = new MethodDefinition(source.MemberDefinition.Name, 0, voidReference);
@@ -109,7 +108,7 @@ namespace Bix.Mixers.CecilMixer.Core
             }
 
             foreach (var source in from property in this.Source.MemberInfo.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                                   where !Attribute.IsDefined(property, typeof(SkipAttribute))
+                                   where !property.IsSkipped()
                                    select new PropertyWithRespectToModule(property, this.Target.Module))
             {
                 var target = new PropertyDefinition(source.MemberDefinition.Name, 0, voidReference);
@@ -118,7 +117,7 @@ namespace Bix.Mixers.CecilMixer.Core
             }
 
             foreach (var source in from @event in this.Source.MemberInfo.GetEvents(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                                   where !Attribute.IsDefined(@event, typeof(SkipAttribute))
+                                   where !@event.IsSkipped()
                                    select new EventWithRespectToModule(@event, this.Target.Module))
             {
                 var target = new EventDefinition(source.MemberDefinition.Name, 0, voidReference);
