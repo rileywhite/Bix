@@ -7,6 +7,7 @@ using MethodInfo = System.Reflection.MethodInfo;
 using ParameterInfo = System.Reflection.ParameterInfo;
 using PropertyInfo = System.Reflection.PropertyInfo;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 
 namespace Bix.Mixers.CecilMixer.Core
 {
@@ -258,6 +259,8 @@ namespace Bix.Mixers.CecilMixer.Core
             Contract.Requires(interfaceMethodInfo != null);
             Contract.Requires(interfaceMethodInfo.DeclaringType != null);
             Contract.Requires(interfaceMethodInfo.DeclaringType.IsInterface);
+            Contract.Requires(bodyBuilder != null);
+
             Contract.Ensures(Contract.Result<MethodDefinition>() != null);
 
             var method = target.AddMethod(
@@ -277,6 +280,9 @@ namespace Bix.Mixers.CecilMixer.Core
             Action<ILProcessor> bodyBuilder,
             ParameterDefinition[] parameters = null)
         {
+            Contract.Requires(target != null);
+            Contract.Requires(bodyBuilder != null);
+
             return AddMethod(
                 target,
                 ".ctor",
@@ -291,6 +297,9 @@ namespace Bix.Mixers.CecilMixer.Core
             Action<ILProcessor> bodyBuilder,
             ParameterDefinition[] parameters = null)
         {
+            Contract.Requires(target != null);
+            Contract.Requires(bodyBuilder != null);
+
             return AddMethod(
                 target,
                 ".ctor",
@@ -308,6 +317,9 @@ namespace Bix.Mixers.CecilMixer.Core
             ParameterInfo[] parameterInfos,
             MethodAttributes methodAttributes = MethodAttributes.Public)
         {
+            Contract.Requires(target != null);
+            Contract.Requires(bodyBuilder != null);
+
             return AddMethod(
                 target,
                 name,
@@ -395,6 +407,15 @@ namespace Bix.Mixers.CecilMixer.Core
                 parameterDefinitions[i] = parameterDefinition;
             }
             return parameterDefinitions;
+        }
+
+        public static void Mix(this IEnumerable<IMemberMixer> mixers)
+        {
+            Contract.Requires(mixers != null);
+            Contract.Requires(!mixers.Any(mixer => mixer.IsMixed));
+            Contract.Ensures(mixers.All(mixer => mixer.IsMixed));
+
+            foreach (var mixer in mixers) { mixer.Mix(); }
         }
     }
 }

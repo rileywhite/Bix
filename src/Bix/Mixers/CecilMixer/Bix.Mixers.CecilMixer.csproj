@@ -90,24 +90,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\EventImporter.cs" />
     <Compile Include="Core\EventMixer.cs" />
     <Compile Include="Core\EventWithRespectToModule.cs" />
+    <Compile Include="Core\FieldImporter.cs" />
+    <Compile Include="Core\IMemberImporter.cs" />
+    <Compile Include="Core\IMemberMixer.cs" />
+    <Compile Include="Core\IMemberMixerContract.cs" />
+    <Compile Include="Core\MemberImporterBase.cs" />
+    <Compile Include="Core\MethodImporter.cs" />
+    <Compile Include="Core\PropertyImporter.cs" />
     <Compile Include="Core\PropertyMixer.cs" />
     <Compile Include="Core\MethodMixer.cs" />
     <Compile Include="Core\FieldMixer.cs" />
     <Compile Include="Core\PropertyWithRespectToModule.cs" />
     <Compile Include="Core\MethodWithRespectToModule .cs" />
     <Compile Include="Core\FieldWithRespectToModule.cs" />
-    <Compile Include="Core\MemberWithRespectToModule.cs" />
+    <Compile Include="Core\MemberWithRespectToModuleBase.cs" />
     <Compile Include="Core\InterfaceMixCommand.cs" />
     <Compile Include="Core\MemberMixerBase.cs" />
     <Compile Include="Core\SkipAttribute.cs" />
+    <Compile Include="Core\TypeImporter.cs" />
     <Compile Include="Core\TypeMixer.cs" />
     <Compile Include="Core\TypeWithRespectToModule.cs" />
     <Compile Include="EncapsulateMixing\EncapsulateMixer.cs" />
     <Compile Include="Core\Extensions.cs" />
     <Compile Include="CommonMixing\MixMixer.cs" />
-    <Compile Include="EncapsulateMixing\EncapsulateTemplate.cs" />
+    <Compile Include="EncapsulateMixing\EncapsulateSource.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

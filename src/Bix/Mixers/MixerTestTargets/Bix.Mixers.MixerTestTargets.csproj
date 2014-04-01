@@ -85,10 +85,6 @@
       <Project>{6F93ED35-44D0-46FF-9B51-D0E374104C3D}</Project>
       <Name>Bix.Mix</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CecilMixer\Bix.Mixers.CecilMixer.csproj">
-      <Project>{F62BC726-DEC3-4E9C-B992-95FB66E6D582}</Project>
-      <Name>Bix.Mixers.CecilMixer</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

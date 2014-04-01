@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Mix", "Bix\Mix\Bix.Mix.csproj", "{6F93ED35-44D0-46FF-9B51-D0E374104C3D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{4093DEEF-36E9-4949-9EB5-F43CDC4D31B1}"
@@ -13,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Picks.Luffa", "Bix\Pick
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Picks.Chia", "Bix\Picks\Chia\Bix.Picks.Chia.csproj", "{6C242639-4017-4F4C-824E-F84079A5B015}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Mixers.CecilMixer", "Bix\Mixers\CecilMixer\Bix.Mixers.CecilMixer.csproj", "{F62BC726-DEC3-4E9C-B992-95FB66E6D582}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Mixers.MixerTestTargets", "Bix\Mixers\MixerTestTargets\Bix.Mixers.MixerTestTargets.csproj", "{E513A55D-F33B-4880-BC88-DEB85AA6269F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Mixers.MixerTestTargetsReference", "Bix\Mixers\MixerTestTargetsReference\Bix.Mixers.MixerTestTargetsReference.csproj", "{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}"
@@ -25,50 +25,53 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Picks.ChiaTests", "Bix\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Picks.LuffaTests", "Bix\Picks\LuffaTests\Bix.Picks.LuffaTests.csproj", "{70D7563F-132E-4EAB-8788-5A514EEEE552}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bix.Mixers.CecilMixer", "Bix\Mixers\CecilMixer\Bix.Mixers.CecilMixer.csproj", "{F62BC726-DEC3-4E9C-B992-95FB66E6D582}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{41EDAC0E-0E0F-4FD8-85EF-7A470645A25F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{41EDAC0E-0E0F-4FD8-85EF-7A470645A25F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{41EDAC0E-0E0F-4FD8-85EF-7A470645A25F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{41EDAC0E-0E0F-4FD8-85EF-7A470645A25F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6C242639-4017-4F4C-824E-F84079A5B015}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6C242639-4017-4F4C-824E-F84079A5B015}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6C242639-4017-4F4C-824E-F84079A5B015}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6C242639-4017-4F4C-824E-F84079A5B015}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6F93ED35-44D0-46FF-9B51-D0E374104C3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6F93ED35-44D0-46FF-9B51-D0E374104C3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F93ED35-44D0-46FF-9B51-D0E374104C3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F93ED35-44D0-46FF-9B51-D0E374104C3D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{70D7563F-132E-4EAB-8788-5A514EEEE552}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{70D7563F-132E-4EAB-8788-5A514EEEE552}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{70D7563F-132E-4EAB-8788-5A514EEEE552}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{70D7563F-132E-4EAB-8788-5A514EEEE552}.Release|Any CPU.Build.0 = Release|Any CPU
-		{824140A5-E7BC-4ED3-9025-4236826CA231}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{824140A5-E7BC-4ED3-9025-4236826CA231}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{824140A5-E7BC-4ED3-9025-4236826CA231}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{824140A5-E7BC-4ED3-9025-4236826CA231}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A6523F85-9E3A-48FC-B374-6BE5D1FAC76E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A6523F85-9E3A-48FC-B374-6BE5D1FAC76E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6523F85-9E3A-48FC-B374-6BE5D1FAC76E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6523F85-9E3A-48FC-B374-6BE5D1FAC76E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C242639-4017-4F4C-824E-F84079A5B015}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C242639-4017-4F4C-824E-F84079A5B015}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C242639-4017-4F4C-824E-F84079A5B015}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C242639-4017-4F4C-824E-F84079A5B015}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E513A55D-F33B-4880-BC88-DEB85AA6269F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E513A55D-F33B-4880-BC88-DEB85AA6269F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E513A55D-F33B-4880-BC88-DEB85AA6269F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E513A55D-F33B-4880-BC88-DEB85AA6269F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E7B13FD-A725-4FC1-A283-20EB369AD3BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{824140A5-E7BC-4ED3-9025-4236826CA231}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{824140A5-E7BC-4ED3-9025-4236826CA231}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{824140A5-E7BC-4ED3-9025-4236826CA231}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{824140A5-E7BC-4ED3-9025-4236826CA231}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41EDAC0E-0E0F-4FD8-85EF-7A470645A25F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41EDAC0E-0E0F-4FD8-85EF-7A470645A25F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41EDAC0E-0E0F-4FD8-85EF-7A470645A25F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41EDAC0E-0E0F-4FD8-85EF-7A470645A25F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70D7563F-132E-4EAB-8788-5A514EEEE552}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70D7563F-132E-4EAB-8788-5A514EEEE552}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70D7563F-132E-4EAB-8788-5A514EEEE552}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70D7563F-132E-4EAB-8788-5A514EEEE552}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F62BC726-DEC3-4E9C-B992-95FB66E6D582}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F62BC726-DEC3-4E9C-B992-95FB66E6D582}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F62BC726-DEC3-4E9C-B992-95FB66E6D582}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F62BC726-DEC3-4E9C-B992-95FB66E6D582}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Bix\Mixers\CecilMixerTest\Bix.Mixers.CecilMixerTest.csproj
@@ -114,8 +117,5 @@ Global
 		$3.inheritsSet = Mono
 		$3.inheritsScope = text/x-csharp
 		$3.scope = text/x-csharp
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

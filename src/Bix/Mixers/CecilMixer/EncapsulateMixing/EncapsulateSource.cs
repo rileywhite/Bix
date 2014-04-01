@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Bix.Mixers.CecilMixer.EncapsulateMixing
 {
-    internal class EncapsulateTemplate : IEncapsulates
+    internal class EncapsulateSource : IEncapsulates
     {
         [CompilerGenerated]
         IEncapsulator IEncapsulates.Encapsulator { get; set; }

@@ -3,7 +3,6 @@ using Bix.Mix.Encapsulate;
 using Bix.Mixers.CecilMixer.Core;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Cecil.Pdb;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,17 +10,18 @@ using System.Linq;
 using ParameterInfo = System.Reflection.ParameterInfo;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Diagnostics.Contracts;
 
 namespace Bix.Mixers.CecilMixer.CommonMixing
 {
     internal class MixMixer
     {
-        public void AddMixing(string modulePath, ModuleDefinition typeModule)
+        public void AddMixing(ModuleDefinition targetModule)
         {
-            var objectType = typeModule.Import(typeof(object)).Resolve();
-            var mixesAttributeBaseType = typeModule.Import(typeof(MixesAttributeBase)).Resolve();
+            var objectType = targetModule.Import(typeof(object)).Resolve();
+            var mixesAttributeBaseType = targetModule.Import(typeof(MixesAttributeBase)).Resolve();
 
-            var originalTypes = new List<TypeDefinition>(typeModule.Types);
+            var originalTypes = new List<TypeDefinition>(targetModule.Types);
             foreach (var type in originalTypes)
             {
                 if(type.CustomAttributes.Any(
@@ -37,41 +37,47 @@ namespace Bix.Mixers.CecilMixer.CommonMixing
                         return attributeType == mixesAttributeBaseType;
                     }))
                 {
-                    this.AddIMixes(typeModule, type);
-                    this.AddISerializable(typeModule, type);
+                    this.AddIMixes(type);
+                    this.AddISerializable(type);
                 }
             }
-
-            typeModule.Write(modulePath, new WriterParameters { SymbolWriterProvider = new PdbWriterProvider() });
         }
 
-        private void AddIMixes(ModuleDefinition typeModule, TypeDefinition type)
+        private void AddIMixes(TypeDefinition target)
         {
-            type.Interfaces.Add(typeModule.Import(typeof(IMixes)));
-            var mixersProperty = type.ImplementAutoPropertyExplicitly(typeof(IMixes).GetProperty("Mixers"));
+            Contract.Requires(target != null);
+            Contract.Requires(target.Module != null);
+
+            target.Interfaces.Add(target.Module.Import(typeof(IMixes)));
+            var mixersProperty = target.ImplementAutoPropertyExplicitly(typeof(IMixes).GetProperty("Mixers"));
             mixersProperty.MarkAsCompilerGenerated();
         }
 
-        private void AddISerializable(ModuleDefinition typeModule, TypeDefinition type)
+        private void AddISerializable(TypeDefinition target)
         {
-            type.Interfaces.Add(typeModule.Import(typeof(ISerializable)));
+            Contract.Requires(target != null);
+            Contract.Requires(target.Module != null);
 
-            var voidTypeReference = typeModule.Import(typeof(void));
-            var serializationInfoTypeReference = typeModule.Import(typeof(SerializationInfo));
-            var streamingContextTypeReference = typeModule.Import(typeof(StreamingContext));
+            var targetModule = target.Module;
 
-            type.ImplementMethodExplicitly(
+            target.Interfaces.Add(targetModule.Import(typeof(ISerializable)));
+
+            var voidTypeReference = targetModule.Import(typeof(void));
+            var serializationInfoTypeReference = targetModule.Import(typeof(SerializationInfo));
+            var streamingContextTypeReference = targetModule.Import(typeof(StreamingContext));
+
+            target.ImplementMethodExplicitly(
                 typeof(ISerializable).GetMethod("GetObjectData", new Type[] { typeof(SerializationInfo), typeof(StreamingContext) }),
                 ilProcessor =>
                 {
                     ilProcessor.Append(Instruction.Create(OpCodes.Ret));
                 });
 
-            type.AddPrivateConstructor(
+            target.AddPrivateConstructor(
                 ilProcessor =>
                 {
                     ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
-                    ilProcessor.Append(Instruction.Create(OpCodes.Call, typeModule.ImportConstructor(typeof(object))));
+                    ilProcessor.Append(Instruction.Create(OpCodes.Call, targetModule.ImportConstructor(typeof(object))));
                     ilProcessor.Append(Instruction.Create(OpCodes.Ret));
                 },
                 new ParameterDefinition[] { new ParameterDefinition("info", ParameterAttributes.None, serializationInfoTypeReference), new ParameterDefinition("context", ParameterAttributes.None, streamingContextTypeReference) });

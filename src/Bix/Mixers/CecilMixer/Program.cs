@@ -15,7 +15,9 @@
 // limitations under the License.
 /***************************************************************************/
 
+using Bix.Mix;
 using Mono.Cecil;
+using Mono.Cecil.Pdb;
 using System;
 
 namespace Bix.Mixers.CecilMixer
@@ -28,9 +30,11 @@ namespace Bix.Mixers.CecilMixer
     {
         public static int Main(string[] args)
         {
-            var typeModule = ModuleDefinition.ReadModule(args[0]);
-            new CommonMixing.MixMixer().AddMixing(args[0], typeModule);
-            new EncapsulateMixing.EncapsulateMixer().Mix(args[0], typeModule);
+            var targetModulePath = args[0];
+            var targetModule = ModuleDefinition.ReadModule(targetModulePath);
+            new CommonMixing.MixMixer().AddMixing(targetModule);
+            new EncapsulateMixing.EncapsulateMixer().Mix(targetModule);
+            targetModule.Write(targetModulePath, new WriterParameters { SymbolWriterProvider = new PdbWriterProvider() });
             return 0;
         }
     }

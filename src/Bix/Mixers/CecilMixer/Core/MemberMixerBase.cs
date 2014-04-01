@@ -1,9 +1,14 @@
-﻿using System;
+﻿using Mono.Cecil;
+using System;
 using System.Diagnostics.Contracts;
+using System.Reflection;
 
 namespace Bix.Mixers.CecilMixer.Core
 {
-    internal abstract class MemberMixerBase<TMemberDefinition, TMemberWithRespectToModule>
+    internal abstract class MemberMixerBase<TMemberInfo, TMemberDefinition, TMemberWithRespectToModule> : IMemberMixer
+        where TMemberInfo : MemberInfo
+        where TMemberDefinition : MemberReference, IMemberDefinition, Mono.Cecil.ICustomAttributeProvider
+        where TMemberWithRespectToModule : MemberWithRespectToModuleBase<TMemberInfo, TMemberDefinition>
     {
         public MemberMixerBase(TMemberDefinition target, TMemberWithRespectToModule source)
         {
@@ -16,11 +21,11 @@ namespace Bix.Mixers.CecilMixer.Core
             this.Source = source;
         }
 
-        protected TMemberDefinition Target { get; private set; }
+        public TMemberDefinition Target { get; private set; }
 
-        protected TMemberWithRespectToModule Source { get; private set; }
+        public TMemberWithRespectToModule Source { get; private set; }
 
-        public bool IsMixed { get; private set; }
+        public bool IsMixed { get; protected set; }
 
         public abstract void Mix();
     }

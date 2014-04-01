@@ -23,18 +23,18 @@ namespace Bix.Mixers.CecilMixer.Core
             Contract.Ensures(!this.Target.IsPrimitive);
             Contract.Ensures(this.TargetModule != null);
             Contract.Ensures(this.InterfaceType != null);
-            Contract.Ensures(this.InterfaceType.Member.IsInterface);
-            Contract.Ensures(this.TemplateType != null);
+            Contract.Ensures(this.InterfaceType.MemberInfo.IsInterface);
+            Contract.Ensures(this.Source != null);
 
             this.InterfaceType = new TypeWithRespectToModule(typeof(TMixesInterface), target.Module);
-            this.TemplateType = new TypeWithRespectToModule(typeof(TTemplate), target.Module);
+            this.Source = new TypeWithRespectToModule(typeof(TTemplate), target.Module);
             this.TargetModule = target.Module;
             this.Target = target;
         }
 
         private TypeWithRespectToModule InterfaceType { get; set; }
 
-        private TypeWithRespectToModule TemplateType { get; set; }
+        private TypeWithRespectToModule Source { get; set; }
 
         private ModuleDefinition TargetModule { get; set; }
 
@@ -47,7 +47,7 @@ namespace Bix.Mixers.CecilMixer.Core
                 Contract.Requires(value != null);
                 Contract.Ensures(this.Target != null);
 
-                if(value.Interfaces.Any(@interface => @interface.Resolve() == this.TemplateType.CecilMemberDefinition))
+                if(value.Interfaces.Any(@interface => @interface.Resolve() == this.Source.MemberDefinition))
                 {
                     throw new ArgumentException("Cannot set a target type that already implements the interface to be mixed", "value");
                 }
@@ -65,8 +65,8 @@ namespace Bix.Mixers.CecilMixer.Core
 
             this.IsMixed = true;
 
-            this.Target.Interfaces.Add(this.InterfaceType.CecilMemberDefinition);
-            new TypeMixer(this.Target, this.TemplateType).Mix();
+            //this.Target.Interfaces.Add(this.InterfaceType.MemberDefinition);
+            new TypeMixer(this.Target, this.Source).Mix();
         }
     }
 }
