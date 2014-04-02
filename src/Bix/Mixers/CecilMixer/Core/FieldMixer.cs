@@ -56,7 +56,7 @@ namespace Bix.Mixers.CecilMixer.Core
                 this.Source.MemberDefinition.MetadataToken.RID);
 
             // TODO process type (either import or redirect to type within current module)
-            this.Target.FieldType = this.Source.ReferencingModule.Import(this.Source.MemberDefinition.FieldType);
+            this.Target.FieldType = this.Source.RootImport(this.Source.MemberDefinition.FieldType);
 
             // TODO copy custom attributes and either import or redirect to type within current module
             foreach(var source in this.Source.MemberDefinition.CustomAttributes)

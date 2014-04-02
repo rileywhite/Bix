@@ -349,7 +349,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
         private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, TypeReference type)
         {
-            // TODO replace type reference with mixed version of yfl. reference if needed
+            // TODO replace type reference with mixed version of type reference if needed
             return ilProcessor.Create(opCode, this.Source.ReferencingModule.Import(type));
         }
 
