@@ -54,15 +54,17 @@ namespace Bix.Mixers.CecilMixer.Core
                 this.Source.MemberDefinition.MetadataToken.TokenType,
                 this.Source.MemberDefinition.MetadataToken.RID);
 
-            //this.Target.FieldType = this.Source.RootImport(this.Source.MemberDefinition.FieldType);
-            //this.Target.FieldType = this.Source.ReferencingModule.Import(this.Source.MemberDefinition.FieldType);
-            this.Target.FieldType = this.Target.Module.Import(this.Source.MemberDefinition.FieldType);
+            this.Target.FieldType = this.Source.RootImport(this.Source.MemberDefinition.FieldType);
 
-            foreach(var source in this.Source.MemberDefinition.CustomAttributes)
-            {
-                this.Target.CustomAttributes.Add(new CustomAttribute(this.Source.RootImport(source.Constructor), source.GetBlob()));
-            }
+            // for some reason, I'm seeing duplicate custom attributes if I don't clear first
+            // adding a console output line line like this makes it go away: Console.WriteLine(this.Target.CustomAttributes.Count);
+            // but I opted for an explicit clear instead
+            // (breaking anywhere before the RootImportAll call in the debugger keeps it from happening, too)
+            this.Target.CustomAttributes.Clear();
+            Contract.Assert(this.Target.CustomAttributes.Count == 0);
+            this.Target.CustomAttributes.RootImportAll(this.Source, this.Source.MemberDefinition.CustomAttributes);
 
+            Console.WriteLine(this.Target.CustomAttributes.Count);
             this.IsMixed = true;
         }
     }

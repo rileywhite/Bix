@@ -14,42 +14,36 @@ namespace Bix.Mixers.CecilMixer.Core
         public TItem DynamicRootImport<TItem>(TItem item)
         {
             Contract.Ensures(item == null || Contract.Result<TItem>() != null);
-            Contract.Ensures(!(Contract.Result<TItem>() is IMemberDefinition));
             throw new NotSupportedException();
         }
 
         public TypeReference RootImport(TypeReference type)
         {
             Contract.Ensures(type == null || Contract.Result<TypeReference>() != null);
-            Contract.Ensures(!(Contract.Result<TypeReference>() is IMemberDefinition));
             throw new NotSupportedException();
         }
 
         public FieldReference RootImport(FieldReference field)
         {
             Contract.Ensures(field == null || Contract.Result<FieldReference>() != null);
-            Contract.Ensures(!(Contract.Result<FieldReference>() is IMemberDefinition));
             throw new NotSupportedException();
         }
 
         public PropertyReference RootImport(PropertyReference property)
         {
             Contract.Ensures(property == null || Contract.Result<PropertyReference>() != null);
-            Contract.Ensures(!(Contract.Result<PropertyReference>() is IMemberDefinition));
             throw new NotSupportedException();
         }
 
         public MethodReference RootImport(MethodReference method)
         {
             Contract.Ensures(method == null || Contract.Result<MethodReference>() != null);
-            Contract.Ensures(!(Contract.Result<MethodReference>() is IMemberDefinition));
             throw new NotSupportedException();
         }
 
         public EventReference RootImport(EventReference @event)
         {
             Contract.Ensures(@event == null || Contract.Result<EventReference>() != null);
-            Contract.Ensures(!(Contract.Result<EventReference>() is IMemberDefinition));
             throw new NotSupportedException();
         }
     }

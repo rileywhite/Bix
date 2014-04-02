@@ -11,7 +11,7 @@ namespace Bix.Mixers.CecilMixer.Core
 {
     internal class RootContext : IRootImportProvider
     {
-        public RootContext(TypeWithRespectToModule rootSource, TypeReference rootTarget)
+        public RootContext(TypeWithRespectToModule rootSource, TypeDefinition rootTarget)
         {
             Contract.Requires(rootSource != null);
             Contract.Requires(rootTarget != null);
@@ -19,7 +19,7 @@ namespace Bix.Mixers.CecilMixer.Core
             Contract.Ensures(this.RootTarget != null);
 
             this.RootSource = rootSource;
-            this.RootTarget = rootTarget.Module.Import(rootTarget);
+            this.RootTarget = rootTarget;
             this.TypeCache = new Dictionary<string, TypeReference>();
             this.FieldCache = new Dictionary<string, FieldReference>();
             this.MethodCache = new Dictionary<string, MethodReference>();
@@ -27,7 +27,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
         private TypeWithRespectToModule RootSource { get; set; }
 
-        private TypeReference RootTarget { get; set; }
+        private TypeDefinition RootTarget { get; set; }
 
 
         public TItem DynamicRootImport<TItem>(TItem item)
@@ -56,7 +56,7 @@ namespace Bix.Mixers.CecilMixer.Core
             }
 
             // if the root source type is being imported, then select the root target type
-            if (type.FullName == this.RootSource.MemberDefinition.FullName) { importedType = this.RootTarget; }
+            if (type.FullName == this.RootSource.MemberDefinition.FullName) { importedType = this.RootTarget.Module.Import(this.RootTarget); }
 
             // otherwise if this is not a nested type, then import the type
             else if (type.DeclaringType == null) { importedType = this.RootTarget.Module.Import(type); }
@@ -93,7 +93,7 @@ namespace Bix.Mixers.CecilMixer.Core
             }
 
             Contract.Assert(importedType != null);
-            Contract.Assert(!(importedType is IMemberDefinition));
+            Contract.Assert(!(importedType is IMemberDefinition) || importedType.Module == this.RootTarget.Module);
             this.TypeCache[type.FullName] = importedType;
             return importedType;
         }
@@ -140,7 +140,7 @@ namespace Bix.Mixers.CecilMixer.Core
             }
 
             Contract.Assert(importedField != null);
-            Contract.Assert(!(importedField is IMemberDefinition));
+            Contract.Assert(!(importedField is IMemberDefinition) || importedField.Module == this.RootTarget.Module);
             this.FieldCache[field.FullName] = importedField;
             return importedField;
         }
@@ -192,7 +192,7 @@ namespace Bix.Mixers.CecilMixer.Core
             }
 
             Contract.Assert(importedMethod != null);
-            Contract.Assert(!(importedMethod is IMemberDefinition));
+            Contract.Assert(!(importedMethod is IMemberDefinition) || importedMethod.Module == this.RootTarget.Module);
             this.MethodCache[method.FullName] = importedMethod;
             return importedMethod;
         }

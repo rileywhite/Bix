@@ -90,15 +90,25 @@ namespace Bix.Mixers.CecilMixer.Core
             //};
             this.Target.ReturnType = this.Source.RootImport(this.Source.MemberDefinition.ReturnType);
 
-            var parameterOperandReplacementMap = new Dictionary<ParameterDefinition, ParameterDefinition>(this.Source.MemberDefinition.Parameters.Count);
-            foreach (var sourceParameter in this.Source.MemberDefinition.Parameters)
+            if (this.Source.MemberDefinition.HasOverrides)
             {
-                var targetParameter =
-                    new ParameterDefinition(sourceParameter.Name, sourceParameter.Attributes, this.Source.RootImport(sourceParameter.ParameterType));
-                this.Target.Parameters.Add(targetParameter);
-                parameterOperandReplacementMap.Add(sourceParameter, targetParameter);
+                foreach (var sourceOverride in this.Source.MemberDefinition.Overrides)
+                {
+                    this.Target.Overrides.Add(this.Source.RootImport(sourceOverride));
+                }
             }
 
+            var parameterOperandReplacementMap = new Dictionary<ParameterDefinition, ParameterDefinition>(this.Source.MemberDefinition.Parameters.Count);
+            if (this.Source.MemberDefinition.HasParameters)
+            {
+                foreach (var sourceParameter in this.Source.MemberDefinition.Parameters)
+                {
+                    var targetParameter =
+                        new ParameterDefinition(sourceParameter.Name, sourceParameter.Attributes, this.Source.RootImport(sourceParameter.ParameterType));
+                    this.Target.Parameters.Add(targetParameter);
+                    parameterOperandReplacementMap.Add(sourceParameter, targetParameter);
+                }
+            }
             Contract.Assert(this.Target.Parameters.Count == this.Source.MemberDefinition.Parameters.Count);
 
             if (this.Source.MemberDefinition.HasBody)
@@ -106,9 +116,13 @@ namespace Bix.Mixers.CecilMixer.Core
                 this.CloneBody(this.Source.MemberDefinition.Body, this.Target.Body, parameterOperandReplacementMap);
             }
 
-            //this.Target.CustomAttributes = this.Source.MemberDefinition;
-            //this.Target.GenericParameters = this.Source.MemberDefinition;
-            //this.Target.SecurityDeclarations = this.Source.MemberDefinition;
+            this.Target.CustomAttributes.RootImportAll(this.Source, this.Source.MemberDefinition.CustomAttributes);
+
+            // TODO generic method parameters
+            if (this.Target.GenericParameters.Any()) { throw new NotImplementedException("Implement method generic parameters when needed"); }
+
+            // TODO security declarations on methods
+            if (this.Target.GenericParameters.Any()) { throw new NotImplementedException("Implement method security declarations when needed"); }
 
             this.IsMixed = true;
             Contract.Assert(this.Target.SignatureEquals(this.Source.MemberDefinition));

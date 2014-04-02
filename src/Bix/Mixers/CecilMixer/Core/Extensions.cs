@@ -8,6 +8,7 @@ using ParameterInfo = System.Reflection.ParameterInfo;
 using PropertyInfo = System.Reflection.PropertyInfo;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
+using Mono.Collections.Generic;
 
 namespace Bix.Mixers.CecilMixer.Core
 {
@@ -457,6 +458,20 @@ namespace Bix.Mixers.CecilMixer.Core
                 property =>
                     (property.GetMethod == method || property.SetMethod == method) &&
                     property.IsSkipped());
+        }
+
+        public static void RootImportAll(this Collection<CustomAttribute> target, IRootImportProvider rootImporter, Collection<CustomAttribute> source)
+        {
+            Contract.Requires(target != null);
+            Contract.Requires(target.Count == 0);
+            Contract.Requires(rootImporter != null);
+            Contract.Requires(source != null);
+            Contract.Ensures(target.Count == source.Count);
+
+            foreach (var sourceAttribute in source)
+            {
+                target.Add(new CustomAttribute(rootImporter.RootImport(sourceAttribute.Constructor), sourceAttribute.GetBlob()));
+            }
         }
     }
 }

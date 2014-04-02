@@ -6,13 +6,12 @@ using System.Linq;
 
 namespace Bix.Mixers.CecilMixer.Core
 {
-    internal class InterfaceMixCommand<TMixesInterface, TTemplate>
-        where TMixesInterface : IMixes
-        where TTemplate : TMixesInterface
+    internal class InterfaceMixCommand<TInterface, TTemplate>
+        where TTemplate : TInterface
     {
         public InterfaceMixCommand(TypeDefinition target)
         {
-            Contract.Requires(typeof(TMixesInterface).IsInterface);
+            Contract.Requires(typeof(TInterface).IsInterface);
             Contract.Requires(target != null);
             Contract.Requires(target.Module != null);
             Contract.Requires(!target.IsValueType);
@@ -58,7 +57,7 @@ namespace Bix.Mixers.CecilMixer.Core
             Contract.Requires(!this.IsMixed);
             Contract.Ensures(this.IsMixed);
 
-            //this.Target.Interfaces.Add(this.InterfaceType.MemberDefinition);
+            this.Target.Interfaces.Add(this.TargetModule.Import(typeof(TInterface)));
             new TypeMixer(this.Target, this.Source).Mix();
 
             this.IsMixed = true;
