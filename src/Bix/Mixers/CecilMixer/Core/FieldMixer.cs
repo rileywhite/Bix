@@ -12,7 +12,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
         public override void Mix()
         {
-            this.IsMixed = true;
+            Contract.Requires(this.Target.Name == this.Source.MemberDefinition.Name);
 
             this.Target.Attributes = this.Source.MemberDefinition.Attributes;
             this.Target.Constant = this.Source.MemberDefinition.Constant;
@@ -32,7 +32,6 @@ namespace Bix.Mixers.CecilMixer.Core
             this.Target.IsRuntimeSpecialName = this.Source.MemberDefinition.IsRuntimeSpecialName;
             this.Target.IsSpecialName = this.Source.MemberDefinition.IsSpecialName;
             this.Target.IsStatic = this.Source.MemberDefinition.IsStatic;
-            this.Target.Name = this.Source.MemberDefinition.Name;
             this.Target.Offset = this.Source.MemberDefinition.Offset;
 
             if (this.Source.MemberDefinition.MarshalInfo == null)
@@ -55,14 +54,14 @@ namespace Bix.Mixers.CecilMixer.Core
                 this.Source.MemberDefinition.MetadataToken.TokenType,
                 this.Source.MemberDefinition.MetadataToken.RID);
 
-            // TODO process type (either import or redirect to type within current module)
             this.Target.FieldType = this.Source.RootImport(this.Source.MemberDefinition.FieldType);
 
-            // TODO copy custom attributes and either import or redirect to type within current module
             foreach(var source in this.Source.MemberDefinition.CustomAttributes)
             {
-                this.Target.CustomAttributes.Add(new CustomAttribute(this.Source.ReferencingModule.Import(source.Constructor), source.GetBlob()));
+                this.Target.CustomAttributes.Add(new CustomAttribute(this.Source.RootImport(source.Constructor), source.GetBlob()));
             }
+
+            this.IsMixed = true;
         }
     }
 }

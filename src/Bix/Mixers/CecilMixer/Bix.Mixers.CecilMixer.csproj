@@ -97,6 +97,8 @@
     <Compile Include="Core\IMemberImporter.cs" />
     <Compile Include="Core\IMemberMixer.cs" />
     <Compile Include="Core\IMemberMixerContract.cs" />
+    <Compile Include="Core\IRootImportProvider.cs" />
+    <Compile Include="Core\IRootImportProviderContract.cs" />
     <Compile Include="Core\MemberImporterBase.cs" />
     <Compile Include="Core\MethodImporter.cs" />
     <Compile Include="Core\PropertyImporter.cs" />
@@ -109,6 +111,7 @@
     <Compile Include="Core\MemberWithRespectToModuleBase.cs" />
     <Compile Include="Core\InterfaceMixCommand.cs" />
     <Compile Include="Core\MemberMixerBase.cs" />
+    <Compile Include="Core\RootContext.cs" />
     <Compile Include="Core\SkipAttribute.cs" />
     <Compile Include="Core\TypeImporter.cs" />
     <Compile Include="Core\TypeMixer.cs" />

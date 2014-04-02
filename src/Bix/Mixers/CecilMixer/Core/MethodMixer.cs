@@ -3,6 +3,7 @@ using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Reflection;
 
 namespace Bix.Mixers.CecilMixer.Core
@@ -87,24 +88,18 @@ namespace Bix.Mixers.CecilMixer.Core
             //    MetadataToken = this.Source.MemberDefinition.MethodReturnType.MetadataToken,
             //    ReturnType = this.Source.ReferencingModule.Import(this.Source.MemberDefinition.MethodReturnType.ReturnType)
             //};
-            this.Target.ReturnType = this.Source.ReferencingModule.Import(this.Source.MemberDefinition.ReturnType);
+            this.Target.ReturnType = this.Source.RootImport(this.Source.MemberDefinition.ReturnType);
 
-            foreach (var parameter in this.Source.MemberInfo.GetParameters().ToParameterDefinitionsForModule(this.Source.ReferencingModule))
+            var parameterOperandReplacementMap = new Dictionary<ParameterDefinition, ParameterDefinition>(this.Source.MemberDefinition.Parameters.Count);
+            foreach (var sourceParameter in this.Source.MemberDefinition.Parameters)
             {
-                // TODO process parameter type in case they are mixed types
-                this.Target.Parameters.Add(parameter);
+                var targetParameter =
+                    new ParameterDefinition(sourceParameter.Name, sourceParameter.Attributes, this.Source.RootImport(sourceParameter.ParameterType));
+                this.Target.Parameters.Add(targetParameter);
+                parameterOperandReplacementMap.Add(sourceParameter, targetParameter);
             }
 
             Contract.Assert(this.Target.Parameters.Count == this.Source.MemberDefinition.Parameters.Count);
-
-            var parameterOperandReplacementMap = new Dictionary<ParameterDefinition, ParameterDefinition>(this.Source.MemberDefinition.Parameters.Count);
-            for (int i = 0; i < this.Source.MemberDefinition.Parameters.Count; i++)
-            {
-                // verifying same name should be sufficient since name must be unique within a parameter list
-                Contract.Assert(this.Target.Parameters[i].Name == this.Source.MemberDefinition.Parameters[i].Name);
-
-                parameterOperandReplacementMap.Add(this.Source.MemberDefinition.Parameters[i], this.Target.Parameters[i]);
-            }
 
             if (this.Source.MemberDefinition.HasBody)
             {
@@ -145,8 +140,7 @@ namespace Bix.Mixers.CecilMixer.Core
             {
                 var targetVariable = new VariableDefinition(
                     sourceVariable.Name,
-                    // TODO may need to replace with mixed type
-                    this.Source.ReferencingModule.Import(sourceVariable.VariableType));
+                    this.Source.RootImport(sourceVariable.VariableType));
 
                 variableOperandReplacementMap.Add(sourceVariable, targetVariable);
 
@@ -172,7 +166,7 @@ namespace Bix.Mixers.CecilMixer.Core
                 instructionOperandReplacementMap.Add(sourceInstruction, targetInstruction);
             }
 
-            foreach (var targetInstruction in targetBody.Instructions)
+            foreach (var targetInstruction in targetBody.Instructions.Where(instruction => instruction.Operand != null))
             {
                 if (TryReplaceParameterOperand(parameterOperandReplacementMap, targetInstruction)) { continue; }
                 if (TryReplaceThisReferenceOperand(sourceBody.ThisParameter, targetBody.ThisParameter, targetInstruction)) { continue; }
@@ -191,10 +185,11 @@ namespace Bix.Mixers.CecilMixer.Core
             if (parameterOperand != null)
             {
                 ParameterDefinition replacementParameterOperand;
-                if (parameterOperandReplacementMap.TryGetValue(parameterOperand, out replacementParameterOperand))
+                if (!parameterOperandReplacementMap.TryGetValue(parameterOperand, out replacementParameterOperand))
                 {
-                    targetInstruction.Operand = replacementParameterOperand;
+                    throw new InvalidOperationException("Failed to update parameter operand in an instruction");
                 }
+                targetInstruction.Operand = replacementParameterOperand;
                 return true;
             }
 
@@ -221,10 +216,11 @@ namespace Bix.Mixers.CecilMixer.Core
             if (variableOperand != null)
             {
                 VariableDefinition replacementVariableOperand;
-                if (variableOperandReplacementMap.TryGetValue(variableOperand, out replacementVariableOperand))
+                if (!variableOperandReplacementMap.TryGetValue(variableOperand, out replacementVariableOperand))
                 {
-                    targetInstruction.Operand = replacementVariableOperand;
+                    throw new InvalidOperationException("Failed to update local variable operand in an instruction");
                 }
+                targetInstruction.Operand = replacementVariableOperand;
                 return true;
             }
 
@@ -240,10 +236,11 @@ namespace Bix.Mixers.CecilMixer.Core
             if (instructionOperand != null)
             {
                 Instruction replacementInstructionOperand;
-                if (instructionOperandReplacementMap.TryGetValue(instructionOperand, out replacementInstructionOperand))
+                if (!instructionOperandReplacementMap.TryGetValue(instructionOperand, out replacementInstructionOperand))
                 {
-                    targetInstruction.Operand = replacementInstructionOperand;
+                    throw new InvalidOperationException("Failed to update instruction operand in an instruction");
                 }
+                targetInstruction.Operand = replacementInstructionOperand;
                 return true;
             }
 
@@ -261,10 +258,11 @@ namespace Bix.Mixers.CecilMixer.Core
                 for (int i = 0; i < instructionsOperand.Length; i++)
                 {
                     Instruction replacementInstructionOperand;
-                    if (instructionOperandReplacementMap.TryGetValue(instructionsOperand[i], out replacementInstructionOperand))
+                    if (!instructionOperandReplacementMap.TryGetValue(instructionsOperand[i], out replacementInstructionOperand))
                     {
-                        instructionsOperand[i] = replacementInstructionOperand;
+                        throw new InvalidOperationException(string.Format("Failed to update index [{0}] within an instructions operand in an instruction", i.ToString()));
                     }
+                    instructionsOperand[i] = replacementInstructionOperand;
                 }
                 return true;
             }
@@ -287,7 +285,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
         private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, CallSite site)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Implement when needed");
         }
 
         private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, double value)
@@ -297,8 +295,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
         private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, FieldReference field)
         {
-            // TODO replace field reference with mixed version of field reference if needed
-            return ilProcessor.Create(opCode, this.Source.ReferencingModule.Import(field));
+            return ilProcessor.Create(opCode, this.Source.RootImport(field));
         }
 
         private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, float value)
@@ -328,8 +325,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
         private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, MethodReference method)
         {
-            // TODO replace method reference with mixed version of method reference if needed
-            return ilProcessor.Create(opCode, this.Source.ReferencingModule.Import(method));
+            return ilProcessor.Create(opCode, this.Source.RootImport(method));
         }
 
         private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, ParameterDefinition parameter)
@@ -349,8 +345,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
         private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, TypeReference type)
         {
-            // TODO replace type reference with mixed version of type reference if needed
-            return ilProcessor.Create(opCode, this.Source.ReferencingModule.Import(type));
+            return ilProcessor.Create(opCode, this.Source.RootImport(type));
         }
 
         private Instruction CreateInstructionWithOperand(ILProcessor ilProcessor, OpCode opCode, VariableDefinition variable)

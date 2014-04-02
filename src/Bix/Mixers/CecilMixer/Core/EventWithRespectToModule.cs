@@ -8,8 +8,12 @@ namespace Bix.Mixers.CecilMixer.Core
     internal class EventWithRespectToModule
         : MemberWithRespectToModuleBase<EventInfo, EventDefinition>
     {
-        public EventWithRespectToModule(EventInfo @event, ModuleDefinition referencingModule)
-            : base(@event, referencingModule) { }
+        public EventWithRespectToModule(RootContext rootContext, EventInfo @event, ModuleDefinition referencingModule)
+            : base(rootContext, @event, referencingModule)
+        {
+            Contract.Requires(rootContext != null);
+            Contract.Ensures(this.RootContext != null);
+        }
 
         public EventImporter memberImporter = new EventImporter();
         public override IMemberImporter<EventInfo, EventDefinition> MemberImporter

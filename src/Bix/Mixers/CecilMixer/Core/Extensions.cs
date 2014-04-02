@@ -418,7 +418,7 @@ namespace Bix.Mixers.CecilMixer.Core
             foreach (var mixer in mixers) { mixer.Mix(); }
         }
 
-        public static bool SignatureEquals(this MethodDefinition left, MethodDefinition right)
+        public static bool SignatureEquals(this MethodReference left, MethodReference right)
         {
             if (left == null || right == null) { return left == null && right == null; }
 

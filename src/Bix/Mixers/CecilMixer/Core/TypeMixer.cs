@@ -82,7 +82,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
                 foreach (var source in from type in this.Source.MemberInfo.GetNestedTypes()
                                        where !type.IsSkipped()
-                                       select new TypeWithRespectToModule(type, this.Target.Module))
+                                       select new TypeWithRespectToModule(this.Source.RootContext, type, this.Target.Module))
                 {
                     var target = new TypeDefinition(
                         source.MemberDefinition.Namespace,
@@ -98,7 +98,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
                 foreach (var source in from field in this.Source.MemberInfo.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                                        where !field.IsSkipped()
-                                       select new FieldWithRespectToModule(field, this.Target.Module))
+                                       select new FieldWithRespectToModule(this.Source.RootContext, field, this.Target.Module))
                 {
                     var target = new FieldDefinition(source.MemberInfo.Name, 0, voidReference);
                     this.Target.Fields.Add(target);
@@ -107,7 +107,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
                 foreach (var source in from method in this.Source.MemberInfo.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                                        where !method.IsConstructor && !method.IsSkipped()
-                                       select new MethodWithRespectToModule(method, this.Target.Module))
+                                       select new MethodWithRespectToModule(this.Source.RootContext, method, this.Target.Module))
                 {
                     var target = new MethodDefinition(source.MemberDefinition.Name, 0, voidReference);
                     this.Target.Methods.Add(target);
@@ -116,7 +116,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
                 foreach (var source in from property in this.Source.MemberInfo.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                                        where !property.IsSkipped()
-                                       select new PropertyWithRespectToModule(property, this.Target.Module))
+                                       select new PropertyWithRespectToModule(this.Source.RootContext, property, this.Target.Module))
                 {
                     var target = new PropertyDefinition(source.MemberDefinition.Name, 0, voidReference);
                     this.Target.Properties.Add(target);
@@ -125,7 +125,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
                 foreach (var source in from @event in this.Source.MemberInfo.GetEvents(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                                        where !@event.IsSkipped()
-                                       select new EventWithRespectToModule(@event, this.Target.Module))
+                                       select new EventWithRespectToModule(this.Source.RootContext, @event, this.Target.Module))
                 {
                     var target = new EventDefinition(source.MemberDefinition.Name, 0, voidReference);
                     this.Target.Events.Add(target);

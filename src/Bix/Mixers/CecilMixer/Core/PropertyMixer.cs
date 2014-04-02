@@ -14,7 +14,6 @@ namespace Bix.Mixers.CecilMixer.Core
             Contract.Requires(source != null);
         }
 
-
         public override void Mix()
         {
             Contract.Assert(this.Target.DeclaringType != null);
@@ -28,8 +27,7 @@ namespace Bix.Mixers.CecilMixer.Core
             this.Target.IsRuntimeSpecialName = this.Source.MemberDefinition.IsRuntimeSpecialName;
             this.Target.IsSpecialName = this.Source.MemberDefinition.IsSpecialName;
 
-            // TODO process this type in case it is a mixed type
-            this.Target.PropertyType = this.Source.ReferencingModule.Import(this.Source.MemberDefinition.PropertyType);
+            this.Target.PropertyType = this.Source.RootImport(this.Source.MemberDefinition.PropertyType);
 
             for (int i = 0; i < this.Source.MemberDefinition.OtherMethods.Count; i++)
             {
@@ -42,14 +40,14 @@ namespace Bix.Mixers.CecilMixer.Core
                     this.Target.GetMethod == null &&
                     method.SignatureEquals(this.Source.MemberDefinition.GetMethod))
                 {
-                    this.Target.GetMethod = method;
+                    this.Target.GetMethod = this.Source.RootImport(method);
                 }
 
                 if (this.Source.MemberDefinition.SetMethod != null &&
                     this.Target.SetMethod == null &&
                     method.SignatureEquals(this.Source.MemberDefinition.SetMethod))
                 {
-                    this.Target.SetMethod = method;
+                    this.Target.SetMethod = this.Source.RootImport(method);
                 }
 
                 for (int i = 0; i < this.Source.MemberDefinition.OtherMethods.Count; i++)
@@ -58,7 +56,7 @@ namespace Bix.Mixers.CecilMixer.Core
                         this.Target.OtherMethods[i] == null &&
                         method.SignatureEquals(this.Source.MemberDefinition.OtherMethods[i]))
                     {
-                        this.Target.OtherMethods[i] = method;
+                        this.Target.OtherMethods[i] = this.Source.RootImport(method);
                     }
                 }
             }
@@ -73,9 +71,7 @@ namespace Bix.Mixers.CecilMixer.Core
             Contract.Assert((this.Target.SetMethod == null) == (this.Source.MemberDefinition.SetMethod == null));
             for (int i = 0; i < this.Source.MemberDefinition.OtherMethods.Count; i++)
             {
-                Contract.Assert(
-                    this.Source.MemberDefinition.OtherMethods[i] == null ||
-                    this.Target.OtherMethods[i].FullName == this.Source.MemberDefinition.OtherMethods[i].FullName);
+                Contract.Assert((this.Target.OtherMethods[i] == null) == (this.Source.MemberDefinition.OtherMethods[i] == null));
             }
         }
     }

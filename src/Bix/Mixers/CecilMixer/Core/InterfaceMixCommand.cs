@@ -22,17 +22,12 @@ namespace Bix.Mixers.CecilMixer.Core
             Contract.Ensures(!this.Target.IsValueType);
             Contract.Ensures(!this.Target.IsPrimitive);
             Contract.Ensures(this.TargetModule != null);
-            Contract.Ensures(this.InterfaceType != null);
-            Contract.Ensures(this.InterfaceType.MemberInfo.IsInterface);
             Contract.Ensures(this.Source != null);
 
-            this.InterfaceType = new TypeWithRespectToModule(typeof(TMixesInterface), target.Module);
-            this.Source = new TypeWithRespectToModule(typeof(TTemplate), target.Module);
+            this.Source = new TypeWithRespectToModule(typeof(TTemplate), target);
             this.TargetModule = target.Module;
             this.Target = target;
         }
-
-        private TypeWithRespectToModule InterfaceType { get; set; }
 
         private TypeWithRespectToModule Source { get; set; }
 

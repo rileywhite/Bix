@@ -8,8 +8,12 @@ namespace Bix.Mixers.CecilMixer.Core
     internal class FieldWithRespectToModule
         : MemberWithRespectToModuleBase<FieldInfo, FieldDefinition>
     {
-        public FieldWithRespectToModule(FieldInfo field, ModuleDefinition referencingModule)
-            : base(field, referencingModule) { }
+        public FieldWithRespectToModule(RootContext rootContext, FieldInfo field, ModuleDefinition referencingModule)
+            : base(rootContext, field, referencingModule)
+        {
+            Contract.Requires(rootContext != null);
+            Contract.Ensures(this.RootContext != null);
+        }
 
         private FieldImporter memberImporter = new FieldImporter();
         public override IMemberImporter<FieldInfo, FieldDefinition> MemberImporter
