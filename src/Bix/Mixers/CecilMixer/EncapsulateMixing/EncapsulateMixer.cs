@@ -61,9 +61,6 @@ namespace Bix.Mixers.CecilMixer.EncapsulateMixing
             Contract.Requires(target != null);
 
             new InterfaceMixCommand<IEncapsulates, EncapsulateSource>(target).Mix();
-            //target.Interfaces.Add(target.Module.Import(typeof(IEncapsulates)));
-            //var mixersProperty = type.ImplementAutoPropertyExplicitly(typeof(IEncapsulates).GetProperty("Encapsulator"));
-            //mixersProperty.MarkAsCompilerGenerated();
             AddDataTransferObject(target);
         }
 

@@ -53,27 +53,27 @@ namespace Bix.Mixers.CecilMixer.Core
             return this.RootContext.DynamicRootImport<TItem>(sourceItem);
         }
 
-        public TypeDefinition RootImport(TypeReference sourceType)
+        public TypeReference RootImport(TypeReference sourceType)
         {
             return this.RootContext.RootImport(sourceType);
         }
 
-        public FieldDefinition RootImport(FieldReference sourceField)
+        public FieldReference RootImport(FieldReference sourceField)
         {
             return this.RootContext.RootImport(sourceField);
         }
 
-        public PropertyDefinition RootImport(PropertyReference sourceProperty)
+        public PropertyReference RootImport(PropertyReference sourceProperty)
         {
             return this.RootContext.RootImport(sourceProperty);
         }
 
-        public MethodDefinition RootImport(MethodReference sourceMethod)
+        public MethodReference RootImport(MethodReference sourceMethod)
         {
             return this.RootContext.RootImport(sourceMethod);
         }
 
-        public EventDefinition RootImport(EventReference sourceEvent)
+        public EventReference RootImport(EventReference sourceEvent)
         {
             return this.RootContext.RootImport(sourceEvent);
         }

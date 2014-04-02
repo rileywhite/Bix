@@ -13,14 +13,14 @@ namespace Bix.Mixers.CecilMixer.Core
     {
         TItem DynamicRootImport<TItem>(TItem item);
 
-        TypeDefinition RootImport(TypeReference type);
+        TypeReference RootImport(TypeReference type);
 
-        FieldDefinition RootImport(FieldReference field);
+        FieldReference RootImport(FieldReference field);
 
-        PropertyDefinition RootImport(PropertyReference property);
+        PropertyReference RootImport(PropertyReference property);
 
-        MethodDefinition RootImport(MethodReference method);
+        MethodReference RootImport(MethodReference method);
 
-        EventDefinition RootImport(EventReference @event);
+        EventReference RootImport(EventReference @event);
     }
 }

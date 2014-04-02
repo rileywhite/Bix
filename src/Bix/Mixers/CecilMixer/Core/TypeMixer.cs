@@ -105,23 +105,23 @@ namespace Bix.Mixers.CecilMixer.Core
                     this.Mixers.Add(new FieldMixer(target, source));
                 }
 
-                foreach (var source in from method in this.Source.MemberInfo.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                                       where !method.IsConstructor && !method.IsSkipped()
-                                       select new MethodWithRespectToModule(this.Source.RootContext, method, this.Target.Module))
-                {
-                    var target = new MethodDefinition(source.MemberDefinition.Name, 0, voidReference);
-                    this.Target.Methods.Add(target);
-                    this.Mixers.Add(new MethodMixer(target, source));
-                }
+            //    foreach (var source in from method in this.Source.MemberInfo.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+            //                           where !method.IsConstructor && !method.IsSkipped()
+            //                           select new MethodWithRespectToModule(this.Source.RootContext, method, this.Target.Module))
+            //    {
+            //        var target = new MethodDefinition(source.MemberDefinition.Name, 0, voidReference);
+            //        this.Target.Methods.Add(target);
+            //        this.Mixers.Add(new MethodMixer(target, source));
+            //    }
 
-                foreach (var source in from property in this.Source.MemberInfo.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                                       where !property.IsSkipped()
-                                       select new PropertyWithRespectToModule(this.Source.RootContext, property, this.Target.Module))
-                {
-                    var target = new PropertyDefinition(source.MemberDefinition.Name, 0, voidReference);
-                    this.Target.Properties.Add(target);
-                    this.Mixers.Add(new PropertyMixer(target, source));
-                }
+            //    foreach (var source in from property in this.Source.MemberInfo.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+            //                           where !property.IsSkipped()
+            //                           select new PropertyWithRespectToModule(this.Source.RootContext, property, this.Target.Module))
+            //    {
+            //        var target = new PropertyDefinition(source.MemberDefinition.Name, 0, voidReference);
+            //        this.Target.Properties.Add(target);
+            //        this.Mixers.Add(new PropertyMixer(target, source));
+            //    }
 
                 foreach (var source in from @event in this.Source.MemberInfo.GetEvents(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                                        where !@event.IsSkipped()

@@ -11,7 +11,7 @@ namespace Bix.Mixers.CecilMixer.Core
 {
     internal class RootContext : IRootImportProvider
     {
-        public RootContext(TypeWithRespectToModule rootSource, TypeDefinition rootTarget)
+        public RootContext(TypeWithRespectToModule rootSource, TypeReference rootTarget)
         {
             Contract.Requires(rootSource != null);
             Contract.Requires(rootTarget != null);
@@ -19,15 +19,15 @@ namespace Bix.Mixers.CecilMixer.Core
             Contract.Ensures(this.RootTarget != null);
 
             this.RootSource = rootSource;
-            this.RootTarget = rootTarget;
-            this.TypeCache = new Dictionary<string, TypeDefinition>();
-            this.FieldCache = new Dictionary<string, FieldDefinition>();
-            this.MethodCache = new Dictionary<string, MethodDefinition>();
+            this.RootTarget = rootTarget.Module.Import(rootTarget);
+            this.TypeCache = new Dictionary<string, TypeReference>();
+            this.FieldCache = new Dictionary<string, FieldReference>();
+            this.MethodCache = new Dictionary<string, MethodReference>();
         }
 
         private TypeWithRespectToModule RootSource { get; set; }
 
-        private TypeDefinition RootTarget { get; set; }
+        private TypeReference RootTarget { get; set; }
 
 
         public TItem DynamicRootImport<TItem>(TItem item)
@@ -40,13 +40,13 @@ namespace Bix.Mixers.CecilMixer.Core
             return item;
         }
 
-        private Dictionary<string, TypeDefinition> TypeCache { get; set; }
+        private Dictionary<string, TypeReference> TypeCache { get; set; }
 
-        public TypeDefinition RootImport(TypeReference type)
+        public TypeReference RootImport(TypeReference type)
         {
             if (type == null) { return null; }
 
-            TypeDefinition importedType;
+            TypeReference importedType;
 
             // if root import has already occurred, then return the previous result
             if (this.TypeCache.TryGetValue(type.FullName, out importedType))
@@ -58,8 +58,8 @@ namespace Bix.Mixers.CecilMixer.Core
             // if the root source type is being imported, then select the root target type
             if (type.FullName == this.RootSource.MemberDefinition.FullName) { importedType = this.RootTarget; }
 
-            // otherwise if this is not a nested type, then import and resolve the type
-            else if (type.DeclaringType == null) { importedType = this.RootTarget.Module.Import(type).Resolve(); }
+            // otherwise if this is not a nested type, then import the type
+            else if (type.DeclaringType == null) { importedType = this.RootTarget.Module.Import(type); }
 
             // handle nested types
             else
@@ -68,15 +68,15 @@ namespace Bix.Mixers.CecilMixer.Core
                 var importedDeclaringType = this.RootImport(type.DeclaringType);
                 Contract.Assert(importedDeclaringType != null);
 
-                // if the imported declaring type is unchanged, then import and resolve the type
+                // if the imported declaring type is unchanged, then import the type
                 if (type.DeclaringType.FullName == importedDeclaringType.FullName)
                 {
-                    importedType = this.RootTarget.Module.Import(type).Resolve();
+                    importedType = this.RootTarget.Module.Import(type);
                 }
                 else
                 {
                     // if the declaring type was imported, then find the nested type with the same local name as the type being imported
-                    var localType = importedDeclaringType.NestedTypes.FirstOrDefault(nestedType => nestedType.Name == type.Name);
+                    var localType = importedDeclaringType.Resolve().NestedTypes.FirstOrDefault(nestedType => nestedType.Name == type.Name);
 
                     if (localType == null)
                     {
@@ -88,22 +88,23 @@ namespace Bix.Mixers.CecilMixer.Core
                             this.RootTarget.FullName));
                     }
 
-                    importedType = this.RootTarget.Module.Import(localType).Resolve();
+                    importedType = this.RootTarget.Module.Import(localType);
                 }
             }
 
             Contract.Assert(importedType != null);
+            Contract.Assert(!(importedType is IMemberDefinition));
             this.TypeCache[type.FullName] = importedType;
             return importedType;
         }
 
-        private Dictionary<string, FieldDefinition> FieldCache { get; set; }
+        private Dictionary<string, FieldReference> FieldCache { get; set; }
 
-        public FieldDefinition RootImport(FieldReference field)
+        public FieldReference RootImport(FieldReference field)
         {
             if (field == null) { return null; }
 
-            FieldDefinition importedField;
+            FieldReference importedField;
 
             // look for cached import
             if (this.FieldCache.TryGetValue(field.FullName, out importedField))
@@ -118,12 +119,12 @@ namespace Bix.Mixers.CecilMixer.Core
             // if the declaring type is unchanged, then import the field directly
             if (importedDeclaringType.FullName == field.DeclaringType.FullName)
             {
-                importedField = this.RootTarget.Module.Import(field).Resolve();
+                importedField = this.RootTarget.Module.Import(field);
             }
             else
             {
                 // if there was a change, then find the field with a matching local name
-                var localField = importedDeclaringType.Fields.FirstOrDefault(possibleField => possibleField.Name == field.Name);
+                var localField = importedDeclaringType.Resolve().Fields.FirstOrDefault(possibleField => possibleField.Name == field.Name);
 
                 if (localField == null)
                 {
@@ -135,27 +136,28 @@ namespace Bix.Mixers.CecilMixer.Core
                         this.RootTarget.FullName));
                 }
 
-                importedField = this.RootTarget.Module.Import(localField).Resolve();
+                importedField = this.RootTarget.Module.Import(localField);
             }
 
             Contract.Assert(importedField != null);
+            Contract.Assert(!(importedField is IMemberDefinition));
             this.FieldCache[field.FullName] = importedField;
             return importedField;
         }
 
-        public PropertyDefinition RootImport(PropertyReference property)
+        public PropertyReference RootImport(PropertyReference property)
         {
             if (property == null) { return null; }
             throw new NotImplementedException();
         }
 
-        private Dictionary<string, MethodDefinition> MethodCache { get; set; }
+        private Dictionary<string, MethodReference> MethodCache { get; set; }
 
-        public MethodDefinition RootImport(MethodReference method)
+        public MethodReference RootImport(MethodReference method)
         {
             if (method == null) { return null; }
 
-            MethodDefinition importedMethod;
+            MethodReference importedMethod;
 
             // look for cached import
             if(this.MethodCache.TryGetValue(method.FullName, out importedMethod))
@@ -170,12 +172,12 @@ namespace Bix.Mixers.CecilMixer.Core
             // if the declaring type is unchanged, then import the method directly
             if (importedDeclaringType.FullName == method.DeclaringType.FullName)
             {
-                importedMethod = this.RootTarget.Module.Import(method).Resolve();
+                importedMethod = this.RootTarget.Module.Import(method);
             }
             else
             {
                 // if there was a change, then find the local method with a matching signature
-                var localMethod = importedDeclaringType.Methods.FirstOrDefault(possibleMethod => possibleMethod.SignatureEquals(method));
+                var localMethod = importedDeclaringType.Resolve().Methods.FirstOrDefault(possibleMethod => possibleMethod.SignatureEquals(method));
 
                 if (localMethod == null)
                 {
@@ -186,15 +188,16 @@ namespace Bix.Mixers.CecilMixer.Core
                         this.RootTarget.FullName));
                 }
 
-                importedMethod = this.RootTarget.Module.Import(localMethod).Resolve();
+                importedMethod = this.RootTarget.Module.Import(localMethod);
             }
 
             Contract.Assert(importedMethod != null);
+            Contract.Assert(!(importedMethod is IMemberDefinition));
             this.MethodCache[method.FullName] = importedMethod;
             return importedMethod;
         }
 
-        public EventDefinition RootImport(EventReference @event)
+        public EventReference RootImport(EventReference @event)
         {
             if (@event == null) { return null; }
             throw new NotImplementedException();

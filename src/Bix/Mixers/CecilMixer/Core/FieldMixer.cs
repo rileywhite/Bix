@@ -54,7 +54,9 @@ namespace Bix.Mixers.CecilMixer.Core
                 this.Source.MemberDefinition.MetadataToken.TokenType,
                 this.Source.MemberDefinition.MetadataToken.RID);
 
-            this.Target.FieldType = this.Source.RootImport(this.Source.MemberDefinition.FieldType);
+            //this.Target.FieldType = this.Source.RootImport(this.Source.MemberDefinition.FieldType);
+            //this.Target.FieldType = this.Source.ReferencingModule.Import(this.Source.MemberDefinition.FieldType);
+            this.Target.FieldType = this.Target.Module.Import(this.Source.MemberDefinition.FieldType);
 
             foreach(var source in this.Source.MemberDefinition.CustomAttributes)
             {

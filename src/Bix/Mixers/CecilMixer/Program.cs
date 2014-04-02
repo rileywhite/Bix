@@ -24,7 +24,7 @@ namespace Bix.Mixers.CecilMixer
 {
     /// <summary>
     /// For now this is impemented as an exe. Still need to think this through,
-    /// but it seems likely to change.
+    /// but it seems likely to change. (Possibly use Fody?)
     /// </summary>
     class Program
     {

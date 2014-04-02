@@ -40,14 +40,14 @@ namespace Bix.Mixers.CecilMixer.Core
                     this.Target.GetMethod == null &&
                     method.SignatureEquals(this.Source.MemberDefinition.GetMethod))
                 {
-                    this.Target.GetMethod = this.Source.RootImport(method);
+                    this.Target.GetMethod = this.Source.RootImport(method).Resolve();
                 }
 
                 if (this.Source.MemberDefinition.SetMethod != null &&
                     this.Target.SetMethod == null &&
                     method.SignatureEquals(this.Source.MemberDefinition.SetMethod))
                 {
-                    this.Target.SetMethod = this.Source.RootImport(method);
+                    this.Target.SetMethod = this.Source.RootImport(method).Resolve();
                 }
 
                 for (int i = 0; i < this.Source.MemberDefinition.OtherMethods.Count; i++)
@@ -56,7 +56,7 @@ namespace Bix.Mixers.CecilMixer.Core
                         this.Target.OtherMethods[i] == null &&
                         method.SignatureEquals(this.Source.MemberDefinition.OtherMethods[i]))
                     {
-                        this.Target.OtherMethods[i] = this.Source.RootImport(method);
+                        this.Target.OtherMethods[i] = this.Source.RootImport(method).Resolve();
                     }
                 }
             }
