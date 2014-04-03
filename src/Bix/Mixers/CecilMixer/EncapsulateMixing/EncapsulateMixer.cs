@@ -61,7 +61,7 @@ namespace Bix.Mixers.CecilMixer.EncapsulateMixing
             Contract.Requires(target != null);
 
             new InterfaceMixCommand<IEncapsulates, EncapsulateSource>(target).Mix();
-            //AddDataTransferObject(target);
+            AddDataTransferObject(target);
         }
 
         private static void AddDataTransferObject(TypeDefinition target)
