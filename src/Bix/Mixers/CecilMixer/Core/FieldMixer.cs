@@ -64,7 +64,6 @@ namespace Bix.Mixers.CecilMixer.Core
             Contract.Assert(this.Target.CustomAttributes.Count == 0);
             this.Target.RootImportAllCustomAttributes(this.Source, this.Source.MemberDefinition.CustomAttributes);
 
-            Console.WriteLine(this.Target.CustomAttributes.Count);
             this.IsMixed = true;
         }
     }

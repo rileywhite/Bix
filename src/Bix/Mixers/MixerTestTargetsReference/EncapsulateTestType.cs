@@ -30,26 +30,7 @@ namespace Bix.Mixers.MixerTestTargets
     {
         public EncapsulatesTestType()
         {
-            //this.InitializeBix();
         }
-
-        //#region Bix Initialization
-
-        //[CompilerGenerated]
-        //[SpecialName]
-        //private void InitializeBix()
-        //{
-        //    MixContext.SetFor(this);
-        //    MixContext mixContext = MixContext.GetFrom(this);
-        //    List<IMixer> mixers = new List<IMixer>();
-
-        //    ((IEncapsulates)this).InitializeResult = mixContext.Get<IEncapsulateProvider>().Initialize(this);
-        //    mixers.Add(((IEncapsulates)this).Encapsulator);
-
-        //    ((IMixes)this).Mixers = mixers.AsReadOnly();
-        //}
-
-        //#endregion
 
         #region Copied code with attributes removed
 
@@ -246,11 +227,8 @@ namespace Bix.Mixers.MixerTestTargets
 
         #region Reference for IEncapsulates Implementation
 
-        //[CompilerGenerated]
-        //InitializeResult IEncapsulates.InitializeResult { get; set; }
-
-        //[CompilerGenerated]
-        //IEncapsulator IEncapsulates.Encapsulator { get; set; }
+        [CompilerGenerated]
+        IEncapsulator IEncapsulates.Encapsulator { get; set; }
 
         #endregion
     }

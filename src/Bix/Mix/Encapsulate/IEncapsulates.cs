@@ -25,8 +25,6 @@ namespace Bix.Mix.Encapsulate
 {
     public interface IEncapsulates : IMixes
     {
-        //new InitializeResult InitializeResult { get; set; }
-
-        //IEncapsulator Encapsulator { get; set; }
+        IEncapsulator Encapsulator { get; set; }
     }
 }

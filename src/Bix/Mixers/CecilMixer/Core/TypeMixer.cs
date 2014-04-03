@@ -32,43 +32,57 @@ namespace Bix.Mixers.CecilMixer.Core
 
         private void CopyTypeData()
         {
-            this.Target.Attributes = this.Source.MemberDefinition.Attributes;
-            this.Target.ClassSize = this.Source.MemberDefinition.ClassSize;
-            this.Target.HasSecurity = this.Source.MemberDefinition.HasSecurity;
-            this.Target.IsAbstract = this.Source.MemberDefinition.IsAbstract;
-            this.Target.IsAnsiClass = this.Source.MemberDefinition.IsAnsiClass;
-            this.Target.IsAutoClass = this.Source.MemberDefinition.IsAutoClass;
-            this.Target.IsAutoLayout = this.Source.MemberDefinition.IsAutoLayout;
-            this.Target.IsBeforeFieldInit = this.Source.MemberDefinition.IsBeforeFieldInit;
-            this.Target.IsClass = this.Source.MemberDefinition.IsClass;
-            this.Target.IsExplicitLayout = this.Source.MemberDefinition.IsExplicitLayout;
-            this.Target.IsImport = this.Source.MemberDefinition.IsImport;
-            this.Target.IsInterface = this.Source.MemberDefinition.IsInterface;
-            this.Target.IsNestedAssembly = this.Source.MemberDefinition.IsNestedAssembly;
-            this.Target.IsNestedFamily = this.Source.MemberDefinition.IsNestedFamily;
-            this.Target.IsNestedFamilyAndAssembly = this.Source.MemberDefinition.IsNestedFamilyAndAssembly;
-            this.Target.IsNestedFamilyOrAssembly = this.Source.MemberDefinition.IsNestedFamilyOrAssembly;
-            this.Target.IsNestedPrivate = this.Source.MemberDefinition.IsNestedPrivate;
-            this.Target.IsNestedPublic = this.Source.MemberDefinition.IsNestedPublic;
-            this.Target.IsNotPublic = this.Source.MemberDefinition.IsNotPublic;
-            this.Target.IsPublic = this.Source.MemberDefinition.IsPublic;
-            this.Target.IsRuntimeSpecialName = this.Source.MemberDefinition.IsRuntimeSpecialName;
-            this.Target.IsSealed = this.Source.MemberDefinition.IsSealed;
-            this.Target.IsSequentialLayout = this.Source.MemberDefinition.IsSequentialLayout;
-            this.Target.IsSerializable = this.Source.MemberDefinition.IsSerializable;
-            this.Target.IsSpecialName = this.Source.MemberDefinition.IsSpecialName;
-            this.Target.IsUnicodeClass = this.Source.MemberDefinition.IsUnicodeClass;
-            this.Target.IsValueType = this.Source.MemberDefinition.IsValueType;
-            this.Target.IsWindowsRuntime = this.Source.MemberDefinition.IsWindowsRuntime;
-            this.Target.PackingSize = this.Source.MemberDefinition.PackingSize;
-            this.Target.Scope = this.Source.MemberDefinition.Scope;
+            if (this.Target != this.Source.RootContext.RootTarget)
+            {
+                this.Target.Attributes = this.Source.MemberDefinition.Attributes;
+                this.Target.HasSecurity = this.Source.MemberDefinition.HasSecurity;
+                this.Target.IsAbstract = this.Source.MemberDefinition.IsAbstract;
+                this.Target.IsAnsiClass = this.Source.MemberDefinition.IsAnsiClass;
+                this.Target.IsAutoClass = this.Source.MemberDefinition.IsAutoClass;
+                this.Target.IsAutoLayout = this.Source.MemberDefinition.IsAutoLayout;
+                this.Target.IsBeforeFieldInit = this.Source.MemberDefinition.IsBeforeFieldInit;
+                this.Target.IsClass = this.Source.MemberDefinition.IsClass;
+                this.Target.IsExplicitLayout = this.Source.MemberDefinition.IsExplicitLayout;
+                this.Target.IsImport = this.Source.MemberDefinition.IsImport;
+                this.Target.IsInterface = this.Source.MemberDefinition.IsInterface;
+                this.Target.IsNestedAssembly = this.Source.MemberDefinition.IsNestedAssembly;
+                this.Target.IsNestedFamily = this.Source.MemberDefinition.IsNestedFamily;
+                this.Target.IsNestedFamilyAndAssembly = this.Source.MemberDefinition.IsNestedFamilyAndAssembly;
+                this.Target.IsNestedFamilyOrAssembly = this.Source.MemberDefinition.IsNestedFamilyOrAssembly;
+                this.Target.IsNestedPrivate = this.Source.MemberDefinition.IsNestedPrivate;
+                this.Target.IsNestedPublic = this.Source.MemberDefinition.IsNestedPublic;
+                this.Target.IsNotPublic = this.Source.MemberDefinition.IsNotPublic;
+                this.Target.IsPublic = this.Source.MemberDefinition.IsPublic;
+                this.Target.IsRuntimeSpecialName = this.Source.MemberDefinition.IsRuntimeSpecialName;
+                this.Target.IsSealed = this.Source.MemberDefinition.IsSealed;
+                this.Target.IsSequentialLayout = this.Source.MemberDefinition.IsSequentialLayout;
+                this.Target.IsSerializable = this.Source.MemberDefinition.IsSerializable;
+                this.Target.IsSpecialName = this.Source.MemberDefinition.IsSpecialName;
+                this.Target.IsUnicodeClass = this.Source.MemberDefinition.IsUnicodeClass;
+                this.Target.IsValueType = this.Source.MemberDefinition.IsValueType;
+                this.Target.IsWindowsRuntime = this.Source.MemberDefinition.IsWindowsRuntime;
 
-            this.Target.BaseType = this.Source.MemberDefinition.BaseType;
-            this.Target.DeclaringType = this.Source.MemberDefinition.DeclaringType;
+                // TODO look more closely at type packing size
+                this.Target.PackingSize = this.Source.MemberDefinition.PackingSize;
 
-            this.Target.MetadataToken = this.Source.MemberDefinition.MetadataToken;
+                // TODO look more closely at type class size
+                this.Target.ClassSize = this.Source.MemberDefinition.ClassSize;
 
-            // I get a similar issue here as with the duplication in the FieldMixer...adding a clear line to work around
+                // TODO look more closely at type scope
+                this.Target.Scope = this.Source.MemberDefinition.Scope;
+
+                if (this.Source.MemberDefinition.IsNested)
+                {
+                    this.Target.DeclaringType = this.Source.RootImport(this.Source.MemberDefinition.DeclaringType).Resolve();
+                }
+
+                this.Target.BaseType = this.Source.RootImport(this.Source.MemberDefinition.BaseType);
+
+                // TODO look more closely at type metadata token
+                this.Target.MetadataToken = this.Source.MemberDefinition.MetadataToken;
+            }
+
+            // I get a similar issue here as with the duplication in the FieldMixer...adding a clear line to work around, but only for non-root type
             if (this.Target != this.Source.RootContext.RootTarget) { this.Target.CustomAttributes.Clear(); }
             this.Target.RootImportAllCustomAttributes(this.Source, this.Source.MemberDefinition.CustomAttributes);
 
