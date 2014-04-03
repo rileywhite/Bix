@@ -48,9 +48,7 @@ namespace Bix.Mixers.CecilMixer.CommonMixing
             Contract.Requires(target != null);
             Contract.Requires(target.Module != null);
 
-            target.Interfaces.Add(target.Module.Import(typeof(IMixes)));
-            var mixersProperty = target.ImplementAutoPropertyExplicitly(typeof(IMixes).GetProperty("Mixers"));
-            mixersProperty.MarkAsCompilerGenerated();
+            new InterfaceMixCommand<IMixes, MixesSource>(target).Mix();
         }
 
         private void AddISerializable(TypeDefinition target)
@@ -58,29 +56,7 @@ namespace Bix.Mixers.CecilMixer.CommonMixing
             Contract.Requires(target != null);
             Contract.Requires(target.Module != null);
 
-            var targetModule = target.Module;
-
-            target.Interfaces.Add(targetModule.Import(typeof(ISerializable)));
-
-            var voidTypeReference = targetModule.Import(typeof(void));
-            var serializationInfoTypeReference = targetModule.Import(typeof(SerializationInfo));
-            var streamingContextTypeReference = targetModule.Import(typeof(StreamingContext));
-
-            target.ImplementMethodExplicitly(
-                typeof(ISerializable).GetMethod("GetObjectData", new Type[] { typeof(SerializationInfo), typeof(StreamingContext) }),
-                ilProcessor =>
-                {
-                    ilProcessor.Append(Instruction.Create(OpCodes.Ret));
-                });
-
-            target.AddPrivateConstructor(
-                ilProcessor =>
-                {
-                    ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
-                    ilProcessor.Append(Instruction.Create(OpCodes.Call, targetModule.ImportConstructor(typeof(object))));
-                    ilProcessor.Append(Instruction.Create(OpCodes.Ret));
-                },
-                new ParameterDefinition[] { new ParameterDefinition("info", ParameterAttributes.None, serializationInfoTypeReference), new ParameterDefinition("context", ParameterAttributes.None, streamingContextTypeReference) });
+            new InterfaceMixCommand<ISerializable, SerializableSource>(target).Mix();
         }
     }
 }

@@ -3,7 +3,7 @@ using Mono.Cecil.Cil;
 using System;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using MethodInfo = System.Reflection.MethodInfo;
+using MethodBase = System.Reflection.MethodBase;
 using ParameterInfo = System.Reflection.ParameterInfo;
 using PropertyInfo = System.Reflection.PropertyInfo;
 using System.Runtime.CompilerServices;
@@ -250,32 +250,6 @@ namespace Bix.Mixers.CecilMixer.Core
                 setterMethod);
         }
 
-        public static MethodDefinition ImplementMethodExplicitly(
-            this TypeDefinition target,
-            MethodInfo interfaceMethodInfo,
-            Action<ILProcessor> bodyBuilder)
-        {
-            Contract.Requires(target != null);
-            Contract.Requires(target.Module != null);
-            Contract.Requires(interfaceMethodInfo != null);
-            Contract.Requires(interfaceMethodInfo.DeclaringType != null);
-            Contract.Requires(interfaceMethodInfo.DeclaringType.IsInterface);
-            Contract.Requires(bodyBuilder != null);
-
-            Contract.Ensures(Contract.Result<MethodDefinition>() != null);
-
-            var method = target.AddMethod(
-                string.Format("{0}.{1}.{2}", interfaceMethodInfo.DeclaringType.Namespace, interfaceMethodInfo.DeclaringType.Name, interfaceMethodInfo.Name),
-                target.Module.Import(interfaceMethodInfo.ReturnType),
-                bodyBuilder,
-                interfaceMethodInfo.GetParameters(),
-                MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final);
-
-            method.Overrides.Add(target.Module.Import(interfaceMethodInfo));
-
-            return method;
-        }
-
         public static MethodDefinition AddPublicConstructor(
             this TypeDefinition target,
             Action<ILProcessor> bodyBuilder,
@@ -437,7 +411,7 @@ namespace Bix.Mixers.CecilMixer.Core
         {
             Contract.Requires(member != null);
 
-            var method = member as System.Reflection.MethodInfo;
+            var method = member as System.Reflection.MethodBase;
             if (method == null)
             {
                 return Attribute.IsDefined(member, typeof(SkipAttribute));
@@ -445,7 +419,7 @@ namespace Bix.Mixers.CecilMixer.Core
             else { return method.IsSkipped(); }
         }
 
-        public static bool IsSkipped(this System.Reflection.MethodInfo method)
+        public static bool IsSkipped(this System.Reflection.MethodBase method)
         {
             Contract.Requires(method != null);
 
@@ -460,17 +434,20 @@ namespace Bix.Mixers.CecilMixer.Core
                     property.IsSkipped());
         }
 
-        public static void RootImportAll(this Collection<CustomAttribute> target, IRootImportProvider rootImporter, Collection<CustomAttribute> source)
+        public static void RootImportAllCustomAttributes(this ICustomAttributeProvider target, IRootImportProvider rootImporter, Collection<CustomAttribute> sourceAttributes)
         {
             Contract.Requires(target != null);
-            Contract.Requires(target.Count == 0);
+            Contract.Requires(target.CustomAttributes != null);
+            Contract.Requires(target.CustomAttributes.Count == 0 || target == rootImporter.RootTarget);
             Contract.Requires(rootImporter != null);
-            Contract.Requires(source != null);
-            Contract.Ensures(target.Count == source.Count);
+            Contract.Requires(sourceAttributes != null);
+            Contract.Ensures(
+                target.CustomAttributes.Count == sourceAttributes.Count ||
+                (target == rootImporter.RootTarget && target.CustomAttributes.Count > sourceAttributes.Count));
 
-            foreach (var sourceAttribute in source)
+            foreach (var sourceAttribute in sourceAttributes)
             {
-                target.Add(new CustomAttribute(rootImporter.RootImport(sourceAttribute.Constructor), sourceAttribute.GetBlob()));
+                target.CustomAttributes.Add(new CustomAttribute(rootImporter.RootImport(sourceAttribute.Constructor), sourceAttribute.GetBlob()));
             }
         }
     }

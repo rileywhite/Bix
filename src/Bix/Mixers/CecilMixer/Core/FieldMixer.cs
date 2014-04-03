@@ -62,7 +62,7 @@ namespace Bix.Mixers.CecilMixer.Core
             // (breaking anywhere before the RootImportAll call in the debugger keeps it from happening, too)
             this.Target.CustomAttributes.Clear();
             Contract.Assert(this.Target.CustomAttributes.Count == 0);
-            this.Target.CustomAttributes.RootImportAll(this.Source, this.Source.MemberDefinition.CustomAttributes);
+            this.Target.RootImportAllCustomAttributes(this.Source, this.Source.MemberDefinition.CustomAttributes);
 
             Console.WriteLine(this.Target.CustomAttributes.Count);
             this.IsMixed = true;

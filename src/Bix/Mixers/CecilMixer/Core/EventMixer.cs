@@ -16,7 +16,8 @@ namespace Bix.Mixers.CecilMixer.Core
 
         public override void Mix()
         {
-            throw new NotImplementedException();
+            // TODO event mixing
+            throw new NotImplementedException("Implement event mixing when needed");
         }
     }
 }

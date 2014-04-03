@@ -27,8 +27,7 @@ namespace Bix.Mixers.CecilMixer.Core
 
         private TypeWithRespectToModule RootSource { get; set; }
 
-        private TypeDefinition RootTarget { get; set; }
-
+        public TypeDefinition RootTarget { get; private set; }
 
         public TItem DynamicRootImport<TItem>(TItem item)
         {

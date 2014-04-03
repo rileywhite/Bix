@@ -61,8 +61,15 @@ namespace Bix.Mixers.CecilMixer.Core
                 }
             }
             this.Target.MetadataToken = this.Source.MemberDefinition.MetadataToken;
-            //this.Target.CustomAttributes = this.Source.MemberDefinition;
-            //this.Target.Parameters = this.Source.MemberDefinition;
+
+            // I get a similar issue here as with the duplication in the FieldMixer...adding a clear line to work around
+            this.Target.CustomAttributes.Clear();
+            this.Target.RootImportAllCustomAttributes(this.Source, this.Source.MemberDefinition.CustomAttributes);
+
+            if (this.Source.MemberDefinition.HasParameters)
+            {
+                throw new NotImplementedException("Implement property parameters when needed");
+            }
 
             this.IsMixed = true;
 

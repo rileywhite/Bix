@@ -7,8 +7,11 @@ namespace Bix.Mixers.CecilMixer.EncapsulateMixing
 {
     internal class EncapsulateSource : IEncapsulates
     {
-        [CompilerGenerated]
-        IEncapsulator IEncapsulates.Encapsulator { get; set; }
+        [Skip]
+        public EncapsulateSource() { }
+
+        //[CompilerGenerated]
+        //IEncapsulator IEncapsulates.Encapsulator { get; set; }
 
         #region Skipped Items
 

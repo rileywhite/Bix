@@ -68,10 +68,21 @@ namespace Bix.Mixers.CecilMixer.Core
 
             this.Target.MetadataToken = this.Source.MemberDefinition.MetadataToken;
 
-            //this.Target.CustomAttributes = this.Source.MemberDefinition;
-            //this.Target.GenericParameters = this.Source.MemberDefinition;
-            //this.Target.Interfaces = this.Source.MemberDefinition;
-            //this.Target.SecurityDeclarations = this.Source.MemberDefinition;
+            // I get a similar issue here as with the duplication in the FieldMixer...adding a clear line to work around
+            if (this.Target != this.Source.RootContext.RootTarget) { this.Target.CustomAttributes.Clear(); }
+            this.Target.RootImportAllCustomAttributes(this.Source, this.Source.MemberDefinition.CustomAttributes);
+
+            if (this.Source.MemberDefinition.HasGenericParameters)
+            {
+                // TODO type generic parameters
+                throw new NotImplementedException("Implement type generic parameters when needed");
+            }
+
+            if (this.Source.MemberDefinition.HasSecurityDeclarations)
+            {
+                // TODO type security declarations
+                throw new NotImplementedException("Implement type security declarations when needed");
+            }
         }
 
         private void PopulateMixersWithScaffolding()
@@ -105,9 +116,13 @@ namespace Bix.Mixers.CecilMixer.Core
                     this.Mixers.Add(new FieldMixer(target, source));
                 }
 
-                foreach (var source in from method in this.Source.MemberInfo.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                                       where !method.IsConstructor && !method.IsSkipped()
-                                       select new MethodWithRespectToModule(this.Source.RootContext, method, this.Target.Module))
+                foreach (var source in (from method in this.Source.MemberInfo.GetConstructors(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                                        where !method.IsSkipped()
+                                        select new MethodWithRespectToModule(this.Source.RootContext, method, this.Target.Module))
+                                       .Concat
+                                       (from method in this.Source.MemberInfo.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public )
+                                        where !method.IsSkipped()
+                                        select new MethodWithRespectToModule(this.Source.RootContext, method, this.Target.Module)))
                 {
                     var target = new MethodDefinition(source.MemberDefinition.Name, 0, voidReference);
                     this.Target.Methods.Add(target);

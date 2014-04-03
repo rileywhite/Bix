@@ -11,6 +11,15 @@ namespace Bix.Mixers.CecilMixer.Core
     [ContractClassFor(typeof(IRootImportProvider))]
     internal abstract class IRootImportProviderContract : IRootImportProvider
     {
+        public TypeDefinition RootTarget
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<TypeDefinition>() != null);
+                throw new NotSupportedException();
+            }
+        }
+
         public TItem DynamicRootImport<TItem>(TItem item)
         {
             Contract.Ensures(item == null || Contract.Result<TItem>() != null);

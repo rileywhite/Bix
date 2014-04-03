@@ -48,6 +48,11 @@ namespace Bix.Mixers.CecilMixer.Core
 
         public RootContext RootContext { get; protected set; }
 
+        TypeDefinition IRootImportProvider.RootTarget
+        {
+            get { return this.RootContext.RootTarget; }
+        }
+
         public TItem DynamicRootImport<TItem>(TItem sourceItem)
         {
             return this.RootContext.DynamicRootImport<TItem>(sourceItem);

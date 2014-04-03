@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Bix.Mixers.CecilMixer.Core
 {
-    internal class MethodMixer : MemberMixerBase<MethodInfo, MethodDefinition, MethodWithRespectToModule>
+    internal class MethodMixer : MemberMixerBase<MethodBase, MethodDefinition, MethodWithRespectToModule>
     {
         public MethodMixer(MethodDefinition target, MethodWithRespectToModule source)
             : base(target, source)
@@ -116,13 +116,21 @@ namespace Bix.Mixers.CecilMixer.Core
                 this.CloneBody(this.Source.MemberDefinition.Body, this.Target.Body, parameterOperandReplacementMap);
             }
 
-            this.Target.CustomAttributes.RootImportAll(this.Source, this.Source.MemberDefinition.CustomAttributes);
+            // I get a similar issue here as with the duplication in the FieldMixer...adding a clear line to work around
+            this.Target.CustomAttributes.Clear();
+            this.Target.RootImportAllCustomAttributes(this.Source, this.Source.MemberDefinition.CustomAttributes);
 
-            // TODO generic method parameters
-            if (this.Target.GenericParameters.Any()) { throw new NotImplementedException("Implement method generic parameters when needed"); }
+            if (this.Source.MemberDefinition.HasGenericParameters)
+            {
+                // TODO method generic parameters
+                throw new NotImplementedException("Implement method generic parameters when needed");
+            }
 
-            // TODO security declarations on methods
-            if (this.Target.GenericParameters.Any()) { throw new NotImplementedException("Implement method security declarations when needed"); }
+            if (this.Source.MemberDefinition.HasSecurityDeclarations)
+            {
+                // TODO method security declarations
+                throw new NotImplementedException("Implement method security declarations when needed");
+            }
 
             this.IsMixed = true;
             Contract.Assert(this.Target.SignatureEquals(this.Source.MemberDefinition));

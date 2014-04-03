@@ -249,8 +249,8 @@ namespace Bix.Mixers.MixerTestTargets
         //[CompilerGenerated]
         //InitializeResult IEncapsulates.InitializeResult { get; set; }
 
-        [CompilerGenerated]
-        IEncapsulator IEncapsulates.Encapsulator { get; set; }
+        //[CompilerGenerated]
+        //IEncapsulator IEncapsulates.Encapsulator { get; set; }
 
         #endregion
     }

@@ -6,9 +6,9 @@ using System.Reflection;
 namespace Bix.Mixers.CecilMixer.Core
 {
     internal class MethodWithRespectToModule
-        : MemberWithRespectToModuleBase<MethodInfo, MethodDefinition>
+        : MemberWithRespectToModuleBase<MethodBase, MethodDefinition>
     {
-        public MethodWithRespectToModule(RootContext rootContext, MethodInfo method, ModuleDefinition referencingModule)
+        public MethodWithRespectToModule(RootContext rootContext, MethodBase method, ModuleDefinition referencingModule)
             : base(rootContext, method, referencingModule)
         {
             Contract.Requires(rootContext != null);
@@ -16,7 +16,7 @@ namespace Bix.Mixers.CecilMixer.Core
         }
 
         private MethodImporter memberImporter = new MethodImporter();
-        public override IMemberImporter<MethodInfo, MethodDefinition> MemberImporter
+        public override IMemberImporter<MethodBase, MethodDefinition> MemberImporter
         {
             get { return this.memberImporter; }
         }

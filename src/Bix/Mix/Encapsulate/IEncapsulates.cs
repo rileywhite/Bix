@@ -27,6 +27,6 @@ namespace Bix.Mix.Encapsulate
     {
         //new InitializeResult InitializeResult { get; set; }
 
-        IEncapsulator Encapsulator { get; set; }
+        //IEncapsulator Encapsulator { get; set; }
     }
 }

@@ -11,6 +11,8 @@ namespace Bix.Mixers.CecilMixer.Core
     [ContractClass(typeof(IRootImportProviderContract))]
     internal interface IRootImportProvider
     {
+        TypeDefinition RootTarget { get; }
+
         TItem DynamicRootImport<TItem>(TItem item);
 
         TypeReference RootImport(TypeReference type);

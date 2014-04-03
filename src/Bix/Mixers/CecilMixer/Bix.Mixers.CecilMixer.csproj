@@ -90,6 +90,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommonMixing\MixesSource.cs" />
+    <Compile Include="CommonMixing\SerializableSource.cs" />
     <Compile Include="Core\EventImporter.cs" />
     <Compile Include="Core\EventMixer.cs" />
     <Compile Include="Core\EventWithRespectToModule.cs" />
