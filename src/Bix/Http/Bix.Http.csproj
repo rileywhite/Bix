@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Platforms>AnyCPU;x64</Platforms>
+    <Authors>Riley White</Authors>
+    <Company>Briollen</Company>
+    <Product>Bix</Product>
+    <Description>Http client and authentication tools for Bix</Description>
+    <Copyright>Copyright 2013-2017 Riley White</Copyright>
+    <PackageLicenseUrl>https://github.com/rileywhite/Bix/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
+    <PackageTags>bix business-mix http-authentication hmac</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NodaTime" Version="2.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Bix.Core.csproj" />
+  </ItemGroup>
+
+</Project>

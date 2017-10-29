@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Platforms>AnyCPU;x64</Platforms>
+    <Authors>Riley White</Authors>
+    <Company>Briollen</Company>
+    <Product>Bix</Product>
+    <Description>Entity Framework Core repository framework for Bix</Description>
+    <Copyright>Copyright 2013-2017 Riley White</Copyright>
+    <PackageLicenseUrl>https://github.com/rileywhite/Bix/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
+    <PackageTags>bix business-mix entityframeworkcore entityframework</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Bix.Core.csproj" />
+  </ItemGroup>
+
+</Project>

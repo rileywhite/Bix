@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Platforms>AnyCPU;x64</Platforms>
+    <Authors>Riley White</Authors>
+    <Company>Briollen</Company>
+    <Product>Bix</Product>
+    <Description>RESTful HTTP client repository framework for Bix</Description>
+    <Copyright>Copyright 2013-2017 Riley White</Copyright>
+    <PackageLicenseUrl>https://github.com/rileywhite/Bix/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
+    <PackageTags>bix business-mix restful-client</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="2.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Http\Bix.Http.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Platforms>AnyCPU;x64</Platforms>
+    <Authors>Riley White</Authors>
+    <Company>Briollen</Company>
+    <Product>Bix</Product>
+    <Description>Core functionality used across all of Bix</Description>
+    <Copyright>Copyright 2013-2017 Riley White</Copyright>
+    <PackageLicenseUrl>https://github.com/rileywhite/Bix/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
+    <PackageIconUrl></PackageIconUrl>
+    <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
+    <PackageTags>bix business-mix</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+  </ItemGroup>
+
+</Project>
