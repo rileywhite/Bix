@@ -1,7 +1,6 @@
 language: csharp
 mono: none
-dotnet: 2.0
+dotnet: 2.0.0
 script:
- - dotnet restore
- - dotnet msubild
-solution: src/Bix.sln
+ - dotnet restore src/Bix.sln
+ - dotnet build src/Bix.sln
