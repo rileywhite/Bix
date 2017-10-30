@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.Core", "Core\Bix.Core.csproj", "{D071FF80-2D35-424D-9C0E-7734C1716791}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.Core", "Bix\Core\Bix.Core.csproj", "{D071FF80-2D35-424D-9C0E-7734C1716791}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.Autofac", "Autofac\Bix.Autofac.csproj", "{22158EFC-44A3-40E7-B81C-41249EE570DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.Autofac", "Bix\Autofac\Bix.Autofac.csproj", "{22158EFC-44A3-40E7-B81C-41249EE570DC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.Http", "Http\Bix.Http.csproj", "{7E2D9C78-39B5-4C6F-A577-63A27877C2C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.Http", "Bix\Http\Bix.Http.csproj", "{7E2D9C78-39B5-4C6F-A577-63A27877C2C4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.Repositories.EntityFramework", "Repositories\EntityFramework\Bix.Repositories.EntityFramework.csproj", "{BFA070EF-56C2-41E5-A48D-C71E38B7294A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.Repositories.EntityFramework", "Bix\Repositories\EntityFramework\Bix.Repositories.EntityFramework.csproj", "{BFA070EF-56C2-41E5-A48D-C71E38B7294A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.Repositories.Restful.HttpClient", "Repositories\Restful.HttpClient\Bix.Repositories.Restful.HttpClient.csproj", "{A7605226-FD3E-4AD5-AB9B-0070E8192E12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.Repositories.Restful.HttpClient", "Bix\Repositories\Restful.HttpClient\Bix.Repositories.Restful.HttpClient.csproj", "{A7605226-FD3E-4AD5-AB9B-0070E8192E12}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.Repositories.Restful.WebApi", "Repositories\Restful.WebApi\Bix.Repositories.Restful.WebApi.csproj", "{3915A7C0-F498-4595-B27A-E73392BDC861}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.Repositories.Restful.WebApi", "Bix\Repositories\Restful.WebApi\Bix.Repositories.Restful.WebApi.csproj", "{3915A7C0-F498-4595-B27A-E73392BDC861}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
