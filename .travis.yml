@@ -4,5 +4,6 @@ dotnet: 2.0.0
 script:
  - dotnet restore src/Bix.sln
  - dotnet build src/Bix.sln
- - dotnet test src/Bix.sln
+ - cd src/Bix/Core.Tests
  - dotnet xunit -configuration Release -failskips -xml ../../../test-results/Bix.Core.xml
+ 
