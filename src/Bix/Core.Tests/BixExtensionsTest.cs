@@ -69,49 +69,65 @@ namespace Bix.Core
         }
 
         [Fact]
-        public void ConvertFromJsonFailsOnNull()
+        public void TryConvertFromJsonReturnsFalseOnNull()
         {
             // arrange
             string json = null;
 
             // act & assert
-            Assert.Throws<ArgumentNullException>("source", () => json.ConvertFromJson<object>());
+            Assert.False(json.TryConvertFromJson(out object obj));
         }
 
         [Fact]
-        public void ConvertFromJsonReturnsNullForObjectTypeAndInvalidJson()
-        {
-            // arrange
-            string json = "";
-
-            // act
-            var value = json.ConvertFromJson<object>();
-
-            // assert
-            Assert.Null(value);
-        }
-
-        [Fact]
-        public void ConvertFromJsonFailsForValueTypeAndInvalidJson()
+        public void TryConvertFromJsonReturnsFalseForObjectTypeAndInvalidJson()
         {
             // arrange
             string json = "";
 
             // act & assert
-            Assert.Throws<JsonSerializationException>(() => json.ConvertFromJson<decimal>());
+            Assert.False(json.TryConvertFromJson(out object obj));
         }
 
         [Fact]
-        public void ConvertFromJsonWorksForObjectType()
+        public void TryConvertFromJsonReturnsFalseForValueTypeAndInvalidJson()
         {
             // arrange
-            string json = "hello";
+            string json = "";
+
+            // act & assert
+            Assert.False(json.TryConvertFromJson(out decimal value));
+        }
+
+        [Fact]
+        public void TryConvertFromJsonWorksForObjectType()
+        {
+            // arrange
+            var fixture = new Fixture();
+            var originalValue = fixture.Create<string>();
+            var json = originalValue.ToJson();
 
             // act
-            var str = json.ConvertFromJson<string>();
+            var success = json.TryConvertFromJson(out string value);
 
             // assert
-            Assert.Equal("hello", str);
+            Assert.True(success);
+            Assert.Equal(originalValue, value);
+        }
+
+        [Fact]
+        public void TryConvertFromJsonWorksForValueType()
+        {
+            // arrange
+            var fixture = new Fixture();
+            var originalValue = fixture.Create<int>();
+            var json = originalValue.ToJson();
+
+            // act
+            var success = json.TryConvertFromJson(out int value);
+
+            // assert
+            Assert.True(success);
+            Assert.Equal(originalValue, value);
         }
     }
 }

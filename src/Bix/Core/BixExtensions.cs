@@ -29,9 +29,9 @@ namespace Bix.Core
         /// Attempts to serialize an object to JSON
         /// </summary>
         /// <param name="source">Object to serialized</param>
-        /// <param name="jsonSerializerSettings">Optional serialier settings</param>
+        /// <param name="jsonSerializerSettings">Optional serializer settings</param>
         /// <returns>Serialized object</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> is null</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> is <c>null</c></exception>
         public static string ToJson(this object source, JsonSerializerSettings jsonSerializerSettings = null)
         {
             if (source == null) { throw new ArgumentNullException(nameof(source)); }
@@ -39,6 +39,14 @@ namespace Bix.Core
             return JsonConvert.SerializeObject(source, jsonSerializerSettings);
         }
 
+        /// <summary>
+        /// Deserialize an object from JSON
+        /// </summary>
+        /// <typeparam name="T">Type of serialized object</typeparam>
+        /// <param name="source">JSON to deserialize</param>
+        /// <param name="jsonSerializerSettings">Optional serializer settings</param>
+        /// <returns>Serialized object or <c>null</c> if the serialized object is invalid</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> is <c>null</c></exception>
         public static T ConvertFromJson<T>(this string source, JsonSerializerSettings jsonSerializerSettings = null)
         {
             if (source == null) { throw new ArgumentNullException(nameof(source)); }
@@ -46,33 +54,24 @@ namespace Bix.Core
             return JsonConvert.DeserializeObject<T>(source, jsonSerializerSettings);
         }
 
+        /// <summary>
+        /// Attempt to deserialize an object from JSON
+        /// </summary>
+        /// <typeparam name="T">Type of serialized object</typeparam>
+        /// <param name="source">JSON to deserialize</param>
+        /// <param name="object">To be populated with desieralized object</param>
+        /// <param name="jsonSerializerSettings">Optional serializer settings</param>
+        /// <returns><c>true</c> if deserialization is successful, else <c>false</c></returns>
         public static bool TryConvertFromJson<T>(this string source, out T @object, JsonSerializerSettings jsonSerializerSettings = null)
-            where T : class
         {
             try { @object = source.ConvertFromJson<T>(jsonSerializerSettings); }
-            catch { @object = null; }
+            catch
+            {
+                @object = default(T);
+                return false;
+            }
 
             return @object != null;
-        }
-
-        public static string Base64Encode(this object source, JsonSerializerSettings jsonSerializerSettings = null)
-        {
-            return source.ToJson(jsonSerializerSettings).Base64Encode();
-        }
-
-        public static string Base64Encode(this string source)
-        {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(source));
-        }
-
-        public static T Base64Decode<T>(this string source, JsonSerializerSettings jsonSerializerSettings = null)
-        {
-            return Encoding.UTF8.GetString(Convert.FromBase64String(source)).ConvertFromJson<T>(jsonSerializerSettings);
-        }
-
-        public static string Base64Decode(this string source)
-        {
-            return Encoding.UTF8.GetString(Convert.FromBase64String(source));
         }
     }
 }
