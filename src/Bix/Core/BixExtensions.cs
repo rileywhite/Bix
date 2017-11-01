@@ -20,8 +20,18 @@ using System.Text;
 
 namespace Bix.Core
 {
+    /// <summary>
+    /// Extensions methods that are useful through all of Bix
+    /// </summary>
     public static class BixExtensions
     {
+        /// <summary>
+        /// Attempts to serialize an object to JSON
+        /// </summary>
+        /// <param name="source">Object to serialized</param>
+        /// <param name="jsonSerializerSettings">Optional serialier settings</param>
+        /// <returns>Serialized object</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> is null</exception>
         public static string ToJson(this object source, JsonSerializerSettings jsonSerializerSettings = null)
         {
             if (source == null) { throw new ArgumentNullException(nameof(source)); }
