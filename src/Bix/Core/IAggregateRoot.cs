@@ -18,5 +18,17 @@ using System;
 
 namespace Bix.Core
 {
+    /// <summary>
+    /// Marks a type as the root of an aggregate, or as the item that can be saved to
+    /// or retreived from a <see cref="IRepository{TIdentity, TItem}"/>.
+    /// </summary>
+    /// <remarks>
+    /// Aggregates are alway retrieved/saved as a unit by way of the repository of the root of
+    /// the aggregate.
+    /// 
+    /// See https://martinfowler.com/bliki/DDD_Aggregate.html.
+    /// 
+    /// This interface does not add any explicit functional contract.
+    /// </remarks>
     public interface IAggregateRoot { }
 }

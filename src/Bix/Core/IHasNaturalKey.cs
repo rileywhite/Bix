@@ -18,8 +18,18 @@ using System;
 
 namespace Bix.Core
 {
+    /// <summary>
+    /// Allows a type to declare a natural key
+    /// </summary>
+    /// <typeparam name="TNaturalKey">Type of the natural key</typeparam>
+    /// <remarks>
+    /// A typical use case for this is DDD value objects (https://martinfowler.com/bliki/ValueObject.html)
+    /// </remarks>
     public interface IHasNaturalKey<TNaturalKey>
     {
+        /// <summary>
+        /// Gets the natural key of an instance
+        /// </summary>
         TNaturalKey NaturalKey { get; }
     }
 }

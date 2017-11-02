@@ -15,22 +15,33 @@
 /***************************************************************************/
 
 using System;
+using System.Collections.Generic;
 
 namespace Bix.Core
 {
     /// <summary>
-    /// A simple cache interface
+    /// Implements a <see cref="ICache"/> that stores all values in the memory of the current process
     /// </summary>
-    public interface ICache
+    public class DictionaryCache : ICache
     {
         /// <summary>
-        /// Sets a value cached value
+        /// Creates a new <see cref="DictionaryCache"/> using a backing store
+        /// of type <see cref="Dictionary{string, object}"/>
         /// </summary>
-        /// <typeparam name="T">Type of the value to cache</typeparam>
-        /// <param name="key">Cache key for later retrieval</param>
-        /// <param name="value">Value to save in the cache</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/> is <c>null</c></exception>
-        void Set<T>(string key, T value);
+        public DictionaryCache() : this(new Dictionary<string, object>()) { }
+
+        /// <summary>
+        /// Creates a new <see cref="DictionaryCache"/> with the given backing store
+        /// </summary>
+        /// <param name="backingStore">Dictionary in which to store the cached values</param>
+        public DictionaryCache(IDictionary<string, object> backingStore)
+        {
+            if (backingStore == null) { throw new ArgumentNullException(nameof(backingStore)); }
+
+            this.Items = backingStore;
+        }
+
+        private IDictionary<string, object> Items { get; }
 
         /// <summary>
         /// Gets a value from the cache
@@ -42,7 +53,11 @@ namespace Bix.Core
         /// Any exception caused by a failure to cast the existing value will be passed up the stack.
         /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/> is <c>null</c></exception>
-        T Get<T>(string key);
+        public T Get<T>(string key)
+        {
+            if (key == null) { throw new ArgumentNullException(nameof(key)); }
+            return (T)this.Items[key];
+        }
 
         /// <summary>
         /// Tries to get a value from the cache
@@ -52,7 +67,18 @@ namespace Bix.Core
         /// <param name="value">Will be populated with retrieved value</param>
         /// <returns><c>true</c> if the retrieval was successful, else <c>false</c></returns>
         /// <remarks>A failure to cast will cause a return value of <c>false</c></remarks>
-        bool TryGet<T>(string key, out T value);
+        public bool TryGet<T>(string key, out T value)
+        {
+            if (key == null) { throw new ArgumentNullException(nameof(key)); }
+            if (!this.Items.TryGetValue(key, out object valueAsObject))
+            {
+                value = default(T);
+                return false;
+            }
+
+            value = (T)valueAsObject;
+            return true;
+        }
 
         /// <summary>
         /// Gets a value from the cache
@@ -60,7 +86,11 @@ namespace Bix.Core
         /// <param name="key">Key of the value to retrieve</param>
         /// <returns>Retreived value</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/> is <c>null</c></exception>
-        object Get(string key);
+        public object Get(string key)
+        {
+            if (key == null) { throw new ArgumentNullException(nameof(key)); }
+            return this.Items[key];
+        }
 
         /// <summary>
         /// Tries to get a value from the cache
@@ -68,6 +98,23 @@ namespace Bix.Core
         /// <param name="key">Key of the value to retrieve</param>
         /// <param name="value">Will be populated with retrieved value</param>
         /// <returns><c>true</c> if the retrieval was successful, else <c>false</c></returns>
-        bool TryGet(string key, out object value);
+        public bool TryGet(string key, out object value)
+        {
+            if (key == null) { throw new ArgumentNullException(nameof(key)); }
+            return this.Items.TryGetValue(key, out value);
+        }
+
+        /// <summary>
+        /// Sets a value cached value
+        /// </summary>
+        /// <typeparam name="T">Type of the value to cache</typeparam>
+        /// <param name="key">Cache key for later retrieval</param>
+        /// <param name="value">Value to save in the cache</param>
+        /// <exception cref="ArgumentNullException">Thrown if key is <c>null</c></exception>
+        public void Set<T>(string key, T value)
+        {
+            if (key == null) { throw new ArgumentNullException(nameof(key)); }
+            this.Items[key] = value;
+        }
     }
 }

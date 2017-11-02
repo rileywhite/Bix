@@ -14,19 +14,17 @@
 // limitations under the License.
 /***************************************************************************/
 
+using AutoFixture;
 using System;
+using Xunit;
 
 namespace Bix.Core
 {
-    /// <summary>
-    /// Allows a type to declare a unique identity
-    /// </summary>
-    /// <typeparam name="TIdentity">Type of the identity</typeparam>
-    public interface IHasIdentity<TIdentity>
+    public class InMemoryCacheTest
     {
-        /// <summary>
-        /// Gets the unique identity of an instance
-        /// </summary>
-        TIdentity Identity { get; }
+        public void SetAddsToTheInnerDictionary()
+        {
+
+        }
     }
 }
