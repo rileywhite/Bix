@@ -25,20 +25,12 @@ namespace Bix.Core
     public class DictionaryCache : ICache
     {
         /// <summary>
-        /// Creates a new <see cref="DictionaryCache"/> using a backing store
-        /// of type <see cref="Dictionary{string, object}"/>
-        /// </summary>
-        public DictionaryCache() : this(new Dictionary<string, object>()) { }
-
-        /// <summary>
         /// Creates a new <see cref="DictionaryCache"/> with the given backing store
         /// </summary>
         /// <param name="backingStore">Dictionary in which to store the cached values</param>
         public DictionaryCache(IDictionary<string, object> backingStore)
         {
-            if (backingStore == null) { throw new ArgumentNullException(nameof(backingStore)); }
-
-            this.Items = backingStore;
+            this.Items = backingStore ?? throw new ArgumentNullException(nameof(backingStore));
         }
 
         private IDictionary<string, object> Items { get; }
