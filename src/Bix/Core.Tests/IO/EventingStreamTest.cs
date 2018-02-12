@@ -99,5 +99,44 @@ namespace Bix.Core.IO
             Assert.Equal(827, readTimeout);
             Assert.Equal(923, writeTimeout);
         }
+
+        [Fact]
+        public void BeginWriteCallsThroughToWriteAsync()
+        {
+            // arrange
+            var buffer = new byte[3];
+            var asyncCallback = Mock.Of<AsyncCallback>();
+            var m = new Mock<EventingStream>(Stream.Null) { CallBase = true };
+            m.Setup(es => es.WriteAsync(buffer, 234, 112, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask).Verifiable();
+            var eventingStream = m.Object;
+
+            // act
+            var result = eventingStream.BeginWrite(buffer, 234, 112, asyncCallback, null);
+            eventingStream.EndWrite(result);
+
+            // assert
+            m.Verify();
+            Assert.True(result.IsCompleted);
+        }
+
+        [Fact]
+        public void BeginReadCallsThroughToReadAsync()
+        {
+            // arrange
+            var buffer = new byte[3];
+            var asyncCallback = Mock.Of<AsyncCallback>();
+            var m = new Mock<EventingStream>(Stream.Null) { CallBase = true };
+            m.Setup(es => es.ReadAsync(buffer, 4848, 554, It.IsAny<CancellationToken>())).Returns(Task.FromResult(2622)).Verifiable();
+            var eventingStream = m.Object;
+
+            // act
+            var result = eventingStream.BeginRead(buffer, 4848, 554, asyncCallback, null);
+            var count = eventingStream.EndRead(result);
+
+            // assert
+            m.Verify();
+            Assert.True(result.IsCompleted);
+            Assert.Equal(2622, count);
+        }
     }
 }
