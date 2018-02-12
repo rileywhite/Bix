@@ -18,7 +18,6 @@ using Autofac.Extras.Moq;
 using AutoFixture;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Xunit;
 
 namespace Bix.Core

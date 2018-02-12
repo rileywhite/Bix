@@ -16,7 +16,6 @@
 
 using Newtonsoft.Json;
 using System;
-using System.Text;
 
 namespace Bix.Core
 {
