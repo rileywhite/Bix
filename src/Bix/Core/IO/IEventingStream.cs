@@ -50,17 +50,17 @@ namespace Bix.Core.IO
 
     public class DataWriteCompletedEventArgs : EventArgs
     {
-        public DataWriteCompletedEventArgs(long positionBeforeRead, long positionAfterRead, byte[] buffer, int offset, int count)
+        public DataWriteCompletedEventArgs(long positionBeforeWrite, long positionAfterWrite, byte[] buffer, int offset, int count)
         {
-            this.PositionBeforeRead = positionBeforeRead;
-            this.PositionAfterRead = positionAfterRead;
+            this.PositionBeforeWrite = positionBeforeWrite;
+            this.PositionAfterWrite = positionAfterWrite;
             this.Buffer = buffer;
             this.Offset = offset;
             this.Count = count;
         }
 
-        public long PositionBeforeRead { get; }
-        public long PositionAfterRead { get; }
+        public long PositionBeforeWrite { get; }
+        public long PositionAfterWrite { get; }
         public byte[] Buffer { get; }
         public int Offset { get; }
         public int Count { get; }

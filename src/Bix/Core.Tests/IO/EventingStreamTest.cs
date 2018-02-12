@@ -138,5 +138,59 @@ namespace Bix.Core.IO
             Assert.True(result.IsCompleted);
             Assert.Equal(2622, count);
         }
+
+        [Fact]
+        public void WriteRaisesDataWriteCompleted()
+        {
+            // arrange
+            var buffer = new byte[7];
+            var m = new Mock<Stream>();
+            m.SetupSequence(s => s.Position).Returns(3374893).Returns(7237278);
+            m.Setup(s => s.Write(buffer, 938, 3884)).Verifiable();
+            DataWriteCompletedEventArgs args = null;
+            var eventingStream = new EventingStream(m.Object);
+            eventingStream.DataWriteCompleted += (object sender, DataWriteCompletedEventArgs dwce) => args = dwce;
+
+            // act
+            eventingStream.Write(buffer, 938, 3884);
+
+            // assert
+            Assert.NotNull(args);
+            Assert.Same(buffer, args.Buffer);
+            Assert.Equal(938, args.Offset);
+            Assert.Equal(3884, args.Count);
+            Assert.Equal(3374893, args.PositionBeforeWrite);
+            Assert.Equal(7237278, args.PositionAfterWrite);
+        }
+
+        [Fact]
+        public void ReadRaisesDataReadCompleted()
+        {
+            // arrange
+            var buffer = new byte[0];
+            var m = new Mock<Stream>();
+            m.SetupSequence(s => s.Position).Returns(846).Returns(7);
+            m.Setup(s => s.Read(buffer, 88, 88483)).Returns(48).Verifiable();
+            DataReadCompletedEventArgs args = null;
+            var eventingStream = new EventingStream(m.Object);
+            eventingStream.DataReadCompleted += (object sender, DataReadCompletedEventArgs drce) => args = drce;
+
+            // act
+            eventingStream.Write(buffer, 938, 3884);
+
+            // assert
+            Assert.NotNull(args);
+            Assert.Same(buffer, args.Buffer);
+            Assert.Equal(88, args.Offset);
+            Assert.Equal(88483, args.MaxCount);
+            Assert.Equal(48, args.ActualCount);
+            Assert.Equal(846, args.PositionBeforeRead);
+            Assert.Equal(7, args.PositionAfterRead);
+        }
+
+        private void EventingStream_DataWriteCompleted(object sender, DataWriteCompletedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
