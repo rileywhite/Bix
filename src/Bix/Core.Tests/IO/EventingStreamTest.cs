@@ -14,7 +14,6 @@
 // limitations under the License.
 /***************************************************************************/
 
-using Autofac.Extras.Moq;
 using Moq;
 using System;
 using System.IO;

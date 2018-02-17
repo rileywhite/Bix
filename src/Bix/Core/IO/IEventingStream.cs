@@ -23,7 +23,7 @@ namespace Bix.Core.IO
     {
         event EventHandler<DataReadCompletedEventArgs> DataReadCompleted;
         event EventHandler<DataWriteCompletedEventArgs> DataWriteCompleted;
-        TStream InnerStream { get; }
+        TStream AsStream { get; }
     }
 
     public interface IEventingStream : IEventingStream<Stream> { }

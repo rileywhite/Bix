@@ -31,31 +31,9 @@ namespace Bix.Core.IO
         public ForwardReadingSubstream(IEventingStream baseStream, long startAt = 0, long? maxLength = default(long?))
         {
             Contract.Requires(baseStream != null);
-            Contract.Requires(baseStream.InnerStream.CanRead);
+            Contract.Requires(baseStream.AsStream.CanRead);
             Contract.Ensures(this.MappedStream != null);
-            Contract.Ensures(this.MappedStream.InnerStream.CanRead);
-            this.MappedStream = baseStream;
-            this.StartAt = startAt;
-            this.MaxLength = maxLength;
-
-            baseStream.DataReadCompleted += this.MappedStream_DataReadCompleted;
-        }
-
-        protected ForwardReadingSubstream(IEventingStream baseStream, int maxLength) : this(baseStream, 0, maxLength)
-        {
-            Contract.Requires(baseStream != null);
-            Contract.Requires(baseStream.InnerStream.CanRead);
-            Contract.Ensures(this.MappedStream != null);
-            Contract.Ensures(this.MappedStream.InnerStream.CanRead);
-        }
-
-        protected ForwardReadingSubstream(IEventingStream baseStream, long startAt, int maxLength)
-            : base(maxLength)
-        {
-            Contract.Requires(baseStream != null);
-            Contract.Requires(baseStream.InnerStream.CanRead);
-            Contract.Ensures(this.MappedStream != null);
-            Contract.Ensures(this.MappedStream.InnerStream.CanRead);
+            Contract.Ensures(this.MappedStream.AsStream.CanRead);
             this.MappedStream = baseStream;
             this.StartAt = startAt;
             this.MaxLength = maxLength;
@@ -73,7 +51,7 @@ namespace Bix.Core.IO
 
         #endregion
 
-        Stream IEventingStream<Stream>.InnerStream => (Stream)this.MappedStream;
+        Stream IEventingStream<Stream>.AsStream => (Stream)this.MappedStream;
         public IEventingStream MappedStream { get; }
         public long StartAt { get; }
         public long? MaxLength { get; }
@@ -222,8 +200,8 @@ namespace Bix.Core.IO
         {
             get
             {
-                var potentialLength = this.MappedStream.InnerStream.Length - this.StartAt;
-                return this.MaxLength.HasValue ? Math.Min(this.MaxLength.Value, potentialLength) : potentialLength;
+                var potentialLength = this.MappedStream.AsStream.Length - this.StartAt;
+                return Math.Max(0, this.MaxLength.HasValue ? Math.Min(this.MaxLength.Value, potentialLength) : potentialLength);
             }
         }
 
@@ -233,19 +211,22 @@ namespace Bix.Core.IO
             set => base.Position = value;
         }
 
-        private long BytesInBuffer => this.WritePosition - this.ReadPosition;
+        protected virtual long BytesInBuffer => this.WritePosition - this.ReadPosition;
 
         public override long Position
         {
             get
             {
-                var positionOffsetByStart = Math.Max(this.MappedStream.InnerStream.Position - this.StartAt - this.BytesInBuffer, 0L);
-                if (!this.MaxLength.HasValue) { return positionOffsetByStart; }
+                var unmappedPosition = this.MappedStream.AsStream.Position;
+                var bytesInBuffer = this.BytesInBuffer;
+                var positionOffsetByStartAndBuffer = Math.Max(unmappedPosition - this.StartAt - bytesInBuffer, 0L);
+                if (!this.MaxLength.HasValue) { return positionOffsetByStartAndBuffer; }
 
-                var overshotOffset = Math.Max(this.MappedStream.InnerStream.Position - this.MaxLength.Value, 0);
-                return positionOffsetByStart - overshotOffset;
+                var overrun = Math.Max(0, positionOffsetByStartAndBuffer - this.MaxLength.Value + bytesInBuffer);
+
+                return Math.Min(positionOffsetByStartAndBuffer - overrun, this.MaxLength.Value);
             }
-            set => this.MappedStream.InnerStream.Position = this.StartAt + value;
+            set => throw new NotSupportedException();
         }
 
         #endregion
@@ -253,7 +234,11 @@ namespace Bix.Core.IO
         #region Unsupported
 
         public override bool CanSeek => false;
-        public event EventHandler<DataWriteCompletedEventArgs> DataWriteCompleted;
+        public event EventHandler<DataWriteCompletedEventArgs> DataWriteCompleted
+        {
+            add { throw new NotSupportedException(); }
+            remove { throw new NotSupportedException(); }
+        }
         public override int ReadByte() => throw new NotSupportedException();
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
         public override void SetLength(long value) => throw new NotSupportedException();
