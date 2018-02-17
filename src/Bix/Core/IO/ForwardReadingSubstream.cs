@@ -60,7 +60,7 @@ namespace Bix.Core.IO
 
         private AsyncManualResetEvent ManualResetEvent { get; } = new AsyncManualResetEvent(false);
         private AsyncMonitor ReadWriteMonitor { get; } = new AsyncMonitor();
-        private long WritePosition { get; set; }
+        protected virtual long WritePosition { get; set; }
 
         private void MappedStream_DataReadCompleted(object sender, DataReadCompletedEventArgs e)
         {
@@ -105,7 +105,7 @@ namespace Bix.Core.IO
         public override bool CanRead => true;
         private bool IsReading { get; set; }
         public event EventHandler<DataReadCompletedEventArgs> DataReadCompleted;
-        private long ReadPosition { get; set; }
+        protected virtual long ReadPosition { get; set; }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -211,7 +211,7 @@ namespace Bix.Core.IO
             set => base.Position = value;
         }
 
-        protected virtual long BytesInBuffer => this.WritePosition - this.ReadPosition;
+        public virtual long BytesInBuffer => Math.Max(0, this.WritePosition - this.ReadPosition);
 
         public override long Position
         {

@@ -81,6 +81,28 @@ namespace Bix.Core.IO
         }
 
         [Theory]
+        [InlineData(0, 0, 0)]
+        [InlineData(15, 15, 0)]
+        [InlineData(0, 100, 100)]
+        [InlineData(35, 60, 25)]
+        [InlineData(100, 0, 0)]
+        public void BytesInBufferIsCalculatedCorrectly(long innerReadPosition, long innerWritePosition, long expectedBytesInBuffer)
+        {
+            // arrange
+            var substreamMock = new Mock<ForwardReadingSubstream>(new object[] { Mock.Of<IEventingStream>(), 0, null }) { CallBase = true };
+            substreamMock.Protected().Setup<long>("ReadPosition").Returns(innerReadPosition);
+            substreamMock.Protected().Setup<long>("WritePosition").Returns(innerWritePosition);
+            var substream = substreamMock.Object;
+
+
+            // act
+            var bytesInBuffer = substream.BytesInBuffer;
+
+            // assert
+            Assert.Equal(expectedBytesInBuffer, bytesInBuffer);
+        }
+
+        [Theory]
         [InlineData(0, null, 0, 0)]
         [InlineData(0, null, 10, 10)]
         [InlineData(1, null, 10, 9)]
@@ -162,7 +184,7 @@ namespace Bix.Core.IO
             var interfaceMock = m.As<IEventingStream>();
             interfaceMock.Setup(s => s.AsStream).Returns(m.Object);
             var substreamMock = new Mock<ForwardReadingSubstream>(new object[] { interfaceMock.Object, startAt, maxLength }) { CallBase = true };
-            substreamMock.Protected().Setup<long>("BytesInBuffer").Returns(bytesInBuffer);
+            substreamMock.Setup(s => s.BytesInBuffer).Returns(bytesInBuffer);
             var substream = substreamMock.Object;
 
             // act
