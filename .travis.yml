@@ -6,3 +6,6 @@ script:
  - dotnet build src/Bix.sln
  - cd src/Bix/Core.Tests
  - dotnet xunit -configuration Release -failskips -xml ../../../test-results/Bix.Core.xml
+ - cd ../IO.Tests
+ - dotnet xunit -configuration Release -failskips -xml ../../../test-results/Bix.IO.xml
+ 

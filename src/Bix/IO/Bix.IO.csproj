@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.0.0-pre-05" />
+    <PackageReference Include="Nito.AsyncEx.Interop.WaitHandles" Version="5.0.0-pre-05" />
+  </ItemGroup>
+
+</Project>

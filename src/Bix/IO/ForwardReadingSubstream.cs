@@ -22,7 +22,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Bix.Core.IO
+namespace Bix.IO
 {
     public class ForwardReadingSubstream : MemoryStream, IEventingStream
     {

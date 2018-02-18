@@ -17,7 +17,7 @@
 using System;
 using System.IO;
 
-namespace Bix.Core.IO
+namespace Bix.IO
 {
     public interface IEventingStream<out TStream> where TStream : Stream
     {

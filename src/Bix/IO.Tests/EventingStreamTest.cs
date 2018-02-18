@@ -21,7 +21,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Bix.Core.IO
+namespace Bix.IO
 {
     public class EventingStreamTest
     {

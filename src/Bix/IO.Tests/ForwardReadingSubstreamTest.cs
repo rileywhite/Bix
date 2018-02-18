@@ -21,7 +21,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Bix.Core.IO
+namespace Bix.IO
 {
     public class ForwardReadingSubstreamTest
     {
@@ -270,6 +270,26 @@ namespace Bix.Core.IO
             Assert.Equal(expectedOffset, offset);
             Assert.Equal(expectedCount, count);
         }
+
+        //[Fact]
+        //public void InnerStreamReadsAreAddedToBuffer()
+        //{
+        //    // arrange
+        //    var m = new Mock<Stream>();
+        //    m.Setup(s => s.Position).Returns(innerPosition);
+        //    var interfaceMock = m.As<IEventingStream>();
+        //    interfaceMock.Setup(s => s.AsStream).Returns(m.Object);
+        //    var substreamMock = new Mock<ForwardReadingSubstream>(new object[] { interfaceMock.Object, startAt, maxLength }) { CallBase = true };
+        //    substreamMock.Setup(s => s.BytesInBuffer).Returns(bytesInBuffer);
+        //    var substream = substreamMock.Object;
+
+        //    // act
+        //    var position = substream.Position;
+
+
+        //    // assert
+        //    Assert.Equal(expectedPosition, position);
+        //}
 
         //[Fact]
         //public void ReadRaisesDataReadCompleted()
