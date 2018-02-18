@@ -195,6 +195,82 @@ namespace Bix.Core.IO
             Assert.Equal(expectedPosition, position);
         }
 
+        [Theory]
+        // empty read
+        [InlineData(0, null, 0, 0, 0, false, -1, -1)]
+        [InlineData(0, null, 100, 100, 0, false, -1, -1)]
+        [InlineData(100, null, 0, 0, 0, false, -1, -1)]
+        [InlineData(100, 75, 0, 0, 0, false, -1, -1)]
+
+        // data is left of target area without max length
+        [InlineData(100, null, 0, 50, 50, false, -1, -1)]
+        [InlineData(100, null, 0, 99, 99, false, -1, -1)]
+        [InlineData(100, null, 0, 100, 100, false, -1, -1)]
+
+        // data is left of target area with max length
+        [InlineData(100, 75, 0, 50, 50, false, -1, -1)]
+        [InlineData(100, 75, 0, 99, 99, false, -1, -1)]
+        [InlineData(100, 75, 0, 100, 100, false, -1, -1)]
+
+        // data is right of target area
+        [InlineData(100, 75, 175, 250, 75, false, -1, -1)]
+        [InlineData(100, 75, 176, 177, 1, false, -1, -1)]
+        [InlineData(0, 75, 100, 150, 50, false, -1, -1)]
+
+        // data overlaps left border of target area without max length
+        [InlineData(100, null, 0, 101, 101, true, 100, 1)]
+        [InlineData(100, null, 10, 101, 91, true, 90, 1)]
+        [InlineData(100, null, 75, 127, 52, true, 25, 27)]
+        [InlineData(100, null, 99, 127, 28, true, 1, 27)]
+
+        // data overlaps left border of target area with max length
+        [InlineData(100, 50, 0, 101, 101, true, 100, 1)]
+        [InlineData(100, 50, 10, 101, 91, true, 90, 1)]
+        [InlineData(100, 50, 75, 127, 52, true, 25, 27)]
+        [InlineData(100, 50, 99, 127, 28, true, 1, 27)]
+
+        // data overlaps right border of target area
+        [InlineData(100, 75, 174, 176, 2, true, 0, 1)]
+        [InlineData(100, 75, 124, 352, 228, true, 0, 51)]
+        [InlineData(100, 75, 100, 352, 252, true, 0, 75)]
+
+        // data fully contains target area
+        [InlineData(100, 75, 100, 175, 75, true, 0, 75)]
+        [InlineData(100, 75, 50, 352, 302, true, 50, 75)]
+
+        // data is fully contained by target area without max length
+        [InlineData(0, null, 0, 100, 100, true, 0, 100)]
+        [InlineData(100, null, 50, 150, 100, true, 50, 50)]
+        [InlineData(100, null, 100, 150, 50, true, 0, 50)]
+        [InlineData(100, null, 110, 160, 50, true, 0, 50)]
+
+        // data is fully contained by target area with max length
+        [InlineData(100, 75, 100, 150, 50, true, 0, 50)]
+        [InlineData(100, 75, 110, 160, 50, true, 0, 50)]
+        public void WriteOffsetAndCountAreCorrectlyCalculated(
+            long startAt,
+            long? maxLength,
+            long positionBeforeRead,
+            long positionAfterRead,
+            int actualReadCount,
+            bool expectedSuccess,
+            int expectedOffset,
+            int expectedCount)
+        {
+            // arrange
+            var e = new DataReadCompletedEventArgs(positionBeforeRead, positionAfterRead, new byte[0], 8734897, 892378493, actualReadCount);
+
+
+            // act
+            var success = e.TryGetWriteOffsetAndCountForFowardReadingSubstream(startAt, maxLength, out var offset, out var count);
+
+
+            // assert
+            Assert.Equal(expectedSuccess, success);
+            Assert.Equal(expectedOffset, offset);
+            Assert.Equal(expectedCount, count);
+        }
+
         //[Fact]
         //public void ReadRaisesDataReadCompleted()
         //{

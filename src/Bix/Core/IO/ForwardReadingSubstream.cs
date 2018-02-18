@@ -64,19 +64,7 @@ namespace Bix.Core.IO
 
         private void MappedStream_DataReadCompleted(object sender, DataReadCompletedEventArgs e)
         {
-            int writeOffset, writeCount;
-            if (this.MaxLength.HasValue)
-            {
-                if (e.PositionAfterRead < this.StartAt || e.PositionBeforeRead > this.StartAt + this.MaxLength.Value) { return; }
-                writeOffset = Math.Max(0, (int)(this.StartAt - e.PositionBeforeRead));
-                writeCount = Math.Min(e.ActualCount, (int)(this.StartAt + this.MaxLength.Value - e.PositionBeforeRead - writeOffset));
-            }
-            else
-            {
-                if (e.PositionAfterRead < this.StartAt) { return; }
-                writeOffset = Math.Max(0, (int)(this.StartAt - e.PositionBeforeRead));
-                writeCount = Math.Min(e.ActualCount, e.ActualCount - writeOffset);
-            }
+            if (!e.TryGetWriteOffsetAndCountForFowardReadingSubstream(this.StartAt, this.MaxLength, out var writeOffset, out var writeCount)) { return; }
 
             using (this.ReadWriteMonitor.Enter())
             {
@@ -245,5 +233,59 @@ namespace Bix.Core.IO
         public override void WriteByte(byte value) => throw new NotSupportedException();
 
         #endregion
+    }
+
+    public static class ForwardReadingSubstreamExtensions
+    {
+        public static bool TryGetWriteOffsetAndCountForFowardReadingSubstream(
+            this DataReadCompletedEventArgs source,
+            long startAt,
+            long? maxLength,
+            out int writeOffset,
+            out int writeCount)
+        {
+            writeOffset = Math.Max(0, (int)(startAt - source.PositionBeforeRead));
+
+            switch (maxLength)
+            {
+                // data is fully left or right of the target part of the stream
+                case null when source.PositionAfterRead < startAt:
+                case long ml when source.PositionAfterRead < startAt || source.PositionBeforeRead > startAt + ml:
+                    writeCount = -1;
+                    break;
+
+                // data overlaps left border of target area only
+                case long ml when source.PositionBeforeRead < startAt && source.PositionAfterRead < (startAt + ml):
+                case null when source.PositionBeforeRead < startAt:
+                    writeCount = source.ActualCount - writeOffset;
+                    break;
+
+                // data overlaps right border of target area only
+                case long ml when source.PositionBeforeRead >= startAt && source.PositionAfterRead >= (startAt + ml):
+                    writeCount = (int)(startAt + ml - source.PositionBeforeRead);
+                    break;
+
+                // data is completely contained within target area
+                case null when source.PositionBeforeRead >= startAt:
+                case long ml when source.PositionBeforeRead >= startAt && source.PositionAfterRead < (startAt + ml):
+                    writeCount = source.ActualCount;
+                    break;
+
+                // data completely contains target area
+                default:
+                    Contract.Assert(
+                        maxLength.HasValue &&
+                        source.PositionBeforeRead < startAt &&
+                        source.PositionAfterRead >= (startAt + maxLength.Value));
+                    writeCount = (int)maxLength.Value;
+                    break;
+            }
+
+            if (writeCount > 0 && writeOffset >= 0) { return true; }
+
+            writeCount = -1;
+            writeOffset = -1;
+            return false;
+        }
     }
 }
