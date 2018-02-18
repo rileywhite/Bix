@@ -335,14 +335,42 @@ namespace Bix.IO
 
             // act
             im.Raise(s => s.DataReadCompleted += null, new DataReadCompletedEventArgs(0, sourceBuffer.Length, sourceBuffer, 0, sourceBuffer.Length, sourceBuffer.Length));
-            for(var i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 substream.Read(targetBuffer, i * 10_000, 10_000);
             }
 
 
             // assert
-            for(int i = 0; i < sourceBuffer.Length; i++)
+            for (int i = 0; i < sourceBuffer.Length; i++)
+            {
+                Assert.Equal(sourceBuffer[i], targetBuffer[i]);
+            }
+        }
+
+        [Fact]
+        public async Task ReadAsyncGetsCorrectData()
+        {
+            // arrange
+            var m = new Mock<Stream>();
+            var im = m.As<IEventingStream>();
+            im.Setup(s => s.AsStream).Returns(m.Object);
+            var substream = new ForwardReadingSubstream(im.Object);
+            var fixture = new Fixture();
+            var sourceBuffer = fixture.CreateMany<byte>(100_000).ToArray();
+            var targetBuffer = new byte[100_000];
+
+
+            // act
+            im.Raise(s => s.DataReadCompleted += null, new DataReadCompletedEventArgs(0, sourceBuffer.Length, sourceBuffer, 0, sourceBuffer.Length, sourceBuffer.Length));
+            for (var i = 0; i < 10; i++)
+            {
+                await substream.ReadAsync(targetBuffer, i * 10_000, 10_000);
+            }
+
+
+            // assert
+            for (int i = 0; i < sourceBuffer.Length; i++)
             {
                 Assert.Equal(sourceBuffer[i], targetBuffer[i]);
             }
