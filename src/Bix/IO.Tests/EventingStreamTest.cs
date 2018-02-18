@@ -196,7 +196,7 @@ namespace Bix.IO
         }
 
         [Fact]
-        public void EmptyReadDoesNotRaiseDataReadCompleted()
+        public void EmptyReadDoesRaiseDataReadCompleted()
         {
             // arrange
             var buffer = new byte[0];
@@ -212,7 +212,8 @@ namespace Bix.IO
 
             // assert
             m.Verify();
-            Assert.Null(args);
+            Assert.NotNull(args);
+            Assert.Equal(0, args.ActualCount);
             Assert.Equal(0, count);
         }
 
@@ -244,7 +245,7 @@ namespace Bix.IO
         }
 
         [Fact]
-        public async Task EmptyReadAsyncDoesNotRaiseDataReadCompleted()
+        public async Task EmptyReadAsyncDoesRaiseDataReadCompleted()
         {
             // arrange
             var buffer = new byte[0];
@@ -260,7 +261,8 @@ namespace Bix.IO
 
             // assert
             m.Verify();
-            Assert.Null(args);
+            Assert.NotNull(args);
+            Assert.Equal(0, args.ActualCount);
             Assert.Equal(0, count);
         }
 

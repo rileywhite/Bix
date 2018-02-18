@@ -46,10 +46,7 @@ namespace Bix.IO
         {
             var initialPosition = this.Position;
             var actualCount = this.InnerStream.Read(buffer, offset, count);
-            if (actualCount > 0)
-            {
-                this.DataReadCompleted?.Invoke(this, new DataReadCompletedEventArgs(initialPosition, this.Position, buffer, offset, count, actualCount));
-            }
+            this.DataReadCompleted?.Invoke(this, new DataReadCompletedEventArgs(initialPosition, this.Position, buffer, offset, count, actualCount));
             return actualCount;
         }
 
@@ -57,10 +54,7 @@ namespace Bix.IO
         {
             var initialPosition = this.Position;
             var actualCount = await this.InnerStream.ReadAsync(buffer, offset, count, cancellationToken);
-            if (actualCount > 0)
-            {
-                this.DataReadCompleted?.Invoke(this, new DataReadCompletedEventArgs(initialPosition, this.Position, buffer, offset, count, actualCount));
-            }
+            this.DataReadCompleted?.Invoke(this, new DataReadCompletedEventArgs(initialPosition, this.Position, buffer, offset, count, actualCount));
             return actualCount;
         }
 

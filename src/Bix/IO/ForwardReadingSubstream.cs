@@ -62,8 +62,17 @@ namespace Bix.IO
         private AsyncMonitor ReadWriteMonitor { get; } = new AsyncMonitor();
         protected virtual long WritePosition { get; set; }
 
+        private bool HasMappedStreamSignaledEmptyRead { get; set; }
+
         private void MappedStream_DataReadCompleted(object sender, DataReadCompletedEventArgs e)
         {
+            if (e.ActualCount == 0)
+            {
+                this.HasMappedStreamSignaledEmptyRead = true;
+                this.ManualResetEvent.Set();
+                return;
+            }
+
             if (!e.TryGetWriteOffsetAndCountForFowardReadingSubstream(this.StartAt, this.MaxLength, out var writeOffset, out var writeCount)) { return; }
 
             using (this.ReadWriteMonitor.Enter())
@@ -72,11 +81,12 @@ namespace Bix.IO
                 this.MemoryStreamBufferPosition = this.WritePosition;
 
                 this.IsCurrentlyWritable = true;
-                try { base.Write(e.Buffer, writeOffset, writeCount); }
+                try { base.Write(e.Buffer, e.Offset + writeOffset, writeCount); }
                 finally { this.IsCurrentlyWritable = false; }
 
                 this.WritePosition = this.MemoryStreamBufferPosition;
             }
+
             this.ManualResetEvent.Set();
         }
 
@@ -99,8 +109,11 @@ namespace Bix.IO
         {
             if (this.IsReading) { return base.Read(buffer, offset, count); }
 
-            this.ManualResetEvent.Wait();
-            this.ManualResetEvent.Reset();
+            if (!this.HasMappedStreamSignaledEmptyRead)
+            {
+                this.ManualResetEvent.Wait();
+                this.ManualResetEvent.Reset();
+            }
 
             long originalPosition;
             int actualCount;
@@ -118,11 +131,9 @@ namespace Bix.IO
                 this.ReadPosition = this.MemoryStreamBufferPosition;
                 this.CompressMemory();
             }
-            if (actualCount > 0)
-            {
-                this.DataReadCompleted?.Invoke(this, new DataReadCompletedEventArgs(originalPosition, this.Position, buffer, offset, count, actualCount));
-            }
-            if (base.Length > 0) { this.ManualResetEvent.Set(); }
+            var position = this.Position;
+            this.DataReadCompleted?.Invoke(this, new DataReadCompletedEventArgs(originalPosition, position, buffer, offset, count, actualCount));
+            if (this.BytesInBuffer > 0 || this.HasMappedStreamSignaledEmptyRead || position > this.Length) { this.ManualResetEvent.Set(); }
             return actualCount;
         }
 
@@ -130,8 +141,11 @@ namespace Bix.IO
         {
             if (this.IsReading) { return await base.ReadAsync(buffer, offset, count, cancellationToken); }
 
-            await this.ManualResetEvent.WaitAsync(cancellationToken);
-            this.ManualResetEvent.Reset();
+            if (!this.HasMappedStreamSignaledEmptyRead)
+            {
+                await this.ManualResetEvent.WaitAsync(cancellationToken);
+                this.ManualResetEvent.Reset();
+            }
 
             long originalPosition;
             int actualCount;
@@ -149,20 +163,27 @@ namespace Bix.IO
                 this.ReadPosition = this.MemoryStreamBufferPosition;
                 this.CompressMemory();
             }
-            if (actualCount > 0)
-            {
-                this.DataReadCompleted?.Invoke(this, new DataReadCompletedEventArgs(originalPosition, this.Position, buffer, offset, count, actualCount));
-            }
-            if (base.Length > 0) { this.ManualResetEvent.Set(); }
+            var position = this.Position;
+            this.DataReadCompleted?.Invoke(this, new DataReadCompletedEventArgs(originalPosition, position, buffer, offset, count, actualCount));
+            if (this.BytesInBuffer > 0 || this.HasMappedStreamSignaledEmptyRead || position > this.Length) { this.ManualResetEvent.Set(); }
             return actualCount;
         }
 
         private void CompressMemory()
         {
-            // causes data to be read twice...
+            // this has been problematic...makes full integration test deadlock
 
             //if (this.BytesInBuffer == 0)
             //{
+            //    base.Flush();
+            //    var wasReading = this.IsReading;
+            //    this.IsReading = true;
+            //    try
+            //    {
+            //        this.MemoryStreamBufferPosition = 0;
+            //        base.SetLength(0);
+            //    }
+            //    finally { this.IsReading = wasReading; }
             //    this.ReadPosition = 0;
             //    this.WritePosition = 0;
             //}
@@ -250,7 +271,7 @@ namespace Bix.IO
             {
                 // data is fully left or right of the target part of the stream
                 case null when source.PositionAfterRead < startAt:
-                case long ml when source.PositionAfterRead < startAt || source.PositionBeforeRead > startAt + ml:
+                case long ml when source.PositionAfterRead < startAt || source.PositionBeforeRead >= startAt + ml:
                     writeCount = -1;
                     break;
 

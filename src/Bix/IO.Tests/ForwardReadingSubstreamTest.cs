@@ -14,10 +14,15 @@
 // limitations under the License.
 /***************************************************************************/
 
+using AutoFixture;
 using Moq;
 using Moq.Protected;
+using Nito.AsyncEx;
 using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -271,140 +276,167 @@ namespace Bix.IO
             Assert.Equal(expectedCount, count);
         }
 
-        //[Fact]
-        //public void InnerStreamReadsAreAddedToBuffer()
-        //{
-        //    // arrange
-        //    var m = new Mock<Stream>();
-        //    m.Setup(s => s.Position).Returns(innerPosition);
-        //    var interfaceMock = m.As<IEventingStream>();
-        //    interfaceMock.Setup(s => s.AsStream).Returns(m.Object);
-        //    var substreamMock = new Mock<ForwardReadingSubstream>(new object[] { interfaceMock.Object, startAt, maxLength }) { CallBase = true };
-        //    substreamMock.Setup(s => s.BytesInBuffer).Returns(bytesInBuffer);
-        //    var substream = substreamMock.Object;
+        [Fact]
+        public void InnerStreamReadsAreAddedToBuffer()
+        {
+            // arrange
+            var m = new Mock<Stream>();
+            var im = m.As<IEventingStream>();
+            im.Setup(s => s.AsStream).Returns(m.Object);
+            var substream = new ForwardReadingSubstream(im.Object, 100, 125);
+            var resetEvent = (AsyncManualResetEvent)typeof(ForwardReadingSubstream)
+                .GetProperty("ManualResetEvent", BindingFlags.NonPublic | BindingFlags.Instance)
+                .GetValue(substream);
 
-        //    // act
-        //    var position = substream.Position;
+            var fixture = new Fixture();
+            var innerBuffer = fixture.CreateMany<byte>(1000).ToArray();
+            var initialResetEventIsSet = resetEvent.IsSet;
+            var initialBytesInBuffer = substream.BytesInBuffer;
+
+            // act
+            im.Raise(s => s.DataReadCompleted += null, new DataReadCompletedEventArgs(0, 200, innerBuffer, 0, 1000, 200));
+            var postEvent1ResetEventIsSet = resetEvent.IsSet;
+            var postEvent1BuytesInBuffer = substream.BytesInBuffer;
+
+            im.Raise(s => s.DataReadCompleted += null, new DataReadCompletedEventArgs(200, 400, innerBuffer, 200, 1000, 200));
+            var postEvent2ResetEventIsSet = resetEvent.IsSet;
+            var postEvent2BytesInBuffer = substream.BytesInBuffer;
+
+            var bufferCopy = substream.ToArray();
+
+            // assert
+            Assert.False(initialResetEventIsSet);
+            Assert.Equal(0, initialBytesInBuffer);
+
+            Assert.True(postEvent1ResetEventIsSet);
+            Assert.Equal(100, postEvent1BuytesInBuffer);
+
+            Assert.True(postEvent2ResetEventIsSet);
+            Assert.Equal(125, postEvent2BytesInBuffer);
+
+            for(int i = 0; i < 125; i++)
+            {
+                Assert.Equal(innerBuffer[100 + i], bufferCopy[i]);
+            }
+        }
+
+        [Fact]
+        public void ReadGetsCorrectData()
+        {
+            // arrange
+            var m = new Mock<Stream>();
+            var im = m.As<IEventingStream>();
+            im.Setup(s => s.AsStream).Returns(m.Object);
+            var substream = new ForwardReadingSubstream(im.Object);
+            var fixture = new Fixture();
+            var sourceBuffer = fixture.CreateMany<byte>(100_000).ToArray();
+            var targetBuffer = new byte[100_000];
 
 
-        //    // assert
-        //    Assert.Equal(expectedPosition, position);
-        //}
+            // act
+            im.Raise(s => s.DataReadCompleted += null, new DataReadCompletedEventArgs(0, sourceBuffer.Length, sourceBuffer, 0, sourceBuffer.Length, sourceBuffer.Length));
+            for(var i = 0; i < 10; i++)
+            {
+                substream.Read(targetBuffer, i * 10_000, 10_000);
+            }
 
-        //[Fact]
-        //public void ReadRaisesDataReadCompleted()
-        //{
-        //    // arrange
-        //    var buffer = new byte[0];
-        //    var m = new Mock<Stream>();
-        //    m.SetupSequence(s => s.Position).Returns(846).Returns(7);
-        //    m.Setup(s => s.Read(buffer, 88, 88483)).Returns(48).Verifiable();
-        //    DataReadCompletedEventArgs args = null;
-        //    var eventingStream = new EventingStream(m.Object);
-        //    eventingStream.DataReadCompleted += (object sender, DataReadCompletedEventArgs drce) => args = drce;
 
-        //    // act
-        //    var count = eventingStream.Read(buffer, 88, 88483);
+            // assert
+            for(int i = 0; i < sourceBuffer.Length; i++)
+            {
+                Assert.Equal(sourceBuffer[i], targetBuffer[i]);
+            }
+        }
 
-        //    // assert
-        //    m.Verify();
-        //    Assert.NotNull(args);
-        //    Assert.Equal(48, count);
-        //    Assert.Same(buffer, args.Buffer);
-        //    Assert.Equal(88, args.Offset);
-        //    Assert.Equal(88483, args.MaxCount);
-        //    Assert.Equal(48, args.ActualCount);
-        //    Assert.Equal(846, args.PositionBeforeRead);
-        //    Assert.Equal(7, args.PositionAfterRead);
-        //}
+        [Fact]
+        public async Task MultidepthIntegrationWithEventingStreamWorks()
+        {
+            var expectedResults = new string[]
+            {
+                "012345678",
+                "0123",
+                "01",
+                "0",
+                "1",
+                "23",
+                "2",
+                "3",
+                "4567",
+                "45",
+                "4",
+                "5",
+                "67",
+                "6",
+                "7",
+            };
 
-        //[Fact]
-        //public void EmptyReadDoesNotRaiseDataReadCompleted()
-        //{
-        //    // arrange
-        //    var buffer = new byte[0];
-        //    var m = new Mock<Stream>();
-        //    m.SetupSequence(s => s.Position).Returns(846).Returns(7);
-        //    m.Setup(s => s.Read(buffer, 88, 88483)).Returns(0).Verifiable();
-        //    DataReadCompletedEventArgs args = null;
-        //    var eventingStream = new EventingStream(m.Object);
-        //    eventingStream.DataReadCompleted += (object sender, DataReadCompletedEventArgs drce) => args = drce;
+            using (var memStream = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(memStream, Encoding.ASCII, 50, true))
+                {
+                    writer.Write("012345678");
+                }
 
-        //    // act
-        //    var count = eventingStream.Read(buffer, 88, 88483);
+                memStream.Position = 0;
+                var stream00 = new EventingStream(memStream);
 
-        //    // assert
-        //    m.Verify();
-        //    Assert.Null(args);
-        //    Assert.Equal(0, count);
-        //}
+                using (var stream01 = new ForwardReadingSubstream(stream00, 0, 4))
+                using (var stream02 = new ForwardReadingSubstream(stream01, 0, 2))
+                using (var stream03 = new ForwardReadingSubstream(stream02, 0, 1))
+                using (var stream04 = new ForwardReadingSubstream(stream02, 1))
+                using (var stream05 = new ForwardReadingSubstream(stream01, 2, 2))
+                using (var stream06 = new ForwardReadingSubstream(stream05, 0, 1))
+                using (var stream07 = new ForwardReadingSubstream(stream05, 1))
+                using (var stream08 = new ForwardReadingSubstream(stream00, 4, 4))
+                using (var stream09 = new ForwardReadingSubstream(stream08, 0, 2))
+                using (var stream10 = new ForwardReadingSubstream(stream09, 0, 1))
+                using (var stream11 = new ForwardReadingSubstream(stream09, 1))
+                using (var stream12 = new ForwardReadingSubstream(stream08, 2, 2))
+                using (var stream13 = new ForwardReadingSubstream(stream12, 0, 1))
+                using (var stream14 = new ForwardReadingSubstream(stream12, 1))
+                using (var reader00 = new StreamReader(stream00, Encoding.ASCII, true, 50, true))
+                using (var reader01 = new StreamReader(stream01, Encoding.ASCII, true, 50, true))
+                using (var reader02 = new StreamReader(stream02, Encoding.ASCII, true, 50, true))
+                using (var reader03 = new StreamReader(stream03, Encoding.ASCII, true, 50, true))
+                using (var reader04 = new StreamReader(stream04, Encoding.ASCII, true, 50, true))
+                using (var reader05 = new StreamReader(stream05, Encoding.ASCII, true, 50, true))
+                using (var reader06 = new StreamReader(stream06, Encoding.ASCII, true, 50, true))
+                using (var reader07 = new StreamReader(stream07, Encoding.ASCII, true, 50, true))
+                using (var reader08 = new StreamReader(stream08, Encoding.ASCII, true, 50, true))
+                using (var reader09 = new StreamReader(stream09, Encoding.ASCII, true, 50, true))
+                using (var reader10 = new StreamReader(stream10, Encoding.ASCII, true, 50, true))
+                using (var reader11 = new StreamReader(stream11, Encoding.ASCII, true, 50, true))
+                using (var reader12 = new StreamReader(stream12, Encoding.ASCII, true, 50, true))
+                using (var reader13 = new StreamReader(stream13, Encoding.ASCII, true, 50, true))
+                using (var reader14 = new StreamReader(stream14, Encoding.ASCII, true, 50, true))
+                {
+                    var tasks = new Task<string>[]
+                    {
+                        reader14.ReadToEndAsync(),
+                        reader13.ReadToEndAsync(),
+                        reader12.ReadToEndAsync(),
+                        reader11.ReadToEndAsync(),
+                        reader10.ReadToEndAsync(),
+                        reader09.ReadToEndAsync(),
+                        reader08.ReadToEndAsync(),
+                        reader07.ReadToEndAsync(),
+                        reader06.ReadToEndAsync(),
+                        reader05.ReadToEndAsync(),
+                        reader04.ReadToEndAsync(),
+                        reader03.ReadToEndAsync(),
+                        reader02.ReadToEndAsync(),
+                        reader01.ReadToEndAsync(),
+                        reader00.ReadToEndAsync(),
+                    };
 
-        //[Fact]
-        //public async Task ReadAsyncRaisesDataReadCompleted()
-        //{
-        //    // arrange
-        //    var buffer = new byte[0];
-        //    var m = new Mock<Stream>();
-        //    m.SetupSequence(s => s.Position).Returns(1684).Returns(684315);
-        //    m.Setup(s => s.ReadAsync(buffer, 8453, 3515, It.IsAny<CancellationToken>())).Returns(Task.FromResult(463)).Verifiable();
-        //    DataReadCompletedEventArgs args = null;
-        //    var eventingStream = new EventingStream(m.Object);
-        //    eventingStream.DataReadCompleted += (object sender, DataReadCompletedEventArgs drce) => args = drce;
+                    await Task.WhenAll(tasks);
 
-        //    // act
-        //    var count = await eventingStream.ReadAsync(buffer, 8453, 3515);
-
-        //    // assert
-        //    m.Verify();
-        //    Assert.NotNull(args);
-        //    Assert.Equal(463, count);
-        //    Assert.Same(buffer, args.Buffer);
-        //    Assert.Equal(8453, args.Offset);
-        //    Assert.Equal(3515, args.MaxCount);
-        //    Assert.Equal(463, args.ActualCount);
-        //    Assert.Equal(1684, args.PositionBeforeRead);
-        //    Assert.Equal(684315, args.PositionAfterRead);
-        //}
-
-        //[Fact]
-        //public async Task EmptyReadAsyncDoesNotRaiseDataReadCompleted()
-        //{
-        //    // arrange
-        //    var buffer = new byte[0];
-        //    var m = new Mock<Stream>();
-        //    m.SetupSequence(s => s.Position).Returns(1684).Returns(684315);
-        //    m.Setup(s => s.ReadAsync(buffer, 8453, 3515, It.IsAny<CancellationToken>())).Returns(Task.FromResult(0)).Verifiable();
-        //    DataReadCompletedEventArgs args = null;
-        //    var eventingStream = new EventingStream(m.Object);
-        //    eventingStream.DataReadCompleted += (object sender, DataReadCompletedEventArgs drce) => args = drce;
-
-        //    // act
-        //    var count = await eventingStream.ReadAsync(buffer, 8453, 3515);
-
-        //    // assert
-        //    m.Verify();
-        //    Assert.Null(args);
-        //    Assert.Equal(0, count);
-        //}
-
-        //[Fact]
-        //public void BeginReadCallsThroughToReadAsync()
-        //{
-        //    // arrange
-        //    var buffer = new byte[3];
-        //    var asyncCallback = Mock.Of<AsyncCallback>();
-        //    var m = new Mock<EventingStream>(Stream.Null) { CallBase = true };
-        //    m.Setup(es => es.ReadAsync(buffer, 4848, 554, It.IsAny<CancellationToken>())).Returns(Task.FromResult(2622)).Verifiable();
-        //    var eventingStream = m.Object;
-
-        //    // act
-        //    var result = eventingStream.BeginRead(buffer, 4848, 554, asyncCallback, null);
-        //    var count = eventingStream.EndRead(result);
-
-        //    // assert
-        //    m.Verify();
-        //    Assert.True(result.IsCompleted);
-        //    Assert.Equal(2622, count);
-        //}
+                    for (int i = 0; i < tasks.Length; i++)
+                    {
+                        Assert.Equal(expectedResults[i], tasks[tasks.Length - 1 - i].Result);
+                    }
+                }
+            }
+        }
     }
 }
