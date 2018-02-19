@@ -44,14 +44,14 @@ namespace Bix.IO
 
             // assert
             Assert.Same(stream, substreamWithMaxLength.MappedStream);
-            Assert.Same(stream, ((IEventingStream)substreamWithMaxLength).AsStream);
+            Assert.Same(substreamWithMaxLength, ((IEventingStream)substreamWithMaxLength).AsStream);
             Assert.Equal(789327, substreamWithMaxLength.StartAt);
             Assert.True(substreamWithMaxLength.MaxLength.HasValue);
             Assert.Equal(243, substreamWithMaxLength.MaxLength.Value);
             Assert.True(substreamWithMaxLength.CanRead);
 
             Assert.Same(stream, substreamWithoutMaxLength.MappedStream);
-            Assert.Same(stream, ((IEventingStream)substreamWithoutMaxLength).AsStream);
+            Assert.Same(substreamWithoutMaxLength, ((IEventingStream)substreamWithoutMaxLength).AsStream);
             Assert.Equal(558, substreamWithoutMaxLength.StartAt);
             Assert.False(substreamWithoutMaxLength.MaxLength.HasValue);
             Assert.True(substreamWithoutMaxLength.CanRead);

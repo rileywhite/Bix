@@ -35,7 +35,7 @@ namespace Bix.IO
 
         #endregion
 
-        Stream IEventingStream<Stream>.AsStream => this.InnerStream;
+        Stream IEventingStream<Stream>.AsStream => this;
         private Stream InnerStream { get; }
 
         #region Reading

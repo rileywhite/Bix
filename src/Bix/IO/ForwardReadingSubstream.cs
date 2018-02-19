@@ -51,7 +51,7 @@ namespace Bix.IO
 
         #endregion
 
-        Stream IEventingStream<Stream>.AsStream => (Stream)this.MappedStream;
+        Stream IEventingStream<Stream>.AsStream => this;
         public IEventingStream MappedStream { get; }
         public long StartAt { get; }
         public long? MaxLength { get; }
@@ -209,6 +209,7 @@ namespace Bix.IO
         {
             get
             {
+                if (this.IsCurrentlyWritable) { return base.Length; }
                 var potentialLength = this.MappedStream.AsStream.Length - this.StartAt;
                 return Math.Max(0, this.MaxLength.HasValue ? Math.Min(this.MaxLength.Value, potentialLength) : potentialLength);
             }
@@ -226,6 +227,7 @@ namespace Bix.IO
         {
             get
             {
+                if (this.IsCurrentlyWritable) { return base.Position; }
                 var unmappedPosition = this.MappedStream.AsStream.Position;
                 var bytesInBuffer = this.BytesInBuffer;
                 var positionOffsetByStartAndBuffer = Math.Max(unmappedPosition - this.StartAt - bytesInBuffer, 0L);
