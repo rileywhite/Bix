@@ -69,5 +69,134 @@ namespace Bix.IO.Tests
                 if (File.Exists(targetFilePath)) { File.Delete(targetFilePath); }
             }
         }
+
+        [Fact]
+        public async Task IndexAtBeginningOfTargetFileIsFound()
+        {
+            // arrange
+            var sourceFilePath = Path.GetTempFileName();
+            var targetFilePath = Path.GetTempFileName();
+            var fixture = new Fixture();
+            var contents = fixture.CreateMany<byte>(1024 * 10).ToArray();
+
+            using (var fileStream = File.OpenWrite(sourceFilePath))
+            using (var writer = new BinaryWriter(fileStream))
+            {
+                writer.Write(contents);
+            }
+
+            using (var fileStream = File.OpenWrite(targetFilePath))
+            {
+                fileStream.Position = contents.Length - 1;
+                fileStream.WriteByte(0);
+                fileStream.Position = 0;
+                using (var writer = new BinaryWriter(fileStream))
+                {
+                    writer.Write(contents, 0, 1);
+                }
+            }
+
+            var sourceHashChecker = new FileMultipartHashChecker(sourceFilePath);
+            var targetHashChecker = new FileMultipartHashChecker(targetFilePath);
+
+            try
+            {
+                // act
+                var inconsistentIndex = await sourceHashChecker.GetInconsistentIndex(targetHashChecker);
+
+
+                // assert
+                Assert.Equal(1, inconsistentIndex);
+            }
+            finally
+            {
+                if (File.Exists(sourceFilePath)) { File.Delete(sourceFilePath); }
+                if (File.Exists(targetFilePath)) { File.Delete(targetFilePath); }
+            }
+        }
+
+        [Fact]
+        public async Task IndexAtEndOfTargetFileIsFound()
+        {
+            // arrange
+            var sourceFilePath = Path.GetTempFileName();
+            var targetFilePath = Path.GetTempFileName();
+            var fixture = new Fixture();
+            var contents = fixture.CreateMany<byte>(1024 * 10).ToArray();
+
+            using (var fileStream = File.OpenWrite(sourceFilePath))
+            using (var writer = new BinaryWriter(fileStream))
+            {
+                writer.Write(contents);
+            }
+
+            ++contents[contents.Length - 1];
+            using (var fileStream = File.OpenWrite(targetFilePath))
+            {
+                using (var writer = new BinaryWriter(fileStream))
+                {
+                    // write the full contents except the last byte
+                    writer.Write(contents);
+                }
+            }
+
+            var sourceHashChecker = new FileMultipartHashChecker(sourceFilePath);
+            var targetHashChecker = new FileMultipartHashChecker(targetFilePath);
+
+            try
+            {
+                // act
+                var inconsistentIndex = await sourceHashChecker.GetInconsistentIndex(targetHashChecker);
+
+
+                // assert
+                Assert.Equal(contents.Length - 1, inconsistentIndex);
+            }
+            finally
+            {
+                if (File.Exists(sourceFilePath)) { File.Delete(sourceFilePath); }
+                if (File.Exists(targetFilePath)) { File.Delete(targetFilePath); }
+            }
+        }
+
+        [Fact]
+        public async Task IdenticalTargetFileIsFound()
+        {
+            // arrange
+            var sourceFilePath = Path.GetTempFileName();
+            var targetFilePath = Path.GetTempFileName();
+            var fixture = new Fixture();
+            var contents = fixture.CreateMany<byte>(1024 * 10).ToArray();
+
+            using (var fileStream = File.OpenWrite(sourceFilePath))
+            using (var writer = new BinaryWriter(fileStream))
+            {
+                writer.Write(contents);
+            }
+
+            using (var fileStream = File.OpenWrite(targetFilePath))
+            using (var writer = new BinaryWriter(fileStream))
+            {
+                writer.Write(contents);
+            }
+
+            var sourceHashChecker = new FileMultipartHashChecker(sourceFilePath);
+            var targetHashChecker = new FileMultipartHashChecker(targetFilePath);
+
+            try
+            {
+                // act
+                var inconsistentIndex = await sourceHashChecker.GetInconsistentIndex(targetHashChecker);
+
+
+                // assert
+                Assert.Equal(-1, inconsistentIndex);
+            }
+            finally
+            {
+                if (File.Exists(sourceFilePath)) { File.Delete(sourceFilePath); }
+                if (File.Exists(targetFilePath)) { File.Delete(targetFilePath); }
+            }
+        }
     }
 }

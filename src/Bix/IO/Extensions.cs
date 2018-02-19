@@ -118,8 +118,9 @@ namespace Bix.IO
                 {
                     if (Convert.ToBase64String(sourceHashes[i]) != Convert.ToBase64String(targetHashes[i]))
                     {
-                        currentLength = currentLength / segments;
-                        start += (i -1) * currentLength;
+                        var currentSegmentSize = currentLength / segments;
+                        start += (i - 1) * currentSegmentSize;
+                        currentLength = i < segments ? currentSegmentSize : currentSegmentSize + (currentLength % segments);
                         break;
                     }
                 }
