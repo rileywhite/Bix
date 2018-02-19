@@ -24,6 +24,7 @@ namespace Bix.IO
         event EventHandler<DataReadCompletedEventArgs> DataReadCompleted;
         event EventHandler<DataWriteCompletedEventArgs> DataWriteCompleted;
         TStream AsStream { get; }
+        void SignalEnd();
     }
 
     public interface IEventingStream : IEventingStream<Stream> { }

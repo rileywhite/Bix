@@ -62,14 +62,19 @@ namespace Bix.IO
         private AsyncMonitor ReadWriteMonitor { get; } = new AsyncMonitor();
         protected virtual long WritePosition { get; set; }
 
-        private bool HasMappedStreamSignaledEmptyRead { get; set; }
+        private bool HasEndBeenSignaled { get; set; }
+
+        public void SignalEnd()
+        {
+            this.HasEndBeenSignaled = true;
+            this.ManualResetEvent.Set();
+        }
 
         private void MappedStream_DataReadCompleted(object sender, DataReadCompletedEventArgs e)
         {
             if (e.ActualCount == 0)
             {
-                this.HasMappedStreamSignaledEmptyRead = true;
-                this.ManualResetEvent.Set();
+                this.SignalEnd();
                 return;
             }
 
@@ -109,7 +114,7 @@ namespace Bix.IO
         {
             if (this.IsReading) { return base.Read(buffer, offset, count); }
 
-            if (!this.HasMappedStreamSignaledEmptyRead)
+            if (!this.HasEndBeenSignaled)
             {
                 this.ManualResetEvent.Wait();
                 this.ManualResetEvent.Reset();
@@ -133,7 +138,7 @@ namespace Bix.IO
             }
             var position = this.Position;
             this.DataReadCompleted?.Invoke(this, new DataReadCompletedEventArgs(originalPosition, position, buffer, offset, count, actualCount));
-            if (this.BytesInBuffer > 0 || this.HasMappedStreamSignaledEmptyRead || position > this.Length) { this.ManualResetEvent.Set(); }
+            if (this.BytesInBuffer > 0 || this.HasEndBeenSignaled || position > this.Length) { this.ManualResetEvent.Set(); }
             return actualCount;
         }
 
@@ -141,7 +146,7 @@ namespace Bix.IO
         {
             if (this.IsReading) { return await base.ReadAsync(buffer, offset, count, cancellationToken); }
 
-            if (!this.HasMappedStreamSignaledEmptyRead)
+            if (!this.HasEndBeenSignaled)
             {
                 await this.ManualResetEvent.WaitAsync(cancellationToken);
                 this.ManualResetEvent.Reset();
@@ -165,7 +170,7 @@ namespace Bix.IO
             }
             var position = this.Position;
             this.DataReadCompleted?.Invoke(this, new DataReadCompletedEventArgs(originalPosition, position, buffer, offset, count, actualCount));
-            if (this.BytesInBuffer > 0 || this.HasMappedStreamSignaledEmptyRead || position > this.Length) { this.ManualResetEvent.Set(); }
+            if (this.BytesInBuffer > 0 || this.HasEndBeenSignaled || position > this.Length) { this.ManualResetEvent.Set(); }
             return actualCount;
         }
 

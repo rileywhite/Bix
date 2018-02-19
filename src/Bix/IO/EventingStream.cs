@@ -42,6 +42,11 @@ namespace Bix.IO
 
         public event EventHandler<DataReadCompletedEventArgs> DataReadCompleted;
 
+        public void SignalEnd()
+        {
+            this.DataReadCompleted(this, new DataReadCompletedEventArgs(0, 0, new byte[0], 0, 0, 0));
+        }
+
         public override int Read(byte[] buffer, int offset, int count)
         {
             var initialPosition = this.Position;
