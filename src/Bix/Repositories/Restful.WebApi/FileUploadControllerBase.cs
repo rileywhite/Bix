@@ -15,31 +15,10 @@
 /***************************************************************************/
 
 using System;
-using System.IO;
-using System.Threading.Tasks;
 
-namespace Bix.IO
+namespace Bix.Repositories.Restful.WebApi
 {
-    public class FileMultipartHashChecker : IMultipartHashChecker
+    public abstract class FileUploadControllerBase : BixControllerBase
     {
-        public FileMultipartHashChecker(string filePath)
-        {
-            this.FilePath = filePath;
-        }
-
-        public string FilePath { get; }
-
-        public async Task<byte[][]> GetHashes(long startAt, long byteCount, byte partCount, string hashName = "MD5")
-        {
-            using (var fileStream = File.OpenRead(this.FilePath))
-            {
-                return await fileStream.GetNestedHashes(partCount, startAt, byteCount);
-            }
-        }
-
-        public long GetLength()
-        {
-            return new FileInfo(this.FilePath).Length;
-        }
     }
 }

@@ -89,13 +89,16 @@ namespace Bix.IO
             finally
             {
                 foreach (var s in streams) { s?.AsStream?.Dispose(); }
-                eventingStream.Dispose();
             }
         }
 
         public static async Task<long> GetInconsistentIndex(this IMultipartHashChecker source, IMultipartHashChecker target)
         {
             var sourceLength = source.GetLength();
+            var targetLength = target.GetLength();
+
+            // source and target are intended to be the same length, so indicate inconsistency at the beginning
+            if (sourceLength != targetLength) { return 0; }
 
             var start = 0L;
             var currentLength = sourceLength;

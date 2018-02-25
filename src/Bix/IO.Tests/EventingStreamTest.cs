@@ -155,7 +155,7 @@ namespace Bix.IO
             // arrange
             var buffer = new byte[3];
             var asyncCallback = Mock.Of<AsyncCallback>();
-            var m = new Mock<EventingStream>(Stream.Null) { CallBase = true };
+            var m = new Mock<EventingStream>(Stream.Null, true) { CallBase = true };
             m.Setup(es => es.WriteAsync(buffer, 234, 112, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask).Verifiable();
             var eventingStream = m.Object;
 
@@ -272,7 +272,7 @@ namespace Bix.IO
             // arrange
             var buffer = new byte[3];
             var asyncCallback = Mock.Of<AsyncCallback>();
-            var m = new Mock<EventingStream>(Stream.Null) { CallBase = true };
+            var m = new Mock<EventingStream>(Stream.Null, true) { CallBase = true };
             m.Setup(es => es.ReadAsync(buffer, 4848, 554, It.IsAny<CancellationToken>())).Returns(Task.FromResult(2622)).Verifiable();
             var eventingStream = m.Object;
 

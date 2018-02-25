@@ -26,17 +26,25 @@ namespace Bix.IO
     {
         #region Construction & Disposal
 
-        public EventingStream(Stream innerStream) => this.InnerStream = innerStream;
+        public EventingStream(Stream innerStream, bool leaveInnerStreamOpenOnDispose = true)
+        {
+            this.InnerStream = innerStream;
+            this.LeaveInnerStreamOpenOnDispose = leaveInnerStreamOpenOnDispose;
+        }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) { this.InnerStream?.Dispose(); }
+            if (disposing)
+            {
+                if (!this.LeaveInnerStreamOpenOnDispose) { this.InnerStream?.Dispose(); }
+            }
         }
 
         #endregion
 
         Stream IEventingStream<Stream>.AsStream => this;
         private Stream InnerStream { get; }
+        public bool LeaveInnerStreamOpenOnDispose { get; }
 
         #region Reading
 
