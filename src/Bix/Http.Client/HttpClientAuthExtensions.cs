@@ -92,9 +92,25 @@ namespace Bix.Http.Client
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+            return await client.PatchWithAuthenticationAsync(
+                requestUri,
+                contentDataStream,
+                81920,
+                authenticationHeaderGenerator,
+                cancellationToken);
+        }
+
+        public static async Task<HttpResponseMessage> PatchWithAuthenticationAsync(
+            this HttpClient client,
+            string requestUri,
+            Stream contentDataStream,
+            int bufferSize,
+            IAuthenticationHeaderGenerator authenticationHeaderGenerator,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri);
-            return await client.PatchAsync(requestUri, new StreamContent(contentDataStream, 81920), cancellationToken);
+            return await client.PatchAsync(requestUri, new StreamContent(contentDataStream, bufferSize), cancellationToken);
         }
     }
 }

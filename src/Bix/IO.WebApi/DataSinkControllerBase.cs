@@ -97,7 +97,7 @@ namespace Bix.IO.WebApi
         /// <summary>
         /// Buffer size for reading from streaming input and also for writing to file.
         /// </summary>
-        protected virtual int IOBufferSizes { get; } = 81920;
+        protected virtual int IOBufferSize { get; } = 81920;
 
         /// <summary>
         /// Accepts a stream representing the full amount of data to upload. Calls <see cref="OnUploadCompleted( string,string)"/> on success.
@@ -112,7 +112,7 @@ namespace Bix.IO.WebApi
 
             using (var targetStream = this.TargetStreamFactory.CreateStream(this.HttpContextAccessor.HttpContext?.User?.Identity?.Name, id))
             {
-                await stream.CopyToAsync(targetStream, this.IOBufferSizes, cancellationToken);
+                await stream.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
             }
 
             await this.OnUploadCompleted(id);
@@ -125,7 +125,7 @@ namespace Bix.IO.WebApi
         /// </summary>
         /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
         /// <param name="startAt">Position within the target data where writing should start.</param>
-        /// <param name="stream"><see cref="Stream"/> for accessing the remaining data. The first byte in the stream will be writtent at <paramref name="startAt"/>, and the rest will be written in order.</param>
+        /// <param name="stream"><see cref="Stream"/> for accessing the remaining data. The first byte in the stream will be written at <paramref name="startAt"/>, and the rest will be written in order.</param>
         /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>Action result</returns>
         [HttpPatch("{id}/{startAt}")]
@@ -134,7 +134,7 @@ namespace Bix.IO.WebApi
             using (var targetStream = this.TargetStreamFactory.CreateStream(this.HttpContextAccessor.HttpContext?.User?.Identity?.Name, id))
             {
                 targetStream.Position = startAt;
-                await stream.CopyToAsync(targetStream, this.IOBufferSizes, cancellationToken);
+                await stream.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
             }
 
             await this.OnUploadCompleted(id);
@@ -146,17 +146,17 @@ namespace Bix.IO.WebApi
         /// Accepts a stream representing a sub-segment of data to upload. Never calls <see cref="OnUploadCompleted( string,string)"/>, even on success, as no order of uploaded segments is assumed.
         /// </summary>
         /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
-        /// <param name="startAt"></param>
-        /// <param name="stream"></param>
+        /// <param name="startAt">Position within the target data where writing should start.</param>
+        /// <param name="stream"><see cref="Stream"/> for accessing the remaining data. The first byte in the stream will be written at <paramref name="startAt"/>, and the rest will be written in order.</param>
         /// <param name="cancellationToken"></param>
         /// <returns>Action result</returns>
-        [HttpPatch("{id}/{startAt}/{fullDataLength}")]
+        [HttpPatch("{id}/{startAt}/part")]
         public async Task<IActionResult> SendPartialData(string id, long startAt, [FromBody] Stream stream, CancellationToken cancellationToken)
         {
             using (var targetStream = this.TargetStreamFactory.CreateStream(this.HttpContextAccessor.HttpContext?.User?.Identity?.Name, id))
             {
                 targetStream.Position = startAt;
-                await stream.CopyToAsync(targetStream, this.IOBufferSizes, cancellationToken);
+                await stream.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
             }
 
             return this.Ok();
@@ -175,6 +175,7 @@ namespace Bix.IO.WebApi
         /// <param name="partition">Partition that separates sets of unique IDs for </param>
         /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
         /// <returns>Async task</returns>
+        /// <remarks>The possibility exists of multiple calls, so implementations should be idempotent.</remarks>
         protected abstract Task OnUploadCompleted(string partition, string id);
     }
 }
