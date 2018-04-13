@@ -14,12 +14,13 @@
 // limitations under the License.
 /***************************************************************************/
 
+using Bix.Http.Hmac;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 
-namespace Bix.Http
+namespace Bix.WebApi.Core
 {
-    public interface IAuthenticatedUserLookup
-    {
-        string GetAuthenticatedUser();
-    }
+    [Authorize(AuthenticationSchemes = HmacAuthenticationHandler.HmacSchemeName)]
+    public abstract class BixControllerBase : Controller { }
 }

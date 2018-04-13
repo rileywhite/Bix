@@ -14,9 +14,13 @@
 // limitations under the License.
 /***************************************************************************/
 
+using Bix.Core;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NodaTime;
 using NodaTime.Text;
 using System;
@@ -25,14 +29,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
 using System.Text.Encodings.Web;
-using Bix.Http.Hmac;
-using Bix.Core;
 
-namespace Bix.Repositories.Restful.WebApi.Authentication
+namespace Bix.Http.Hmac
 {
     /// <summary>
     /// Authentication that delegates identity management to calling applications and, once

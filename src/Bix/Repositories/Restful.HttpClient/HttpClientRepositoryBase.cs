@@ -15,7 +15,8 @@
 /***************************************************************************/
 
 using Bix.Core;
-using Bix.Http;
+using Bix.Http.Core;
+using Bix.Http.Client;
 using Newtonsoft.Json;
 using Serilog;
 using System;
@@ -28,18 +29,18 @@ using System.Threading.Tasks;
 
 namespace Bix.Repositories.Restful.HttpClient
 {
-    public abstract class ClientRepositoryBase<TIdentity, TItem> : IRepository<TIdentity, TItem>
+    public abstract class HttpClientRepositoryBase<TIdentity, TItem> : IRepository<TIdentity, TItem>
         where TItem : class, IAggregateRoot, IHasIdentity<TIdentity>
     {
-        protected IClientConfiguration Config { get; }
+        protected IHttpClientConfiguration Config { get; }
         protected IAuthenticationHeaderGenerator AuthenticationHeaderGenerator { get; }
         protected ILogger Logger { get; }
 
         protected abstract string ItemsControllerPath { get; }
         protected abstract string ItemControllerPath { get; }
 
-        public ClientRepositoryBase(
-            IClientConfiguration config,
+        public HttpClientRepositoryBase(
+            IHttpClientConfiguration config,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
             ILogger logger)
         {

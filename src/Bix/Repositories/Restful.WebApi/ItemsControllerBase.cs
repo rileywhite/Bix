@@ -15,6 +15,7 @@
 /***************************************************************************/
 
 using Bix.Core;
+using Bix.WebApi.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;

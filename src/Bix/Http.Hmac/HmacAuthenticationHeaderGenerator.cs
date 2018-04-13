@@ -15,6 +15,7 @@
 /***************************************************************************/
 
 using Bix.Core;
+using Bix.Http.Core;
 using NodaTime;
 using NodaTime.Text;
 using System;

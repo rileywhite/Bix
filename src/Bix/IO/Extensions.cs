@@ -94,11 +94,17 @@ namespace Bix.IO
 
         public static async Task<long> GetInconsistentIndex(this IMultipartHashChecker source, IMultipartHashChecker target)
         {
-            var sourceLength = source.GetLength();
-            var targetLength = target.GetLength();
+            Contract.Requires(source != null);
+            Contract.Requires(target != null);
+            Contract.Requires(source.CanGetLength);
 
-            // source and target are intended to be the same length, so indicate inconsistency at the beginning
-            if (sourceLength != targetLength) { return 0; }
+            var sourceLength = source.GetLength();
+
+            if (target.CanGetLength && sourceLength == target.GetLength())
+            {
+                // source and target are intended to be the same length, so indicate inconsistency at the beginning
+                return 0;
+            }
 
             var start = 0L;
             var currentLength = sourceLength;
@@ -109,21 +115,21 @@ namespace Bix.IO
 
                 if (segments == 1) { return start; }
 
-                var sourceHashesTask = source.GetHashes(start, currentLength, segments);
-                var targetHashesTask = target.GetHashes(start, currentLength, segments);
+                var sourceSubstreamDetailsTask = source.GetSubstreamDetails(start, currentLength, segments);
+                var targetSubstreamDetailsTask = target.GetSubstreamDetails(start, currentLength, segments);
 
-                var sourceHashes = await sourceHashesTask;
-                var targetHashes = await targetHashesTask;
+                var sourceSubstreamDetails = await sourceSubstreamDetailsTask;
+                var targetSubstreamDetails = await targetSubstreamDetailsTask;
 
-                if (Convert.ToBase64String(sourceHashes[0]) == Convert.ToBase64String(targetHashes[0])) { return start - 1; }
+                if (sourceSubstreamDetails.Hash == targetSubstreamDetails.Hash) { return start - 1; }
 
-                for (int i = 1; i <= segments; i++)
+                for (int i = 0; i < segments; i++)
                 {
-                    if (Convert.ToBase64String(sourceHashes[i]) != Convert.ToBase64String(targetHashes[i]))
+                    if (sourceSubstreamDetails.SegmentHashes[i] != targetSubstreamDetails.SegmentHashes[i])
                     {
                         var currentSegmentSize = currentLength / segments;
-                        start += (i - 1) * currentSegmentSize;
-                        currentLength = i < segments ? currentSegmentSize : currentSegmentSize + (currentLength % segments);
+                        start += i * currentSegmentSize;
+                        currentLength = i < segments - 1 ? currentSegmentSize : currentSegmentSize + (currentLength % segments);
                         break;
                     }
                 }

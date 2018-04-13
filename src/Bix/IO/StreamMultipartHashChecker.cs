@@ -17,6 +17,7 @@
 using System;
 using System.Diagnostics.Contracts;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Bix.IO
@@ -68,14 +69,21 @@ namespace Bix.IO
 
         public bool LeaveStreamOpenOnDispose { get; }
 
-        public async Task<byte[][]> GetHashes(long startAt, long byteCount, byte partCount, string hashName = "MD5")
+        public async Task<SubstreamDetails> GetSubstreamDetails(long startAt, long byteCount, byte partCount, string hashName = "MD5")
         {
-            return await this.Stream.GetNestedHashes(partCount, startAt, byteCount);
+            var hashes = await this.Stream.GetNestedHashes(partCount, startAt, byteCount);
+            return new SubstreamDetails
+            {
+                Start = startAt,
+                Length = byteCount,
+                SegmentLength = partCount,
+                HashName = hashName,
+                Hash = Convert.ToBase64String(hashes[0]),
+                SegmentHashes = hashes.Skip(1).Select(hash => Convert.ToBase64String(hash)).ToArray(),
+            };
         }
 
-        public long GetLength()
-        {
-            return this.Stream.Length;
-        }
+        public bool CanGetLength => this.Stream.CanSeek;
+        public long GetLength() => this.Stream.Length;
     }
 }

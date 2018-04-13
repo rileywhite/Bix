@@ -19,20 +19,20 @@ using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
-namespace Bix.Repositories.Restful.HttpClient
+namespace Bix.IO.HttpClient
 {
     [Serializable]
-    public class RestfulRepositoryHttpClientException : Exception
+    public class DataSinkHttpClientException : Exception
     {
         public Guid LogInstance { get; private set; } = Guid.NewGuid();
 
         public HttpResponseMessage ErrorResponse { get; set; }
 
-        public RestfulRepositoryHttpClientException() { }
-        public RestfulRepositoryHttpClientException(string message) : base(message) { }
-        public RestfulRepositoryHttpClientException(string message, Exception innerException) : base(message, innerException) { }
+        public DataSinkHttpClientException() { }
+        public DataSinkHttpClientException(string message) : base(message) { }
+        public DataSinkHttpClientException(string message, Exception innerException) : base(message, innerException) { }
 
-        private RestfulRepositoryHttpClientException(SerializationInfo info, StreamingContext context)
+        private DataSinkHttpClientException(SerializationInfo info, StreamingContext context)
         {
             this.LogInstance = Guid.Parse(info.GetString("LogInstance"));
         }

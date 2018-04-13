@@ -14,12 +14,17 @@
 // limitations under the License.
 /***************************************************************************/
 
-using Microsoft.AspNetCore.Authentication;
 using System;
 
-namespace Bix.Repositories.Restful.WebApi.Authentication
+namespace Bix.IO
 {
-    public class HmacAuthenticationSchemeOptions : AuthenticationSchemeOptions
+    public class SubstreamDetails
     {
+        public long Start { get; set; }
+        public long Length { get; set; }
+        public long SegmentLength { get; set; }
+        public string HashName { get; set; }
+        public string Hash { get; set; }
+        public string[] SegmentHashes { get; set; }
     }
 }

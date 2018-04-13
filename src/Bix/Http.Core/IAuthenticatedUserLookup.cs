@@ -15,14 +15,11 @@
 /***************************************************************************/
 
 using System;
-using System.Threading.Tasks;
 
-namespace Bix.IO
+namespace Bix.Http.Core
 {
-    public interface IMultipartHashChecker
+    public interface IAuthenticatedUserLookup
     {
-        Task<SubstreamDetails> GetSubstreamDetails(long startAt, long byteCount, byte partCount, string hashName = "MD5");
-        bool CanGetLength { get; }
-        long GetLength();
+        string GetAuthenticatedUser();
     }
 }

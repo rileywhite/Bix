@@ -15,11 +15,15 @@
 /***************************************************************************/
 
 using System;
+using System.Diagnostics.Contracts;
+using System.IO;
 
-namespace Bix.Repositories.Restful.HttpClient
+namespace Bix.IO
 {
-    public interface IClientConfiguration
+    [ContractClass(typeof(TargetStreamFactoryContracts))]
+    public interface ITargetStreamFactory
     {
-        string BaseControllerPath { get; }
+        Stream CreateStream(string partition, string id);
+        void DestroyUnmanagedData(string partition, string id);
     }
 }

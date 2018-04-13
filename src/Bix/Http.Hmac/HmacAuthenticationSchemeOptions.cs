@@ -14,13 +14,12 @@
 // limitations under the License.
 /***************************************************************************/
 
-using Bix.Repositories.Restful.WebApi.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
 using System;
 
-namespace Bix.Repositories.Restful.WebApi
+namespace Bix.Http.Hmac
 {
-    [Authorize(AuthenticationSchemes = HmacAuthenticationHandler.HmacSchemeName)]
-    public abstract class BixControllerBase : Controller { }
+    public class HmacAuthenticationSchemeOptions : AuthenticationSchemeOptions
+    {
+    }
 }

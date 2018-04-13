@@ -16,9 +16,12 @@
 
 using System;
 
-namespace Bix.Repositories.Restful.WebApi
+namespace Bix.IO
 {
-    public abstract class FileUploadControllerBase : BixControllerBase
+    public class StreamStatus
     {
+        public StreamDescriptor Descriptor { get; set; }
+        public SubstreamDetails SourceSubstreamDetails { get; set; }
+        public SubstreamDetails TargetSubstreamDetails { get; set; }
     }
 }

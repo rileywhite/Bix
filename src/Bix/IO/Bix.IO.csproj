@@ -2,11 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.0.0-pre-05" />
     <PackageReference Include="Nito.AsyncEx.Interop.WaitHandles" Version="5.0.0-pre-05" />
+    <PackageReference Include="System.Diagnostics.Contracts" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

@@ -14,6 +14,7 @@
 // limitations under the License.
 /***************************************************************************/
 
+using Bix.Http.Core;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -21,7 +22,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Bix.Http
+namespace Bix.Http.Client
 {
     public static class HttpClientAuthExtensions
     {
@@ -82,6 +83,18 @@ namespace Bix.Http
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
             return await client.PatchAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken);
+        }
+
+        public static async Task<HttpResponseMessage> PatchWithAuthenticationAsync(
+            this HttpClient client,
+            string requestUri,
+            Stream contentDataStream,
+            IAuthenticationHeaderGenerator authenticationHeaderGenerator,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            client.DefaultRequestHeaders.Authorization =
+                authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri);
+            return await client.PatchAsync(requestUri, new StreamContent(contentDataStream, 81920), cancellationToken);
         }
     }
 }

@@ -15,14 +15,14 @@
 /***************************************************************************/
 
 using System;
-using System.Threading.Tasks;
+using System.Net.Http.Headers;
 
-namespace Bix.IO
+namespace Bix.Http.Core
 {
-    public interface IMultipartHashChecker
+    public interface IAuthenticationHeaderGenerator
     {
-        Task<SubstreamDetails> GetSubstreamDetails(long startAt, long byteCount, byte partCount, string hashName = "MD5");
-        bool CanGetLength { get; }
-        long GetLength();
+        AuthenticationHeaderValue GenerateAuthenticationHeader(
+            string endpointUri,
+            string jsonContent = null);
     }
 }

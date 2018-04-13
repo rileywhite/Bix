@@ -15,14 +15,22 @@
 /***************************************************************************/
 
 using System;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace Bix.IO
+namespace Bix.Http.Client
 {
-    public interface IMultipartHashChecker
+    public static class HttpClientExtensions
     {
-        Task<SubstreamDetails> GetSubstreamDetails(long startAt, long byteCount, byte partCount, string hashName = "MD5");
-        bool CanGetLength { get; }
-        long GetLength();
+        public static async Task<HttpResponseMessage> PatchAsync(
+            this HttpClient client,
+            string requestUri,
+            HttpContent content,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return await client.SendAsync(
+                new HttpRequestMessage(new HttpMethod("PATCH"), requestUri) { Content = content }, cancellationToken);
+        }
     }
 }

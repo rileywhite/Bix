@@ -15,14 +15,14 @@
 /***************************************************************************/
 
 using System;
-using System.Net.Http.Headers;
 
-namespace Bix.Http
+namespace Bix.IO
 {
-    public interface IAuthenticationHeaderGenerator
+    public class StreamDescriptor
     {
-        AuthenticationHeaderValue GenerateAuthenticationHeader(
-            string endpointUri,
-            string jsonContent = null);
+        public string Id { get; set; }
+        public long Length { get; set; }
+        public string HashName { get; set; }
+        public string Hash { get; set; }
     }
 }
