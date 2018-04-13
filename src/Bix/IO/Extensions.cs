@@ -100,7 +100,7 @@ namespace Bix.IO
 
             var sourceLength = source.GetLength();
 
-            if (target.CanGetLength && sourceLength == target.GetLength())
+            if (target.CanGetLength && sourceLength != target.GetLength())
             {
                 // source and target are intended to be the same length, so indicate inconsistency at the beginning
                 return 0;
