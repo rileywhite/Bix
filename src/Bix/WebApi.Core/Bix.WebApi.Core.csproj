@@ -16,8 +16,4 @@
     <ProjectReference Include="..\Http.Hmac\Bix.Http.Hmac.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Authentication\" />
-  </ItemGroup>
-
 </Project>
