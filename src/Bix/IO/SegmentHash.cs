@@ -15,15 +15,13 @@
 /***************************************************************************/
 
 using System;
-using System.Diagnostics.Contracts;
-using System.IO;
 
 namespace Bix.IO
 {
-    [ContractClass(typeof(TargetStreamFactoryContracts))]
-    public interface ITargetStreamFactory
+    public class SegmentHash
     {
-        Stream CreateStream(string partition, string id);
-        void DestroyUnmanagedData(string partition, string id);
+        public long Start { get; set; }
+        public long Length { get; set; }
+        public string Hash { get; set; }
     }
 }

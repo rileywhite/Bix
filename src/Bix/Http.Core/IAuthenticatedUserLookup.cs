@@ -18,8 +18,15 @@ using System;
 
 namespace Bix.Http.Core
 {
+    /// <summary>
+    /// Allows an application to find the user who is currently authenticated
+    /// </summary>
     public interface IAuthenticatedUserLookup
     {
+        /// <summary>
+        /// Retrieves the currently authenticated user
+        /// </summary>
+        /// <returns>Currently authenticated user</returns>
         string GetAuthenticatedUser();
     }
 }

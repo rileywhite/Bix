@@ -21,7 +21,7 @@ namespace Bix.IO
     public class StreamStatus
     {
         public StreamDescriptor Descriptor { get; set; }
-        public SubstreamDetails SourceSubstreamDetails { get; set; }
-        public SubstreamDetails TargetSubstreamDetails { get; set; }
+        public SegmentHash[] SegmentHashes { get; set; }
     }
 }
+ 

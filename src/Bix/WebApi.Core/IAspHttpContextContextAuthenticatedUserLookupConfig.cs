@@ -16,15 +16,19 @@
 
 using System;
 
-namespace Bix.IO
+namespace Bix.WebApi.Core
 {
-    public class SubstreamDetails
+    /// <summary>
+    /// When implemented by a concrete type, can be passed into the constructor of
+    /// a <see cref="AspHttpContextContextAuthenticatedUserLookup"/> to provide
+    /// a username to be used by the Application to perform actions that are not associated
+    /// with an active incoming request, such as startup, shutdown, etc.
+    /// </summary>
+    public interface IAspHttpContextContextAuthenticatedUserLookupConfig
     {
-        public long Start { get; set; }
-        public long Length { get; set; }
-        public long SegmentLength { get; set; }
-        public string HashName { get; set; }
-        public string Hash { get; set; }
-        public string[] SegmentHashes { get; set; }
+        /// <summary>
+        /// Name of the User that represents the currently running application
+        /// </summary>
+        string ApplicationUserName { get; }
     }
 }

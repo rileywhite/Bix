@@ -23,6 +23,5 @@ namespace Bix.IO
         public string Id { get; set; }
         public long Length { get; set; }
         public string HashName { get; set; }
-        public string Hash { get; set; }
     }
 }

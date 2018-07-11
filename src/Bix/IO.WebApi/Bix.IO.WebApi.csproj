@@ -3,10 +3,13 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
+    <Description>IO tooling used for fast network data transfer</Description>
   </PropertyGroup>
 
+  <Import Project="..\..\BixShared.targets" />
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.1" />
   </ItemGroup>
 
   <ItemGroup>

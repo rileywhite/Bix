@@ -20,25 +20,25 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Diagnostics.Contracts;
 using System.IO;
+using System.IO.MemoryMappedFiles;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Bix.IO.WebApi
 {
+    [DisableRequestSizeLimit]
     public abstract class DataSinkControllerBase : BixControllerBase
     {
         protected IHttpContextAccessor HttpContextAccessor { get; }
-        protected ITargetStreamFactory TargetStreamFactory { get; }
 
-        public DataSinkControllerBase(IHttpContextAccessor httpContextAccessor, ITargetStreamFactory targetStreamFactory)
+        public DataSinkControllerBase(IHttpContextAccessor httpContextAccessor)
         {
             Contract.Requires(httpContextAccessor != null);
-            Contract.Requires(targetStreamFactory != null);
             Contract.Ensures(this.HttpContextAccessor != null);
-            Contract.Ensures(this.TargetStreamFactory != null);
 
             this.HttpContextAccessor = httpContextAccessor;
-            this.TargetStreamFactory = targetStreamFactory;
         }
 
         /// <summary>
@@ -56,14 +56,27 @@ namespace Bix.IO.WebApi
         [HttpPatch]
         public async Task<IActionResult> Bump([FromBody] StreamStatus streamStatus, CancellationToken cancellationToken)
         {
-            using (var targetStream = this.TargetStreamFactory.CreateStream(this.HttpContextAccessor.HttpContext?.User?.Identity?.Name, streamStatus.Descriptor.Id))
+            var segmentStart = streamStatus.SegmentHashes[0].Start;
+            var segmentLength = streamStatus.SegmentHashes.Sum(sh => sh.Length);
+
+            var targetFilePath = GetTargetFilePath(
+                this.HttpContextAccessor.HttpContext?.User?.Identity?.Name,
+                streamStatus.Descriptor.Id);
+
+            if (!Directory.Exists(Path.GetDirectoryName(targetFilePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(targetFilePath));
+            }
+
+            using (var targetStream = new FileStream(targetFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
                 switch (targetStream.Length)
                 {
                     case long l when l < streamStatus.Descriptor.Length:
-                        // more efficient that SetLength since the file isn't filled with 0s
+                        // more efficient than SetLength since the file isn't filled with 0s
                         targetStream.Position = streamStatus.Descriptor.Length - 1;
                         targetStream.WriteByte(0);
+                        targetStream.Position = 0;
                         break;
 
                     case long l when l > streamStatus.Descriptor.Length:
@@ -71,93 +84,84 @@ namespace Bix.IO.WebApi
                         targetStream.SetLength(streamStatus.Descriptor.Length);
                         break;
                 }
-
-                using (var hashChecker = new StreamMultipartHashChecker(targetStream))
-                {
-                    var sourceDetails = streamStatus.SourceSubstreamDetails;
-
-                    streamStatus.TargetSubstreamDetails = await hashChecker.GetSubstreamDetails(
-                        sourceDetails.Start,
-                        sourceDetails.Length,
-                        (byte)sourceDetails.SegmentHashes.Length,
-                        sourceDetails.HashName);
-                }
             }
 
-            if (streamStatus.TargetSubstreamDetails.Length == streamStatus.Descriptor.Length &&
-                streamStatus.TargetSubstreamDetails.HashName == streamStatus.Descriptor.HashName &&
-                streamStatus.TargetSubstreamDetails.Hash == streamStatus.Descriptor.Hash)
+            var targetFile = new FileInfo(targetFilePath);
+
+            var hasher = new SegmentHasher();
+            if (hasher.TryGetSubsegmentHashesOfFirstDiff(
+                streamStatus.SegmentHashes,
+                targetFile,
+                segmentStart,
+                segmentLength,
+                (byte)streamStatus.SegmentHashes.Length,
+                new HashAlgorithmName(streamStatus.Descriptor.HashName),
+                out var diffSubsegmentHashes))
+            {
+                streamStatus.SegmentHashes = diffSubsegmentHashes;
+                return this.Ok(streamStatus);
+            }
+
+            // no diff
+            // check if we were comparing the full file, and if so, indicate file upload completeness
+            if (segmentStart == 0 && segmentLength == targetFile.Length)
             {
                 await this.OnUploadCompleted(streamStatus.Descriptor.Id);
+                if (targetFile.Exists) { try { targetFile.Delete(); } catch { /* Ignore */ } }
             }
 
+            // TODO null segment hashes is a poor indicator of a lack of difference
+            //      and an even poorer indicator that that the OnUploadCompleted event was raised
+            streamStatus.SegmentHashes = null;
             return this.Ok(streamStatus);
+        }
+
+        private static string GetTargetFilePath(string partition, string id)
+        {
+            if (string.IsNullOrWhiteSpace(partition)) { partition = "DefaultPartition"; };
+
+            // replace any invalid partition characters with underscores
+            // (potential for collision here, but I'm accepting that risk until a need to change it emerges
+            partition = string.Join("_", partition.Split(Path.GetInvalidFileNameChars()));
+
+            return Path.Combine(
+                Path.GetTempPath(),
+                "BixDataUpload",
+                partition,
+                id);
         }
 
         /// <summary>
         /// Buffer size for reading from streaming input and also for writing to file.
         /// </summary>
-        protected virtual int IOBufferSize { get; } = 81920;
+        public virtual int IOBufferSize { get; } = 81920;
 
         /// <summary>
-        /// Accepts a stream representing the full amount of data to upload. Calls <see cref="OnUploadCompleted( string,string)"/> on success.
+        /// Accepts a stream representing the data to transfer. Calls <see cref="OnUploadCompleted( string,string)"/> on success.
         /// </summary>
         /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
-        /// <param name="stream"><see cref="Stream"/> for accessing the full data, from beginning to end.</param>
+        /// <param name="startAt">Position within the target data where writing should start. Defaults to 0, which indicates that a full set of data is being transferred.</param>
         /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>Action result</returns>
+        /// <remarks>
+        /// Regardless of the value of <paramref name="startAt"/>, the source data is read from the beginning. This means that
+        /// if a transfer is being restarted, the client should send a stream beginning at the restart point. The server side
+        /// will begin writing at the correct location in the target stream.
+        /// </remarks>
         [HttpPatch("{id}")]
-        public async Task<IActionResult> SendFullData(string id, [FromBody] Stream stream, CancellationToken cancellationToken)
-        {
-
-            using (var targetStream = this.TargetStreamFactory.CreateStream(this.HttpContextAccessor.HttpContext?.User?.Identity?.Name, id))
-            {
-                await stream.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
-            }
-
-            await this.OnUploadCompleted(id);
-
-            return this.Ok();
-        }
-
-        /// <summary>
-        /// Accepts a stream representing the remaining amount of data to upload to continue a detected incomplete upload. Calls <see cref="OnUploadCompleted( string,string)"/> on success.
-        /// </summary>
-        /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
-        /// <param name="startAt">Position within the target data where writing should start.</param>
-        /// <param name="stream"><see cref="Stream"/> for accessing the remaining data. The first byte in the stream will be written at <paramref name="startAt"/>, and the rest will be written in order.</param>
-        /// <param name="cancellationToken">Used to cancel the operation</param>
-        /// <returns>Action result</returns>
         [HttpPatch("{id}/{startAt}")]
-        public async Task<IActionResult> SendRemainingData(string id, long startAt, [FromBody] Stream stream, CancellationToken cancellationToken)
+        public async Task<IActionResult> SendData(string id, long startAt = 0, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (var targetStream = this.TargetStreamFactory.CreateStream(this.HttpContextAccessor.HttpContext?.User?.Identity?.Name, id))
+            var targetFilePath = GetTargetFilePath(this.HttpContextAccessor.HttpContext?.User?.Identity?.Name, id);
+            var targetFile = new FileInfo(targetFilePath);
+
+            using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(targetFile.FullName))
+            using (var targetStream = memoryMappedFile.CreateViewStream(startAt, targetFile.Length - startAt, MemoryMappedFileAccess.Write))
             {
-                targetStream.Position = startAt;
-                await stream.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
+                    await this.Request.Body.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
             }
 
             await this.OnUploadCompleted(id);
-
-            return this.Ok();
-        }
-
-        /// <summary>
-        /// Accepts a stream representing a sub-segment of data to upload. Never calls <see cref="OnUploadCompleted( string,string)"/>, even on success, as no order of uploaded segments is assumed.
-        /// </summary>
-        /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
-        /// <param name="startAt">Position within the target data where writing should start.</param>
-        /// <param name="stream"><see cref="Stream"/> for accessing the remaining data. The first byte in the stream will be written at <paramref name="startAt"/>, and the rest will be written in order.</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns>Action result</returns>
-        [HttpPatch("{id}/{startAt}/part")]
-        public async Task<IActionResult> SendPartialData(string id, long startAt, [FromBody] Stream stream, CancellationToken cancellationToken)
-        {
-            using (var targetStream = this.TargetStreamFactory.CreateStream(this.HttpContextAccessor.HttpContext?.User?.Identity?.Name, id))
-            {
-                targetStream.Position = startAt;
-                await stream.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
-            }
 
             return this.Ok();
         }

@@ -18,6 +18,7 @@ using Bix.Http.Core;
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -89,12 +90,14 @@ namespace Bix.Http.Client
             this HttpClient client,
             string requestUri,
             Stream contentDataStream,
+            string streamContentType,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             return await client.PatchWithAuthenticationAsync(
                 requestUri,
                 contentDataStream,
+                streamContentType,
                 81920,
                 authenticationHeaderGenerator,
                 cancellationToken);
@@ -104,13 +107,33 @@ namespace Bix.Http.Client
             this HttpClient client,
             string requestUri,
             Stream contentDataStream,
+            string streamContentType,
             int bufferSize,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri);
-            return await client.PatchAsync(requestUri, new StreamContent(contentDataStream, bufferSize), cancellationToken);
+
+            using (var content = new StreamContent(contentDataStream, bufferSize)
+            {
+                Headers =
+                    {
+                        ContentType = new MediaTypeHeaderValue(streamContentType),
+                    }
+            })
+            {
+                return await client.SendAsync(
+                    new HttpRequestMessage(new HttpMethod("PATCH"), requestUri)
+                    {
+                        Content = content,
+                        Headers =
+                        {
+                            TransferEncodingChunked = true,
+                        }
+                    },
+                    cancellationToken);
+            };
         }
     }
 }

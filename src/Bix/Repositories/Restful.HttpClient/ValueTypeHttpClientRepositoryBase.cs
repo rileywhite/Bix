@@ -27,11 +27,11 @@ using System.Threading.Tasks;
 
 namespace Bix.Repositories.Restful.HttpClient
 {
-    public abstract class ValueTypeClientRepositoryBase<TIdentity, TNaturalKey, TItem>
+    public abstract class ValueTypeHttpClientRepositoryBase<TIdentity, TNaturalKey, TItem>
         : HttpClientRepositoryBase<TIdentity, TItem>, IValueTypeRepository<TIdentity, TNaturalKey, TItem>
         where TItem : class, IAggregateRoot, IHasIdentity<TIdentity>, IHasNaturalKey<TNaturalKey>
     {
-        public ValueTypeClientRepositoryBase(
+        public ValueTypeHttpClientRepositoryBase(
             IHttpClientConfiguration config,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
             ILogger logger)
@@ -70,11 +70,11 @@ namespace Bix.Repositories.Restful.HttpClient
         }
     }
 
-    public abstract class ValueTypeClientRepositoryBase<TNaturalKey, TItem>
-        : ValueTypeClientRepositoryBase<TNaturalKey, TNaturalKey, TItem>, IValueTypeRepository<TNaturalKey, TItem>
+    public abstract class ValueTypeHttpClientRepositoryBase<TNaturalKey, TItem>
+        : ValueTypeHttpClientRepositoryBase<TNaturalKey, TNaturalKey, TItem>, IValueTypeRepository<TNaturalKey, TItem>
         where TItem : class, IAggregateRoot, IHasIdentity<TNaturalKey>, IHasNaturalKey<TNaturalKey>
     {
-        public ValueTypeClientRepositoryBase(
+        public ValueTypeHttpClientRepositoryBase(
             IHttpClientConfiguration config,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
             ILogger logger)

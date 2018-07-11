@@ -16,6 +16,7 @@
 
 using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,6 +32,15 @@ namespace Bix.Http.Client
         {
             return await client.SendAsync(
                 new HttpRequestMessage(new HttpMethod("PATCH"), requestUri) { Content = content }, cancellationToken);
+        }
+
+        public static async Task<HttpResponseMessage> PatchAsync(
+            this HttpClient client,
+            string requestUri,
+            string jsonContent,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return await client.PatchAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken);
         }
     }
 }

@@ -3,12 +3,25 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
+    <Description>IO tooling for fast network data transfer for Bix</Description>
   </PropertyGroup>
+
+  <Import Project="..\..\BixShared.targets" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="SegmentHasher.cs~RF2b60791.TMP" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.0.0-pre-05" />
     <PackageReference Include="Nito.AsyncEx.Interop.WaitHandles" Version="5.0.0-pre-05" />
     <PackageReference Include="System.Diagnostics.Contracts" Version="4.3.0" />
+    <PackageReference Include="System.Security.Cryptography.Primitives" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

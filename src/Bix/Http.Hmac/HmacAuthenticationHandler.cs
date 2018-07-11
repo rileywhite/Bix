@@ -30,6 +30,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Text.Encodings.Web;
+using System.Diagnostics.Contracts;
 
 namespace Bix.Http.Hmac
 {
@@ -45,8 +46,17 @@ namespace Bix.Http.Hmac
             IOptionsMonitor<HmacAuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
-            ISystemClock clock)
-            : base(options, logger, encoder, clock) { }
+            ISystemClock clock,
+            IApplicationSecretStore applicationSecretStore)
+            : base(options, logger, encoder, clock)
+        {
+            Contract.Requires(applicationSecretStore != null);
+            Contract.Ensures(this.ApplicationSecretStore != null);
+
+            this.ApplicationSecretStore = applicationSecretStore;
+        }
+
+        private IApplicationSecretStore ApplicationSecretStore { get; }
 
         protected async override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
@@ -62,16 +72,22 @@ namespace Bix.Http.Hmac
                 return AuthenticateResult.Fail("Invalid HMAC authentication parameter");
             }
 
+            if (!this.ApplicationSecretStore.TryGetValue(parameter.ApplicationKey, out var applicationSecret))
+            {
+                return AuthenticateResult.Fail("No secret found for application key");
+            }
+
             if (!IsRequestFresh(parameter))
             {
                 return AuthenticateResult.Fail("HMAC authentication request is not fresh");
             }
 
-            string requestBody = await ReadRequestBody(this.Request);
+            var includeBodyInHash = this.Request.ContentLength.HasValue && this.Request.ContentLength.Value > 0;
+            var requestBody = includeBodyInHash ? await ReadRequestBody(this.Request) : string.Empty;
 
             var hash = HmacHashGenerator.Generate(
                 parameter,
-                new Guid("B8ED2A90-5CB2-4E0D-BF06-3BA6F0B1F6AF"),
+                applicationSecret,
                 this.Request.GetDisplayUrl(),
                 requestBody);
 

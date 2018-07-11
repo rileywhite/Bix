@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Riley White</Authors>
+    <Company>Briollen</Company>
+    <Product>Bix</Product>
+    <Copyright>Copyright 2013-2018 Riley White</Copyright>
+    <PackageLicenseUrl>https://github.com/rileywhite/Bix/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
+    <PackageTags>bix business-mix restful webapi aspnetcore</PackageTags>
+    <Version>2.0-rc.1</Version>
+  </PropertyGroup>
+</Project>

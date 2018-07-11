@@ -20,12 +20,12 @@ using Bix.Http.Core;
 using Newtonsoft.Json;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using snh = System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Net.Http;
+using System.Diagnostics.Contracts;
+using System.Net;
 
 namespace Bix.IO.HttpClient
 {
@@ -34,6 +34,23 @@ namespace Bix.IO.HttpClient
         protected IHttpClientConfiguration Config { get; }
         protected IAuthenticationHeaderGenerator AuthenticationHeaderGenerator { get; }
         protected ILogger Logger { get; }
+
+        public HttpClientDataSinkBase(
+            IHttpClientConfiguration config,
+            IAuthenticationHeaderGenerator authenticationHeaderGenerator,
+            ILogger logger)
+        {
+            Contract.Requires(config != null);
+            Contract.Requires(authenticationHeaderGenerator != null);
+            Contract.Requires(logger != null);
+            Contract.Ensures(this.Config != null);
+            Contract.Ensures(this.AuthenticationHeaderGenerator != null);
+            Contract.Ensures(this.Logger != null);
+
+            this.Config = config;
+            this.AuthenticationHeaderGenerator = authenticationHeaderGenerator;
+            this.Logger = logger;
+        }
 
         protected abstract string DataSinkControllerPath { get; }
 
@@ -49,7 +66,7 @@ namespace Bix.IO.HttpClient
         /// Otherwise, data uploading may begin/proceed if the caller has enough info, or the caller may bump again with a more
         /// targeted segment length.
         /// </remarks>
-        public async Task<StreamStatus> BumpAsync(StreamStatus streamStatus, CancellationToken cancellationToken)
+        public async Task<StreamStatus> BumpAsync(StreamStatus streamStatus, CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
@@ -83,50 +100,16 @@ namespace Bix.IO.HttpClient
         /// <summary>
         /// Buffer size for reading from streaming input and also for writing to file.
         /// </summary>
-        protected virtual int IOBufferSize { get; } = 81920;
-
-        /// <summary>
-        /// Accepts a stream representing the full amount of data to upload. Calls <see cref="OnUploadCompleted( string,string)"/> on success.
-        /// </summary>
-        /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
-        /// <param name="stream"><see cref="Stream"/> for accessing the full data, from beginning to end.</param>
-        /// <param name="cancellationToken">Used to cancel the operation</param>
-        public async Task SendFullDataAsync(string id, Stream stream, CancellationToken cancellationToken)
-        {
-            try
-            {
-                using (var client = new snh.HttpClient())
-                {
-                    client.Timeout = Timeout.InfiniteTimeSpan;
-
-                    var response = await client.PatchWithAuthenticationAsync(
-                        $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}",
-                        stream,
-                        this.IOBufferSize,
-                        this.AuthenticationHeaderGenerator,
-                        cancellationToken);
-
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        throw new DataSinkHttpClientException("Unsuccessful service call response") { ErrorResponse = response };
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                this.Logger.Error(ex, "Failure to SendFullDataAsync");
-                throw;
-            }
-        }
+        public virtual int IOBufferSize { get; } = 81920;
 
         /// <summary>
         /// Accepts a stream representing the remaining amount of data to upload to continue a detected incomplete upload. Calls <see cref="OnUploadCompleted( string,string)"/> on success.
         /// </summary>
         /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
-        /// <param name="startAt">Position within the target data where writing should start.</param>
         /// <param name="stream"><see cref="Stream"/> for accessing the remaining data. The first byte in the stream will be written at <paramref name="startAt"/>, and the rest will be written in order.</param>
+        /// <param name="startAt">Position within the target data where writing should start.</param>
         /// <param name="cancellationToken">Used to cancel the operation</param>
-        public async Task SendRemainingDataAsync(string id, long startAt, Stream stream, CancellationToken cancellationToken)
+        public async Task SendDataAsync(string id, Stream stream, long startAt = 0, CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
@@ -134,58 +117,38 @@ namespace Bix.IO.HttpClient
                 {
                     client.Timeout = Timeout.InfiniteTimeSpan;
 
+                    var requestUri = startAt > 0 ?
+                        $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}/{startAt}" :
+                        $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}";
+
                     var response = await client.PatchWithAuthenticationAsync(
-                        $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}/{startAt}",
+                        requestUri,
                         stream,
+                        "application/octet-stream",
                         this.IOBufferSize,
                         this.AuthenticationHeaderGenerator,
                         cancellationToken);
 
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        throw new DataSinkHttpClientException("Unsuccessful service call response") { ErrorResponse = response };
-                    }
+                    EnsureSuccessfulDataTransfer(response);
                 }
             }
             catch (Exception ex)
             {
-                this.Logger.Error(ex, "Failure to SendRemainingDataAsync");
+                this.Logger.Error(ex, "Failure to SendDataAsync");
                 throw;
             }
         }
 
-        /// <summary>
-        /// Accepts a stream representing a sub-segment of data to upload. Never calls <see cref="OnUploadCompleted( string,string)"/>, even on success, as no order of uploaded segments is assumed.
-        /// </summary>
-        /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
-        /// <param name="startAt">Position within the target data where writing should start.</param>
-        /// <param name="stream"><see cref="Stream"/> for accessing the remaining data. The first byte in the stream will be written at <paramref name="startAt"/>, and the rest will be written in order.</param>
-        /// <param name="cancellationToken">Used to cancel the operation</param>
-        public async Task SendPartialDataAsync(string id, long startAt, Stream stream, CancellationToken cancellationToken)
+        private static void EnsureSuccessfulDataTransfer(snh.HttpResponseMessage response)
         {
-            try
+            if (!response.IsSuccessStatusCode)
             {
-                using (var client = new snh.HttpClient())
+                if (response.StatusCode == HttpStatusCode.NotFound)
                 {
-                    client.Timeout = Timeout.InfiniteTimeSpan;
-
-                    var response = await client.PatchWithAuthenticationAsync(
-                        $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}/{startAt}/part",
-                        stream,
-                        this.IOBufferSize,
-                        this.AuthenticationHeaderGenerator,
-                        cancellationToken);
-
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        throw new DataSinkHttpClientException("Unsuccessful service call response") { ErrorResponse = response };
-                    }
+                    throw new DataSinkHttpClientException("404 error response. If the controller exists and handles PATCH, then this may be caused by large message request filtering on the server, i.e. 404.13.") { ErrorResponse = response };
                 }
-            }
-            catch (Exception ex)
-            {
-                this.Logger.Error(ex, "Failure to SendPartialDataAsync");
-                throw;
+
+                throw new DataSinkHttpClientException("Unsuccessful service call response") { ErrorResponse = response };
             }
         }
     }
