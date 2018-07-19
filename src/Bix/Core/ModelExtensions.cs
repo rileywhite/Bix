@@ -26,20 +26,22 @@ namespace Bix.Core
     {
         public static bool IsAggregateRootModelType(this Type source)
         {
+            var typeInfo = typeof(ModelBase).GetTypeInfo();
             return
                 source != null &&
-                typeof(ModelBase).IsAssignableFrom(source) &&
-                typeof(IAggregateRoot).IsAssignableFrom(source) &&
-                !source.IsAbstract;
+                typeInfo.IsAssignableFrom(source) &&
+                typeInfo.IsAssignableFrom(source) &&
+                !typeInfo.IsAbstract;
         }
 
         public static bool IsNonAggregateRootModelType(this Type source)
         {
+            var typeInfo = typeof(ModelBase).GetTypeInfo();
             return
                 source != null &&
-                typeof(ModelBase).IsAssignableFrom(source) &&
-                !typeof(IAggregateRoot).IsAssignableFrom(source) &&
-                !source.IsAbstract;
+                typeInfo.IsAssignableFrom(source) &&
+                !typeInfo.IsAssignableFrom(source) &&
+                !typeInfo.IsAbstract;
         }
 
         public static IEnumerable<PropertyInfo> GetChildModelProperties(
@@ -66,7 +68,7 @@ namespace Bix.Core
             if (source == null) { return new PropertyInfo[0]; }
 
             return
-                from p in source.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
+                from p in source.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
                 where IsChildModelProperty(p)
                 select p;
         }
@@ -97,7 +99,7 @@ namespace Bix.Core
             if (source == null) { yield break; }
 
             foreach (var property in
-                source.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+                source.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
             {
                 if (property.IsChildModelListProperty(out Type childModelType))
                 {
@@ -130,7 +132,7 @@ namespace Bix.Core
                 return false;
             }
 
-            var genericArguments = source.PropertyType.GetGenericArguments();
+            var genericArguments = source.PropertyType.GetTypeInfo().GetGenericArguments();
 
             if (genericArguments.Length != 1)
             {
@@ -140,7 +142,7 @@ namespace Bix.Core
 
             childModelType = genericArguments[0];
 
-            if (!typeof(ModelBase).IsAssignableFrom(childModelType))
+            if (!typeof(ModelBase).GetTypeInfo().IsAssignableFrom(childModelType))
             {
                 childModelType = null;
                 return false;
