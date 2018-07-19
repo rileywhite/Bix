@@ -3,15 +3,29 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
+    <LangVersion>latest</LangVersion>
     <Description>IO tooling for fast network data transfer for Bix</Description>
   </PropertyGroup>
 
-  <Import Project="..\..\BixShared.targets" />
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LangVersion>latest</LangVersion>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <Import Project="..\..\BixShared.targets" />
 
   <ItemGroup>
     <None Remove="SegmentHasher.cs~RF2b60791.TMP" />
