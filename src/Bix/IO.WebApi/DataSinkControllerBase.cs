@@ -59,9 +59,9 @@ namespace Bix.IO.WebApi
             var segmentStart = streamStatus.SegmentHashes[0].Start;
             var segmentLength = streamStatus.SegmentHashes.Sum(sh => sh.Length);
 
-            var targetFilePath = GetTargetFilePath(
-                this.HttpContextAccessor.HttpContext?.User?.Identity?.Name,
-                streamStatus.Descriptor.Id);
+            var partition = this.HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+
+            var targetFilePath = GetTargetFilePath(partition, streamStatus.Descriptor.Id);
 
             if (!Directory.Exists(Path.GetDirectoryName(targetFilePath)))
             {
@@ -106,8 +106,7 @@ namespace Bix.IO.WebApi
             // check if we were comparing the full file, and if so, indicate file upload completeness
             if (segmentStart == 0 && segmentLength == targetFile.Length)
             {
-                await this.OnUploadCompleted(streamStatus.Descriptor.Id);
-                if (targetFile.Exists) { try { targetFile.Delete(); } catch { /* Ignore */ } }
+                await this.SignalUploadCompleted(partition, streamStatus.Descriptor.Id, targetFile);
             }
 
             // TODO null segment hashes is a poor indicator of a lack of difference
@@ -121,7 +120,7 @@ namespace Bix.IO.WebApi
             if (string.IsNullOrWhiteSpace(partition)) { partition = "DefaultPartition"; };
 
             // replace any invalid partition characters with underscores
-            // (potential for collision here, but I'm accepting that risk until a need to change it emerges
+            // (potential for collision here, but I'm accepting that risk until a need to change it emerges)
             partition = string.Join("_", partition.Split(Path.GetInvalidFileNameChars()));
 
             return Path.Combine(
@@ -150,36 +149,45 @@ namespace Bix.IO.WebApi
         /// </remarks>
         [HttpPatch("{id}")]
         [HttpPatch("{id}/{startAt}")]
-        public async Task<IActionResult> SendData(string id, long startAt = 0, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IActionResult> SendData(string id, long startAt = 0, CancellationToken cancellationToken = default)
         {
-            var targetFilePath = GetTargetFilePath(this.HttpContextAccessor.HttpContext?.User?.Identity?.Name, id);
+            var partition = this.HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+            var targetFilePath = GetTargetFilePath(partition, id);
             var targetFile = new FileInfo(targetFilePath);
 
             using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(targetFile.FullName))
             using (var targetStream = memoryMappedFile.CreateViewStream(startAt, targetFile.Length - startAt, MemoryMappedFileAccess.Write))
             {
-                    await this.Request.Body.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
+                await this.Request.Body.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
             }
 
-            await this.OnUploadCompleted(id);
+            await this.SignalUploadCompleted(partition, id, targetFile);
 
             return this.Ok();
         }
 
         /// <summary>
-        /// When overridden in a subclass, should process the uploaded data, including moving/deleting the file.
+        /// Wraps call to <see cref="OnUploadCompleted(string, string, FileInfo)"/>. Will try to clean up the temp uploaded file
+        /// after a successful completion of the upload completion method.
         /// </summary>
+        /// <param name="partition">Partition that separates sets of unique IDs for </param>
         /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
+        /// <param name="tempFileInfo">FileInfo for the temporary location of the uploaded data. Overridden method should clean up/move this file. If it does not, then this base type will attempt to.</param>
         /// <returns>Async task</returns>
-        private async Task OnUploadCompleted(string id) { await this.OnUploadCompleted(this.HttpContextAccessor.HttpContext?.User?.Identity?.Name, id); }
+        private async Task SignalUploadCompleted(string partition, string id, FileInfo tempFileInfo)
+        {
+            await this.OnUploadCompleted(partition, id, tempFileInfo);
+            if (tempFileInfo.Exists) { try { tempFileInfo.Delete(); } catch { /* Ignore */ } }
+        }
 
         /// <summary>
         /// When overridden in a subclass, should process the uploaded data, including moving/deleting the file.
         /// </summary>
         /// <param name="partition">Partition that separates sets of unique IDs for </param>
         /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
+        /// <param name="tempFileInfo">FileInfo for the temporary location of the uploaded data. Overridden method should clean up/move this file. If it does not, then this base type will attempt to.</param>
         /// <returns>Async task</returns>
         /// <remarks>The possibility exists of multiple calls, so implementations should be idempotent.</remarks>
-        protected abstract Task OnUploadCompleted(string partition, string id);
+        protected abstract Task OnUploadCompleted(string partition, string id, FileInfo tempFileInfo);
     }
 }
