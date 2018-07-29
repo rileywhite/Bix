@@ -12,4 +12,8 @@
     <PackageTags>bix business-mix restful webapi aspnetcore</PackageTags>
     <Version>2.0-rc.3</Version>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DocumentationFile>$(TargetDir)$(TargetName).xml</DocumentationFile>
+  </PropertyGroup>
 </Project>
