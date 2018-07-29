@@ -112,8 +112,9 @@ namespace Bix.IO.HttpClient
         /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
         /// <param name="stream"><see cref="Stream"/> for accessing the remaining data. The first byte in the stream will be written at <paramref name="startAt"/>, and the rest will be written in order.</param>
         /// <param name="startAt">Position within the target data where writing should start.</param>
+        /// <param name="length">If provided, the given number of bytes will be streamed. Defaults to <c>null</c>, meaning that all bytes will be streamed. Either way, the completion action will be invoked only if the last expected data byte is sent (based on expected data length). If given for a partial data upload, then the service can significantly reduce memory usage.</param>
         /// <param name="cancellationToken">Used to cancel the operation</param>
-        public async Task SendDataAsync(string id, Stream stream, long startAt = 0, CancellationToken cancellationToken = default)
+        public async Task SendDataAsync(string id, Stream stream, long startAt = 0, long? length = default, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -121,9 +122,20 @@ namespace Bix.IO.HttpClient
                 {
                     client.Timeout = Timeout.InfiniteTimeSpan;
 
-                    var requestUri = startAt > 0 ?
-                        $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}/{startAt}" :
-                        $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}";
+                    string requestUri;
+                    if (length.HasValue)
+                    {
+                        requestUri = $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}/{length.Value}";
+                    }
+                    else if (startAt > 0)
+                    {
+                        requestUri = $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}";
+                    }
+                    else
+                    {
+                        requestUri = $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}";
+                    }
+
 
                     var response = await client.PatchWithAuthenticationAsync(
                         requestUri,

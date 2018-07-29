@@ -17,6 +17,7 @@
 using Bix.WebApi.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics.Contracts;
 using System.IO;
@@ -28,18 +29,37 @@ using System.Threading.Tasks;
 
 namespace Bix.IO.WebApi
 {
+    /// <summary>
+    /// Base type for controllers that accept streaming data of a known size.
+    /// </summary>
     [DisableRequestSizeLimit]
     public abstract class DataSinkControllerBase : BixControllerBase
     {
-        protected IHttpContextAccessor HttpContextAccessor { get; }
-
-        public DataSinkControllerBase(IHttpContextAccessor httpContextAccessor)
+        /// <summary>
+        /// Creates a new <see cref="DataSinkControllerBase"/>
+        /// </summary>
+        /// <param name="httpContextAccessor">For accessing info about the current HTTP request</param>
+        /// <param name="logger">Logger to which log entries will be written</param>
+        public DataSinkControllerBase(IHttpContextAccessor httpContextAccessor, ILogger logger)
         {
             Contract.Requires(httpContextAccessor != null);
+            Contract.Requires(logger != null);
             Contract.Ensures(this.HttpContextAccessor != null);
+            Contract.Ensures(this.Logger != null);
 
             this.HttpContextAccessor = httpContextAccessor;
+            this.Logger = logger;
         }
+
+        /// <summary>
+        /// Gets the HTTP context accessor for the current request
+        /// </summary>
+        protected IHttpContextAccessor HttpContextAccessor { get; }
+
+        /// <summary>
+        /// Gets the current logger
+        /// </summary>
+        protected ILogger Logger { get; }
 
         /// <summary>
         /// Bumps, or signals creation/completion/status update request, based on the stream's current state.
@@ -49,7 +69,7 @@ namespace Bix.IO.WebApi
         /// <returns>Stream status with target details filled in or <c>null</c> if the target stream already contains full data.</returns>
         /// <remarks>
         /// A returned value with equivalent target and sources hashes and a segment length equal to the full data length,
-        /// then a completion signal was sent. In this case, <see cref="OnUploadCompleted( string,string)"/> will have been called.
+        /// then a completion signal was sent. In this case, <see cref="OnUploadCompleted(string, string, FileInfo, CancellationToken)"/> will have been called.
         /// Otherwise, data uploading may begin/proceed if the caller has enough info, or the caller may bump again with a more
         /// targeted segment length.
         /// </remarks>
@@ -74,6 +94,7 @@ namespace Bix.IO.WebApi
                 {
                     case long l when l < streamStatus.Descriptor.Length:
                         // more efficient than SetLength since the file isn't filled with 0s
+                        Logger.LogInformation($"Setting length of file {targetFilePath} with partition {partition} and ID {streamStatus.Descriptor.Id} to {streamStatus.Descriptor.Length}.");
                         targetStream.Position = streamStatus.Descriptor.Length - 1;
                         targetStream.WriteByte(0);
                         targetStream.Position = 0;
@@ -81,6 +102,7 @@ namespace Bix.IO.WebApi
 
                     case long l when l > streamStatus.Descriptor.Length:
                         // truncate the file
+                        Logger.LogWarning($"Truncating length of file {targetFilePath} with partition {partition} and ID {streamStatus.Descriptor.Id} to {streamStatus.Descriptor.Length}.");
                         targetStream.SetLength(streamStatus.Descriptor.Length);
                         break;
                 }
@@ -98,20 +120,27 @@ namespace Bix.IO.WebApi
                 new HashAlgorithmName(streamStatus.Descriptor.HashName),
                 out var diffSubsegmentHashes))
             {
+                Logger.LogDebug($"Difference was found for the data stream with partition {partition}, ID {streamStatus.Descriptor.Id}, segment start {segmentStart}, and segment length {segmentLength}.");
                 streamStatus.SegmentHashes = diffSubsegmentHashes;
                 return this.Ok(streamStatus);
-            }
-
-            // no diff
-            // check if we were comparing the full file, and if so, indicate file upload completeness
-            if (segmentStart == 0 && segmentLength == targetFile.Length)
-            {
-                await this.SignalUploadCompleted(partition, streamStatus.Descriptor.Id, targetFile, cancellationToken);
             }
 
             // TODO null segment hashes is a poor indicator of a lack of difference
             //      and an even poorer indicator that that the OnUploadCompleted event was raised
             streamStatus.SegmentHashes = null;
+
+            // no diff
+            // check if we were comparing the full file, and if so, indicate file upload completeness
+            if (segmentStart == 0 && segmentLength == targetFile.Length)
+            {
+                Logger.LogInformation($"No difference was found for a full data stream with partition {partition} and ID {streamStatus.Descriptor.Id}. Signaling upload completed.");
+                await this.SignalUploadCompleted(partition, streamStatus.Descriptor.Id, targetFile, cancellationToken);
+            }
+            else
+            {
+                Logger.LogInformation($"No difference was found for a partial data stream with partition {partition}, ID {streamStatus.Descriptor.Id}, segment start {segmentStart}, and segment length {segmentLength}.");
+            }
+
             return this.Ok(streamStatus);
         }
 
@@ -136,10 +165,11 @@ namespace Bix.IO.WebApi
         public virtual int IOBufferSize { get; } = 81920;
 
         /// <summary>
-        /// Accepts a stream representing the data to transfer. Calls <see cref="OnUploadCompleted( string,string)"/> on success.
+        /// Accepts a stream representing the data to transfer. Calls <see cref="OnUploadCompleted(string, string, FileInfo, CancellationToken)"/> on success.
         /// </summary>
         /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
         /// <param name="startAt">Position within the target data where writing should start. Defaults to 0, which indicates that a full set of data is being transferred.</param>
+        /// <param name="length">If provided, the given number of bytes will be streamed. Defaults to <c>null</c>, meaning that all bytes will be streamed. Either way, the completion action will be invoked only if the last expected data byte is sent (based on expected data length). If given for a partial data upload, then the service can significantly reduce memory usage.</param>
         /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>Action result</returns>
         /// <remarks>
@@ -149,25 +179,54 @@ namespace Bix.IO.WebApi
         /// </remarks>
         [HttpPatch("{id}")]
         [HttpPatch("{id}/{startAt}")]
-        public async Task<IActionResult> SendData(string id, long startAt = 0, CancellationToken cancellationToken = default)
+        [HttpPatch("{id}/{startAt}/{length}")]
+        public async Task<IActionResult> SendData(string id, long startAt = 0, long? length = default, CancellationToken cancellationToken = default)
         {
             var partition = this.HttpContextAccessor.HttpContext?.User?.Identity?.Name;
             var targetFilePath = GetTargetFilePath(partition, id);
             var targetFile = new FileInfo(targetFilePath);
 
-            using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(targetFile.FullName))
-            using (var targetStream = memoryMappedFile.CreateViewStream(startAt, targetFile.Length - startAt, MemoryMappedFileAccess.Write))
+            var bytesLeft = targetFile.Length - startAt;
+            length = length ?? bytesLeft;
+            if (length.Value > bytesLeft)
             {
-                await this.Request.Body.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
+                // too much data sent
+                this.Logger.LogWarning($"Expected no more than {bytesLeft} bytes, but {length.Value} bytes were indicated.");
+                return this.BadRequest();
             }
 
-            await this.SignalUploadCompleted(partition, id, targetFile, cancellationToken);
+            Logger.LogInformation($"Starting to write {length.Value} expected bytes to {targetFilePath} with partition {partition} and ID {id}.");
+
+            var actualWrittenBytes = 0L;
+
+            using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(targetFile.FullName))
+            using (var targetStream = memoryMappedFile.CreateViewStream(startAt, length.Value, MemoryMappedFileAccess.Write))
+            {
+                await this.Request.Body.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
+                actualWrittenBytes = targetStream.Position;
+            }
+
+            if (actualWrittenBytes != length.Value)
+            {
+                Logger.LogWarning($"Wrote {length.Value} bytes to {targetFilePath} with partition {partition} and ID {id}. This was fewer than expected. Specify a length parameter to avoid allocating unneeded memory in the service.");
+            }
+            else
+            {
+                Logger.LogInformation($"Wrote {length.Value} bytes to {targetFilePath} with partition {partition} and ID {id}.");
+            }
+
+            if (actualWrittenBytes == bytesLeft)
+            {
+                // last of the data was sent
+                Logger.LogInformation($"Signaling completion after data transfer for {targetFilePath} with partition {partition} and ID {id}.");
+                await this.SignalUploadCompleted(partition, id, targetFile, cancellationToken);
+            }
 
             return this.Ok();
         }
 
         /// <summary>
-        /// Wraps call to <see cref="OnUploadCompleted(string, string, FileInfo)"/>. Will try to clean up the temp uploaded file
+        /// Wraps call to <see cref="OnUploadCompleted(string, string, FileInfo, CancellationToken)"/>. Will try to clean up the temp uploaded file
         /// after a successful completion of the upload completion method.
         /// </summary>
         /// <param name="partition">Partition that separates sets of unique IDs for </param>
