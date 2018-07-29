@@ -18,10 +18,25 @@ using System;
 
 namespace Bix.IO
 {
+    /// <summary>
+    /// Represents a segment of data within a larger stream that allows for fast comparison
+    /// between the segment in a source and a target data transfer.
+    /// </summary>
     public class SegmentHash
     {
+        /// <summary>
+        /// Gets or sets the position within a larger stream of the first byte in a data segment.
+        /// </summary>
         public long Start { get; set; }
+
+        /// <summary>
+        /// Gets or sets the length within a larger stream of the data segment.
+        /// </summary>
         public long Length { get; set; }
+
+        /// <summary>
+        /// Base64 encoded hash of the data segment.
+        /// </summary>
         public string Hash { get; set; }
     }
 }

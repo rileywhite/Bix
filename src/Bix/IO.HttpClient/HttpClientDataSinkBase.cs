@@ -29,6 +29,10 @@ using System.Net;
 
 namespace Bix.IO.HttpClient
 {
+    /// <summary>
+    /// Base type for sending large data over HTTP.
+    /// </summary>
+    /// <remarks>Currently only handles data with a known size.</remarks>
     public abstract class HttpClientDataSinkBase
     {
         protected IHttpClientConfiguration Config { get; }
@@ -66,7 +70,7 @@ namespace Bix.IO.HttpClient
         /// Otherwise, data uploading may begin/proceed if the caller has enough info, or the caller may bump again with a more
         /// targeted segment length.
         /// </remarks>
-        public async Task<StreamStatus> BumpAsync(StreamStatus streamStatus, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<StreamStatus> BumpAsync(StreamStatus streamStatus, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -109,7 +113,7 @@ namespace Bix.IO.HttpClient
         /// <param name="stream"><see cref="Stream"/> for accessing the remaining data. The first byte in the stream will be written at <paramref name="startAt"/>, and the rest will be written in order.</param>
         /// <param name="startAt">Position within the target data where writing should start.</param>
         /// <param name="cancellationToken">Used to cancel the operation</param>
-        public async Task SendDataAsync(string id, Stream stream, long startAt = 0, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task SendDataAsync(string id, Stream stream, long startAt = 0, CancellationToken cancellationToken = default)
         {
             try
             {

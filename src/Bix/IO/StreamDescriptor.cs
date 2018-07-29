@@ -18,10 +18,24 @@ using System;
 
 namespace Bix.IO
 {
+    /// <summary>
+    /// Represents info about a full stream of data that is to be transferred from a source to a target.
+    /// </summary>
     public class StreamDescriptor
     {
+        /// <summary>
+        /// Gets or sets an identifier that uniquely identifies a stream of data
+        /// </summary>
         public string Id { get; set; }
+
+        /// <summary>
+        /// Length of the data to be transferred.
+        /// </summary>
         public long Length { get; set; }
+
+        /// <summary>
+        /// Name of the hash algorithm used for associated segment hashses, e.g. "MD5"
+        /// </summary>
         public string HashName { get; set; }
     }
 }

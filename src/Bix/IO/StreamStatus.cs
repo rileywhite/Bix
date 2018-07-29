@@ -18,9 +18,21 @@ using System;
 
 namespace Bix.IO
 {
+    /// <summary>
+    /// Holds a descriptor for a data stream and segment hashes for comparing segments of a stream
+    /// for use in quickly determining a data transfer restart point
+    /// </summary>
     public class StreamStatus
     {
+        /// <summary>
+        /// Gets or sets the descriptor that provides info about a stream of data to be transferred.
+        /// </summary>
         public StreamDescriptor Descriptor { get; set; }
+
+        /// <summary>
+        /// Gets or sets a collection of segment hash data objects that can be used to compare
+        /// pieces of a source and target stream of data.
+        /// </summary>
         public SegmentHash[] SegmentHashes { get; set; }
     }
 }

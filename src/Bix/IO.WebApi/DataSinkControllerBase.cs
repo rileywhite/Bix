@@ -46,7 +46,7 @@ namespace Bix.IO.WebApi
         /// </summary>
         /// <param name="streamStatus">Stream status with the source data filled in with info on the stream being signaled</param>
         /// <param name="cancellationToken">Used to cancel the operation</param>
-        /// <returns>Stream status with target details filled in.</returns>
+        /// <returns>Stream status with target details filled in or <c>null</c> if the target stream already contains full data.</returns>
         /// <remarks>
         /// A returned value with equivalent target and sources hashes and a segment length equal to the full data length,
         /// then a completion signal was sent. In this case, <see cref="OnUploadCompleted( string,string)"/> will have been called.
@@ -54,7 +54,7 @@ namespace Bix.IO.WebApi
         /// targeted segment length.
         /// </remarks>
         [HttpPatch]
-        public async Task<IActionResult> Bump([FromBody] StreamStatus streamStatus, CancellationToken cancellationToken)
+        public async Task<IActionResult> Bump([FromBody] StreamStatus streamStatus, CancellationToken cancellationToken = default)
         {
             var segmentStart = streamStatus.SegmentHashes[0].Start;
             var segmentLength = streamStatus.SegmentHashes.Sum(sh => sh.Length);
@@ -106,7 +106,7 @@ namespace Bix.IO.WebApi
             // check if we were comparing the full file, and if so, indicate file upload completeness
             if (segmentStart == 0 && segmentLength == targetFile.Length)
             {
-                await this.SignalUploadCompleted(partition, streamStatus.Descriptor.Id, targetFile);
+                await this.SignalUploadCompleted(partition, streamStatus.Descriptor.Id, targetFile, cancellationToken);
             }
 
             // TODO null segment hashes is a poor indicator of a lack of difference
@@ -161,7 +161,7 @@ namespace Bix.IO.WebApi
                 await this.Request.Body.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
             }
 
-            await this.SignalUploadCompleted(partition, id, targetFile);
+            await this.SignalUploadCompleted(partition, id, targetFile, cancellationToken);
 
             return this.Ok();
         }
@@ -173,10 +173,11 @@ namespace Bix.IO.WebApi
         /// <param name="partition">Partition that separates sets of unique IDs for </param>
         /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
         /// <param name="tempFileInfo">FileInfo for the temporary location of the uploaded data. Overridden method should clean up/move this file. If it does not, then this base type will attempt to.</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>Async task</returns>
-        private async Task SignalUploadCompleted(string partition, string id, FileInfo tempFileInfo)
+        private async Task SignalUploadCompleted(string partition, string id, FileInfo tempFileInfo, CancellationToken cancellationToken = default)
         {
-            await this.OnUploadCompleted(partition, id, tempFileInfo);
+            await this.OnUploadCompleted(partition, id, tempFileInfo, cancellationToken);
             if (tempFileInfo.Exists) { try { tempFileInfo.Delete(); } catch { /* Ignore */ } }
         }
 
@@ -186,8 +187,9 @@ namespace Bix.IO.WebApi
         /// <param name="partition">Partition that separates sets of unique IDs for </param>
         /// <param name="id">Identifier for the upload. Must be unique for an authenticated user within the timeframe of the upload.</param>
         /// <param name="tempFileInfo">FileInfo for the temporary location of the uploaded data. Overridden method should clean up/move this file. If it does not, then this base type will attempt to.</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>Async task</returns>
         /// <remarks>The possibility exists of multiple calls, so implementations should be idempotent.</remarks>
-        protected abstract Task OnUploadCompleted(string partition, string id, FileInfo tempFileInfo);
+        protected abstract Task OnUploadCompleted(string partition, string id, FileInfo tempFileInfo, CancellationToken cancellationToken = default);
     }
 }

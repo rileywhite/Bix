@@ -24,8 +24,18 @@ using System.Security.Cryptography;
 
 namespace Bix.IO
 {
+    /// <summary>
+    /// Encapsulates efficient logic for hashing segments and subsegments of a data file.
+    /// </summary>
     public class SegmentHasher
     {
+        /// <summary>
+        /// Hashes a requested number of segments within a file.
+        /// </summary>
+        /// <param name="filePath">Path of the file to hash segments of</param>
+        /// <param name="segmentCount">Number of segments to hash</param>
+        /// <param name="hashAlgorithmName">Name of the hash algorithm to use</param>
+        /// <returns>Colletion of <paramref name="segmentCount"/> hash segments</returns>
         public SegmentHash[] GetSegmentHashes(
             string filePath,
             byte segmentCount,
@@ -41,6 +51,13 @@ namespace Bix.IO
             return this.GetSegmentHashes(new FileInfo(filePath), segmentCount, hashAlgorithmName);
         }
 
+        /// <summary>
+        /// Hashes a requested number of segments within a file.
+        /// </summary>
+        /// <param name="file">File to hash segments of</param>
+        /// <param name="segmentCount">Number of segments to hash</param>
+        /// <param name="hashAlgorithmName">Name of the hash algorithm to use</param>
+        /// <returns>Colletion of <paramref name="segmentCount"/> hash segments</returns>
         public SegmentHash[] GetSegmentHashes(
             FileInfo file,
             byte segmentCount,
@@ -56,6 +73,15 @@ namespace Bix.IO
             return this.GetSubsegmentHashes(file, 0, file.Length, segmentCount, hashAlgorithmName);
         }
 
+        /// <summary>
+        /// Hashes a requested number of subsegments within a file segment.
+        /// </summary>
+        /// <param name="file">File to hash subsegments of</param>
+        /// <param name="segmentStart">Position in file of the segment for which you want to hash subsegments</param>
+        /// <param name="segmentLength">Length in file of the segment for which you want to hash subsegments</param>
+        /// <param name="subsegmentCount">Number of subsegments to hash</param>
+        /// <param name="hashAlgorithmName">Name of the hash algorithm to use</param>
+        /// <returns>Colletion of <paramref name="subsegmentCount"/> hash segments</returns>
         public SegmentHash[] GetSubsegmentHashes(
             FileInfo file,
             long segmentStart,
@@ -76,6 +102,15 @@ namespace Bix.IO
             }
         }
 
+        /// <summary>
+        /// Hashes a requested number of subsegments within a file segment.
+        /// </summary>
+        /// <param name="memoryMappedFile">File, mapped to memory for very efficient access, to hash subsegments of</param>
+        /// <param name="segmentStart">Position in file of the segment for which you want to hash subsegments</param>
+        /// <param name="segmentLength">Length in file of the segment for which you want to hash subsegments</param>
+        /// <param name="subsegmentCount">Number of subsegments to hash</param>
+        /// <param name="hashAlgorithmName">Name of the hash algorithm to use</param>
+        /// <returns>Colletion of <paramref name="subsegmentCount"/> hash segments</returns>
         public SegmentHash[] GetSubsegmentHashes(
             MemoryMappedFile memoryMappedFile,
             long segmentStart,
@@ -107,6 +142,18 @@ namespace Bix.IO
             }
         }
 
+        /// <summary>
+        /// Finds the first segment in a file where it differs from a given reference set of segment hashes, and then
+        /// drills down into that segment, pulling subsegment hashes for further comparison.
+        /// </summary>
+        /// <param name="referenceSegmentHashes">Segment hashes to compare the given file segments to</param>
+        /// <param name="filePath">Path of the file to check against the <paramref name="referenceSegmentHashes"/></param>
+        /// <param name="segmentStart">Position in file of the segment that is described by <paramref name="referenceSegmentHashes"/></param>
+        /// <param name="segmentLength">Length in file of the segment that is described by <paramref name="referenceSegmentHashes"/></param>
+        /// <param name="subsegmentCount">Number of subsegment hashes to break the first differing segment into</param>
+        /// <param name="hashAlgorithmName">Hash algorithm name used for comparing data</param>
+        /// <param name="diffSubsegmentHashes">Will be populated with the collection of <paramref name="subsegmentCount"/> hashes from the first differing segment or <c>null</c> if no difference is found.</param>
+        /// <returns><c>true</c> if a difference is found, else <c>false</c></returns>
         public bool TryGetSubsegmentHashesOfFirstDiff(
             SegmentHash[] referenceSegmentHashes,
             string filePath,
@@ -137,6 +184,18 @@ namespace Bix.IO
                 out diffSubsegmentHashes);
         }
 
+        /// <summary>
+        /// Finds the first segment in a file where it differs from a given reference set of segment hashes, and then
+        /// drills down into that segment, pulling subsegment hashes for further comparison.
+        /// </summary>
+        /// <param name="referenceSegmentHashes">Segment hashes to compare the given file segments to</param>
+        /// <param name="file">File to check against the <paramref name="referenceSegmentHashes"/></param>
+        /// <param name="segmentStart">Position in file of the segment that is described by <paramref name="referenceSegmentHashes"/></param>
+        /// <param name="segmentLength">Length in file of the segment that is described by <paramref name="referenceSegmentHashes"/></param>
+        /// <param name="subsegmentCount">Number of subsegment hashes to break the first differing segment into</param>
+        /// <param name="hashAlgorithmName">Hash algorithm name used for comparing data</param>
+        /// <param name="diffSubsegmentHashes">Will be populated with the collection of <paramref name="subsegmentCount"/> hashes from the first differing segment or <c>null</c> if no difference is found.</param>
+        /// <returns><c>true</c> if a difference is found, else <c>false</c></returns>
         public bool TryGetSubsegmentHashesOfFirstDiff(
             SegmentHash[] referenceSegmentHashes,
             FileInfo file,
