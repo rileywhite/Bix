@@ -37,7 +37,7 @@ namespace Bix.Repositories.Restful.HttpClient
             ILogger logger)
             : base(config, authenticationHeaderGenerator, logger) { }
 
-        public async Task<TItem> FindOrAddAsync(TItem item, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<TItem> FindOrAddAsync(TItem item, CancellationToken cancellationToken = default)
         {
             var key = item.NaturalKey;
             try

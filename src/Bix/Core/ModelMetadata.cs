@@ -18,11 +18,29 @@ using System;
 
 namespace Bix.Core
 {
+    /// <summary>
+    /// Represents metadata about a model stored in a repository.
+    /// </summary>
     public class ModelMetadata
     {
+        /// <summary>
+        /// Gets or sets the point in time at which a model was created.
+        /// </summary>
         public DateTime? CreatedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID that represents the user by whom a model was created.
+        /// </summary>
         public decimal? CreatedById { get; set; }
+
+        /// <summary>
+        /// Gets or sets the point in time at which a model was updated.
+        /// </summary>
         public DateTime? LastUpdatedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID that represents the user by whom a model was updated.
+        /// </summary>
         public decimal? LastUpdatedById { get; set; }
     }
 }

@@ -49,7 +49,7 @@ namespace Bix.Repositories.Restful.HttpClient
             this.Logger = logger;
         }
 
-        public async Task<IQueryable<TItem>> GetAllAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IQueryable<TItem>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             try
             {
@@ -72,7 +72,7 @@ namespace Bix.Repositories.Restful.HttpClient
             }
         }
 
-        public async Task<TItem> FindAsync(TIdentity identity, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<TItem> FindAsync(TIdentity identity, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -95,7 +95,7 @@ namespace Bix.Repositories.Restful.HttpClient
             }
         }
 
-        public async Task<TItem> AddAsync(TItem item, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<TItem> AddAsync(TItem item, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -126,7 +126,7 @@ namespace Bix.Repositories.Restful.HttpClient
             }
         }
 
-        public async Task RemoveAsync(TIdentity identity, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task RemoveAsync(TIdentity identity, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -150,7 +150,7 @@ namespace Bix.Repositories.Restful.HttpClient
             }
         }
 
-        public async Task<TItem> UpdateAsync(TItem updated, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<TItem> UpdateAsync(TItem updated, CancellationToken cancellationToken = default)
         {
             var identity = updated.Identity;
 
@@ -183,7 +183,7 @@ namespace Bix.Repositories.Restful.HttpClient
             }
         }
 
-        public async Task<ModelMetadata> GetMetadataAsync(TIdentity identity, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<ModelMetadata> GetMetadataAsync(TIdentity identity, CancellationToken cancellationToken = default)
         {
             try
             {

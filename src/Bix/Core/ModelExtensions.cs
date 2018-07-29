@@ -22,8 +22,16 @@ using System.Threading;
 
 namespace Bix.Core
 {
+    /// <summary>
+    /// Behaviors available to enhance usability of <see cref="ModelBase"/> types
+    /// </summary>
     public static class ModelExtensions
     {
+        /// <summary>
+        /// Determines whether a type is an aggregate root model.
+        /// </summary>
+        /// <param name="source">Type to examing</param>
+        /// <returns><c>true</c> if the type is a model and an aggregate root, else <c>false</c>.</returns>
         public static bool IsAggregateRootModelType(this Type source)
         {
             var typeInfo = typeof(ModelBase).GetTypeInfo();
@@ -34,6 +42,11 @@ namespace Bix.Core
                 !typeInfo.IsAbstract;
         }
 
+        /// <summary>
+        /// Determines whether a type is a model that is not an aggregate root.
+        /// </summary>
+        /// <param name="source">Type to examine</param>
+        /// <returns><c>true</c> if a type is a model but not an aggregate root, else <c>false</c>.</returns>
         public static bool IsNonAggregateRootModelType(this Type source)
         {
             var typeInfo = typeof(ModelBase).GetTypeInfo();
@@ -44,10 +57,18 @@ namespace Bix.Core
                 !typeInfo.IsAbstract;
         }
 
+        /// <summary>
+        /// Finds all child properties that are of non-aggregateroot model types, menaing
+        /// that they are Contained rather than Referenced, and they should be updated in tandem with their parent.
+        /// </summary>
+        /// <param name="source">Type to examine</param>
+        /// <param name="cache">Cache to use for avoiding multiple expensive reflection operations</param>
+        /// <param name="cancellationToken">Cancellation token for cancelling the operation.</param>
+        /// <returns>Collection of all child model properties</returns>
         public static IEnumerable<PropertyInfo> GetChildModelProperties(
             this Type source,
             ICache cache,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             var cacheKey = $"GetChildModelProperties_{source.FullName}";
 
@@ -73,10 +94,17 @@ namespace Bix.Core
                 select p;
         }
 
+        /// <summary>
+        /// Gets the properties of a type the represent collections of child model types.
+        /// </summary>
+        /// <param name="source">Type to examine</param>
+        /// <param name="cache">Cache to use for avoiding multiple expensive reflection operations</param>
+        /// <param name="cancellationToken">Cancellation token for cancelling the operation.</param>
+        /// <returns>Collection of properties that are collections of child models</returns>
         public static IEnumerable<ValueTuple<PropertyInfo, Type>> GetChildModelListProperties(
             this Type source,
             ICache cache,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             if (source == null) { throw new ArgumentNullException(nameof(source)); }
 
@@ -108,6 +136,11 @@ namespace Bix.Core
             }
         }
 
+        /// <summary>
+        /// Examines a property to determine if it is a child model.
+        /// </summary>
+        /// <param name="source">Property to examine</param>
+        /// <returns><c>true</c> if the property holds a child model, else <c>false</c></returns>
         public static bool IsChildModelProperty(this PropertyInfo source)
         {
             return
@@ -117,6 +150,12 @@ namespace Bix.Core
                 source.PropertyType.IsNonAggregateRootModelType();
         }
 
+        /// <summary>
+        /// Examines a property to determine if it is a collection of child models
+        /// </summary>
+        /// <param name="source">Property to examine</param>
+        /// <param name="childModelType">Populated with the child model type if the property is a collection, else <c>null</c>.</param>
+        /// <returns><c>true</c> if the property holds a collection child models, else <c>false</c></returns>
         public static bool IsChildModelListProperty(this PropertyInfo source, out Type childModelType)
         {
             var isChildModelEnumerationProperty =
@@ -160,15 +199,15 @@ namespace Bix.Core
         /// Currently, the ordering logic depends on each entity and sub-entity having no back-references to parent items.
         /// This could be updated by adding an additional topological sort, but until/unless that's needed, I'll leave it out.
         /// </remarks>
-        /// <typeparam name="TAggregateRoot">Type of the aggregate root to look at./typeparam>
+        /// <typeparam name="TAggregateRoot">Type of the aggregate root to look at</typeparam>
         /// <param name="source">Root item to grab sub-items from</param>
         /// <param name="cache">Cache containing previously determined dependencies between model types</param>
-        /// <param name="cancellationToken"/>Tracks cancellation for the operation</param>>
+        /// <param name="cancellationToken">Tracks cancellation for the operation</param>
         /// <returns>Models contained in the aggregate ordered in reverse dependency order so that children come before parents</returns>
         public static IEnumerable<ModelBase> CollectModelsInReverseDependencyOrder<TAggregateRoot>(
             this TAggregateRoot source,
             ICache cache,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where TAggregateRoot : ModelBase, IAggregateRoot
         {
             if (source == null) { yield break; }

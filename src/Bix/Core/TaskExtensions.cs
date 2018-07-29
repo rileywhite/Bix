@@ -19,6 +19,9 @@ using System.Threading.Tasks;
 
 namespace Bix.Core
 {
+    /// <summary>
+    /// Expanded functionality for <see cref="Task"/> objects
+    /// </summary>
     public static class TaskExtensions
     {
         /// <summary>

@@ -18,17 +18,34 @@ using System;
 
 namespace Bix.Core
 {
+    /// <summary>
+    /// Base type for a model with an assigned key and a natural key.
+    /// </summary>
+    /// <typeparam name="TModel">Type of the model</typeparam>
+    /// <typeparam name="TIdentity">Type of the model's ID</typeparam>
+    /// <typeparam name="TNaturalKey">Type of the model's natrual key</typeparam>
     public abstract class ValueTypeModelBase<TModel, TIdentity, TNaturalKey>
         : ModelBase<TModel, TIdentity>, IHasNaturalKey<TNaturalKey>
         where TModel : ValueTypeModelBase<TModel, TIdentity, TNaturalKey>, new()
     {
+        /// <summary>
+        /// Gets the model's natrual key
+        /// </summary>
         public abstract TNaturalKey NaturalKey { get; }
     }
 
+    /// <summary>
+    /// Base type for a model with a natural key.
+    /// </summary>
+    /// <typeparam name="TModel">Type of the model</typeparam>
+    /// <typeparam name="TNaturalKey">Type of the model's natrual key</typeparam>
     public abstract class ValueTypeModelBase<TModel, TNaturalKey>
         : ValueTypeModelBase<TModel, TNaturalKey, TNaturalKey>
         where TModel : ValueTypeModelBase<TModel, TNaturalKey>, new()
     {
+        /// <summary>
+        /// Same as <see cref="IHasNaturalKey{TNaturalKey}.NaturalKey"/>
+        /// </summary>
         public override sealed TNaturalKey Identity => this.NaturalKey;
     }
 }

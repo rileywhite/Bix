@@ -67,7 +67,7 @@ namespace Bix.Repositories.EntityFramework
 
         #region Standard Access Methods
 
-        public async Task<IQueryable<TModel>> GetAllAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IQueryable<TModel>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             try
             {
@@ -86,7 +86,7 @@ namespace Bix.Repositories.EntityFramework
             }
         }
 
-        public async Task<TModel> FindAsync(TIdentity identity, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<TModel> FindAsync(TIdentity identity, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -103,7 +103,7 @@ namespace Bix.Repositories.EntityFramework
             }
         }
 
-        public async Task<TModel> AddAsync(TModel item, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<TModel> AddAsync(TModel item, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -122,7 +122,7 @@ namespace Bix.Repositories.EntityFramework
             }
         }
 
-        public async Task RemoveAsync(TIdentity identity, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task RemoveAsync(TIdentity identity, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -144,7 +144,7 @@ namespace Bix.Repositories.EntityFramework
             }
         }
 
-        public async Task<TModel> UpdateAsync(TModel item, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<TModel> UpdateAsync(TModel item, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -163,7 +163,7 @@ namespace Bix.Repositories.EntityFramework
             }
         }
 
-        public async Task<ModelMetadata> GetMetadataAsync(TIdentity identity, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<ModelMetadata> GetMetadataAsync(TIdentity identity, CancellationToken cancellationToken = default)
         {
             var item = await this.FindAsync(identity, cancellationToken);
             if (item == null) { return null; }

@@ -20,12 +20,30 @@ using System.Threading.Tasks;
 
 namespace Bix.Core
 {
+    /// <summary>
+    /// When implemented, creates a repository that can store items identified by a natural key as well as an
+    /// assigned identity.
+    /// </summary>
+    /// <typeparam name="TIdentity">Type of the assigned identity.</typeparam>
+    /// <typeparam name="TNaturalKey">Type of the natural key</typeparam>
+    /// <typeparam name="TItem">Type of the stored item</typeparam>
     public interface IValueTypeRepository<TIdentity, TNaturalKey, TItem> : IRepository<TIdentity, TItem>
         where TItem : class, IAggregateRoot, IHasIdentity<TIdentity>, IHasNaturalKey<TNaturalKey>
     {
-        Task<TItem> FindOrAddAsync(TItem item, CancellationToken cancellationToken = default(CancellationToken));
+        /// <summary>
+        /// Given an item with a populated natural key, finds the existing version or adds the given value.
+        /// </summary>
+        /// <param name="item">Item to find or add</param>
+        /// <param name="cancellationToken">Cancellation token for cancelling the operation.</param>
+        /// <returns>Found or added item, including any pre-existing or server-generated data.</returns>
+        Task<TItem> FindOrAddAsync(TItem item, CancellationToken cancellationToken = default);
     }
 
+    /// <summary>
+    /// When implemented, creates a repository that can store items identified only by a natural key.
+    /// </summary>
+    /// <typeparam name="TNaturalKey">Type of the natural key.</typeparam>
+    /// <typeparam name="TItem">Type of the stored item</typeparam>
     public interface IValueTypeRepository<TNaturalKey, TItem> : IValueTypeRepository<TNaturalKey, TNaturalKey, TItem>
         where TItem : class, IAggregateRoot, IHasIdentity<TNaturalKey>, IHasNaturalKey<TNaturalKey> { }
 }

@@ -28,7 +28,7 @@ namespace Bix.Http.Client
             this HttpClient client,
             string requestUri,
             HttpContent content,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return await client.SendAsync(
                 new HttpRequestMessage(new HttpMethod("PATCH"), requestUri) { Content = content }, cancellationToken);
@@ -38,7 +38,7 @@ namespace Bix.Http.Client
             this HttpClient client,
             string requestUri,
             string jsonContent,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return await client.PatchAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken);
         }

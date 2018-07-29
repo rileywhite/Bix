@@ -19,6 +19,14 @@ using System;
 
 namespace Bix.Core
 {
+    /// <summary>
+    /// Base for types that can be stored within an <see cref="IRepository{TIdentity, TItem}"/>
+    /// </summary>
+    /// <remarks>
+    /// Do not inherit from this type directly. Instead inherit from <see cref="ModelBase{TModel, TIdentity}"/>.
+    /// This type is primarily for ease of access in cases where the actual type doesn't matter. Normally this is used
+    /// internally by repositories.
+    /// </remarks>
     public abstract class ModelBase
     {
         /// <summary>
@@ -33,9 +41,17 @@ namespace Bix.Core
         }
     }
 
+    /// <summary>
+    /// Base for types that can be stored in a <see cref="IRepository{TIdentity, TItem}"/>.
+    /// </summary>
+    /// <typeparam name="TModel"></typeparam>
+    /// <typeparam name="TIdentity"></typeparam>
     public abstract class ModelBase<TModel, TIdentity> : ModelBase, IHasIdentity<TIdentity>
-    where TModel : ModelBase<TModel, TIdentity>, new()
+        where TModel : ModelBase<TModel, TIdentity>, new()
     {
+        /// <summary>
+        /// Identity that uniquely identifies a model stored within a repository.
+        /// </summary>
         public abstract TIdentity Identity { get; }
     }
 }

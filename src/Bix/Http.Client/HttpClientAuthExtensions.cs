@@ -31,7 +31,7 @@ namespace Bix.Http.Client
             this HttpClient client,
             string requestUri,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri);
@@ -44,7 +44,7 @@ namespace Bix.Http.Client
             string requestUri,
             string jsonContent,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
@@ -55,7 +55,7 @@ namespace Bix.Http.Client
             this HttpClient client,
             string requestUri,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri);
@@ -67,7 +67,7 @@ namespace Bix.Http.Client
             string requestUri,
             string jsonContent,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
@@ -79,7 +79,7 @@ namespace Bix.Http.Client
             string requestUri,
             string jsonContent,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
@@ -92,7 +92,7 @@ namespace Bix.Http.Client
             Stream contentDataStream,
             string streamContentType,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return await client.PatchWithAuthenticationAsync(
                 requestUri,
@@ -110,7 +110,7 @@ namespace Bix.Http.Client
             string streamContentType,
             int bufferSize,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri);
