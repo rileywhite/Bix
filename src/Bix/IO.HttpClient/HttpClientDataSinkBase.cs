@@ -125,15 +125,15 @@ namespace Bix.IO.HttpClient
                     string requestUri;
                     if (length.HasValue)
                     {
-                        requestUri = $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}/{length.Value}";
+                        requestUri = $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}/{startAt}/{length.Value}";
                     }
                     else if (startAt > 0)
                     {
-                        requestUri = $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}";
+                        requestUri = $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}/{startAt}";
                     }
                     else
                     {
-                        requestUri = $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}";
+                        requestUri = $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}/{id}";
                     }
 
 
