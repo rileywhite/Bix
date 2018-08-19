@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
     <PackageTags>bix business-mix restful webapi aspnetcore</PackageTags>
-    <Version>2.0-rc.6</Version>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
