@@ -14,6 +14,7 @@
 // limitations under the License.
 /***************************************************************************/
 
+using Bix.Core;
 using Bix.WebApi.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -76,6 +77,7 @@ namespace Bix.IO.WebApi
         [HttpPatch]
         public async Task<IActionResult> Bump([FromBody] StreamStatus streamStatus, CancellationToken cancellationToken = default)
         {
+            this.Logger?.LogDebug("Processing {Verb} request for {StreamStatus} at {Uri}", this.Request.Method, streamStatus?.ToJson() ?? "{}", this.Request.Path);
             var segmentStart = streamStatus.SegmentHashes[0].Start;
             var segmentLength = streamStatus.SegmentHashes.Sum(sh => sh.Length);
 
@@ -182,6 +184,7 @@ namespace Bix.IO.WebApi
         [HttpPatch("{id}/{startAt}/{length}")]
         public async Task<IActionResult> SendData(string id, long startAt = 0, long? length = default, CancellationToken cancellationToken = default)
         {
+            this.Logger?.LogDebug("Processing {Verb} request for {Id}, {startAt}, {length} at {Uri}", this.Request.Method, id, startAt, length, this.Request.Path);
             var partition = this.HttpContextAccessor.HttpContext?.User?.Identity?.Name;
             var targetFilePath = GetTargetFilePath(partition, id);
             var targetFile = new FileInfo(targetFilePath);
@@ -236,7 +239,10 @@ namespace Bix.IO.WebApi
         /// <returns>Async task</returns>
         private async Task SignalUploadCompleted(string partition, string id, FileInfo tempFileInfo, CancellationToken cancellationToken = default)
         {
+            this.Logger?.LogDebug("Signaling Upload Completed for partition {Partition}, ID {Id}, and temp file {TempFilePath}", partition, id, tempFileInfo.FullName);
             await this.OnUploadCompleted(partition, id, tempFileInfo, cancellationToken);
+
+            this.Logger?.LogDebug("Attempting delete of temp uplaod file {TempFilePath}", tempFileInfo.FullName);
             if (tempFileInfo.Exists) { try { tempFileInfo.Delete(); } catch { /* Ignore */ } }
         }
 

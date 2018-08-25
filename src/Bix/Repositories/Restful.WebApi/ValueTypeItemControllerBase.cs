@@ -36,8 +36,9 @@ namespace Bix.Repositories.Restful.WebApi
         }
 
         [HttpPatch("{naturalKey}")]
-        public async Task<IActionResult> CreateOrUpdate(string naturalKey, [FromBody] TItem item)
+        public async Task<IActionResult> CreateOrUpdate(TNaturalKey naturalKey, [FromBody] TItem item)
         {
+            this.Logger?.LogDebug("Processing {Verb} request for {Item} with naturalKey {NaturalKey} at {Uri}", this.Request.Method, item?.ToJson() ?? "{}", naturalKey?.ToJson() ?? "{}", this.Request.Path);
             if (naturalKey == null || item == null || !naturalKey.Equals(item.NaturalKey))
             {
                 return this.BadRequest();
@@ -48,6 +49,7 @@ namespace Bix.Repositories.Restful.WebApi
         [HttpPatch]
         public async Task<IActionResult> CreateOrUpdate([FromBody] TItem item)
         {
+            this.Logger?.LogDebug("Processing {Verb} request for {Item} at {Uri}", this.Request.Method, item?.ToJson() ?? "{}", this.Request.Path);
             if (item == null || item.NaturalKey == null)
             {
                 return this.BadRequest();

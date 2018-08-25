@@ -58,6 +58,7 @@ namespace Bix.Repositories.Restful.HttpClient
                     await client.GetStreamWithAuthenticationAsync(
                         $"{this.Config.BaseControllerPath}{this.ItemsControllerPath}",
                         this.AuthenticationHeaderGenerator,
+                        this.Logger,
                         cancellationToken)))
                 using (var jsonTextReader = new JsonTextReader(streamReader))
                 {
@@ -81,6 +82,7 @@ namespace Bix.Repositories.Restful.HttpClient
                     await client.GetStreamWithAuthenticationAsync(
                         $"{this.Config.BaseControllerPath}{this.ItemControllerPath}/{identity.ToUrlSegment()}",
                         this.AuthenticationHeaderGenerator,
+                        this.Logger,
                         cancellationToken)))
                 using (var jsonTextReader = new JsonTextReader(streamReader))
                 {
@@ -105,6 +107,7 @@ namespace Bix.Repositories.Restful.HttpClient
                         $"{this.Config.BaseControllerPath}{this.ItemControllerPath}",
                         item.ToJson(),
                         this.AuthenticationHeaderGenerator,
+                        this.Logger,
                         cancellationToken);
 
                     if (!response.IsSuccessStatusCode)
@@ -135,6 +138,7 @@ namespace Bix.Repositories.Restful.HttpClient
                     var response = await client.DeleteWithAuthenticationAsync(
                         $"{this.Config.BaseControllerPath}{this.ItemControllerPath}/{identity.ToUrlSegment()}",
                         this.AuthenticationHeaderGenerator,
+                        this.Logger,
                         cancellationToken);
 
                     if (!response.IsSuccessStatusCode)
@@ -162,6 +166,7 @@ namespace Bix.Repositories.Restful.HttpClient
                         $"{this.Config.BaseControllerPath}{this.ItemControllerPath}/{identity.ToUrlSegment()}",
                         updated.ToJson(),
                         this.AuthenticationHeaderGenerator,
+                        this.Logger,
                         cancellationToken);
 
                     if (!response.IsSuccessStatusCode)
@@ -192,6 +197,7 @@ namespace Bix.Repositories.Restful.HttpClient
                     await client.GetStreamWithAuthenticationAsync(
                         $"{this.Config.BaseControllerPath}{this.ItemControllerPath}/metadata/{identity.ToUrlSegment()}",
                         this.AuthenticationHeaderGenerator,
+                        this.Logger,
                         cancellationToken)))
                 using (var jsonTextReader = new JsonTextReader(streamReader))
                 {

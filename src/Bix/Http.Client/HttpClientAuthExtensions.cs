@@ -15,6 +15,7 @@
 /***************************************************************************/
 
 using Bix.Http.Core;
+using Serilog;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -31,11 +32,13 @@ namespace Bix.Http.Client
             this HttpClient client,
             string requestUri,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
+            ILogger logger,
             CancellationToken cancellationToken = default)
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri);
             cancellationToken.ThrowIfCancellationRequested();
+            logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "GET", requestUri);
             return await client.GetStreamAsync(requestUri);
         }
 
@@ -44,10 +47,12 @@ namespace Bix.Http.Client
             string requestUri,
             string jsonContent,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
+            ILogger logger,
             CancellationToken cancellationToken = default)
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
+            logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "POST", requestUri);
             return await client.PostAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken);
         }
 
@@ -55,10 +60,12 @@ namespace Bix.Http.Client
             this HttpClient client,
             string requestUri,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
+            ILogger logger,
             CancellationToken cancellationToken = default)
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri);
+            logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "DELETE", requestUri);
             return await client.DeleteAsync(requestUri, cancellationToken);
         }
 
@@ -67,10 +74,12 @@ namespace Bix.Http.Client
             string requestUri,
             string jsonContent,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
+            ILogger logger,
             CancellationToken cancellationToken = default)
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
+            logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "PUT", requestUri);
             return await client.PutAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken);
         }
 
@@ -79,10 +88,12 @@ namespace Bix.Http.Client
             string requestUri,
             string jsonContent,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
+            ILogger logger,
             CancellationToken cancellationToken = default)
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
+            logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "PATCH", requestUri);
             return await client.PatchAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken);
         }
 
@@ -92,6 +103,7 @@ namespace Bix.Http.Client
             Stream contentDataStream,
             string streamContentType,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
+            ILogger logger,
             CancellationToken cancellationToken = default)
         {
             return await client.PatchWithAuthenticationAsync(
@@ -100,6 +112,7 @@ namespace Bix.Http.Client
                 streamContentType,
                 81920,
                 authenticationHeaderGenerator,
+                logger,
                 cancellationToken);
         }
 
@@ -110,6 +123,7 @@ namespace Bix.Http.Client
             string streamContentType,
             int bufferSize,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
+            ILogger logger,
             CancellationToken cancellationToken = default)
         {
             client.DefaultRequestHeaders.Authorization =
@@ -123,6 +137,7 @@ namespace Bix.Http.Client
                     }
             })
             {
+                logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "PATCH", requestUri);
                 return await client.SendAsync(
                     new HttpRequestMessage(new HttpMethod("PATCH"), requestUri)
                     {

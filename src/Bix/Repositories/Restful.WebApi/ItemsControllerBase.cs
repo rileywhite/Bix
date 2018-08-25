@@ -47,6 +47,7 @@ namespace Bix.Repositories.Restful.WebApi
         [HttpGet]
         public async Task<IEnumerable<TItem>> GetAll(CancellationToken cancellationToken)
         {
+            this.Logger?.LogDebug("Processing {Verb} request at {Uri}", this.Request.Method, this.Request.Path);
             return await this.Repository.GetAllAsync(cancellationToken);
         }
     }

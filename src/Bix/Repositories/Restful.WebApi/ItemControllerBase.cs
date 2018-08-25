@@ -46,6 +46,7 @@ namespace Bix.Repositories.Restful.WebApi
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] TItem item, CancellationToken cancellationToken)
         {
+            this.Logger?.LogDebug("Processing {Verb} request for {Item} at {Uri}", this.Request.Method, item?.ToJson() ?? "{}", this.Request.Path);
             if (item == null)
             {
                 return this.BadRequest();
@@ -57,6 +58,7 @@ namespace Bix.Repositories.Restful.WebApi
         [HttpGet("{identity}")]
         public async Task<IActionResult> GetById(TIdentity identity, CancellationToken cancellationToken)
         {
+            this.Logger?.LogDebug("Processing {Verb} request for {Identity} at {Uri}", this.Request.Method, identity?.ToJson() ?? "{}", this.Request.Path);
             var item = await this.Repository.FindAsync(identity, cancellationToken);
             if (item == null)
             {
@@ -68,6 +70,7 @@ namespace Bix.Repositories.Restful.WebApi
         [HttpPut("{identity}")]
         public async Task<IActionResult> Update(TIdentity identity, [FromBody] TItem item, CancellationToken cancellationToken)
         {
+            this.Logger?.LogDebug("Processing {Verb} request for {Identity} at {Uri}", this.Request.Method, identity?.ToJson() ?? "{}", this.Request.Path);
             if (identity == null || item == null || !identity.Equals(item.Identity))
             {
                 return this.BadRequest();
@@ -78,6 +81,7 @@ namespace Bix.Repositories.Restful.WebApi
         [HttpDelete("{identity}")]
         public async Task<IActionResult> Delete(TIdentity identity, CancellationToken cancellationToken)
         {
+            this.Logger?.LogDebug("Processing {Verb} request for {Identity} at {Uri}", this.Request.Method, identity?.ToJson() ?? "{}", this.Request.Path);
             var foundItem = await this.Repository.FindAsync(identity, cancellationToken);
             if (foundItem == null)
             {
@@ -97,6 +101,7 @@ namespace Bix.Repositories.Restful.WebApi
         [HttpGet("metadata/{identity}")]
         public async Task<IActionResult> GetMetadata(TIdentity identity, CancellationToken cancellationToken)
         {
+            this.Logger?.LogDebug("Processing {Verb} request for {Identity} at {Uri}", this.Request.Method, identity?.ToJson() ?? "{}", this.Request.Path);
             if (identity == null) { return this.BadRequest(); }
 
             var metadata = await this.Repository.GetMetadataAsync(identity, cancellationToken);

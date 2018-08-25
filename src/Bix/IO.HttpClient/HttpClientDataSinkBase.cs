@@ -80,6 +80,7 @@ namespace Bix.IO.HttpClient
                         $"{this.Config.BaseControllerPath}{this.DataSinkControllerPath}",
                         streamStatus.ToJson(),
                         this.AuthenticationHeaderGenerator,
+                        this.Logger,
                         cancellationToken);
 
                     if (!response.IsSuccessStatusCode)
@@ -143,6 +144,7 @@ namespace Bix.IO.HttpClient
                         "application/octet-stream",
                         this.IOBufferSize,
                         this.AuthenticationHeaderGenerator,
+                        this.Logger,
                         cancellationToken);
 
                     EnsureSuccessfulDataTransfer(response);

@@ -48,6 +48,7 @@ namespace Bix.Repositories.Restful.HttpClient
                         $"{this.Config.BaseControllerPath}{this.ItemControllerPath}",
                         item.ToJson(),
                         this.AuthenticationHeaderGenerator,
+                        this.Logger,
                         cancellationToken);
 
                     if (!response.IsSuccessStatusCode)
