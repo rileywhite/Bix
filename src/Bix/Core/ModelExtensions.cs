@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -34,12 +35,11 @@ namespace Bix.Core
         /// <returns><c>true</c> if the type is a model and an aggregate root, else <c>false</c>.</returns>
         public static bool IsAggregateRootModelType(this Type source)
         {
-            var typeInfo = typeof(ModelBase).GetTypeInfo();
             return
                 source != null &&
-                typeInfo.IsAssignableFrom(source) &&
-                typeInfo.IsAssignableFrom(source) &&
-                !typeInfo.IsAbstract;
+                typeof(ModelBase).GetTypeInfo().IsAssignableFrom(source) &&
+                typeof(IAggregateRoot).GetTypeInfo().IsAssignableFrom(source) &&
+                !source.GetTypeInfo().IsAbstract;
         }
 
         /// <summary>
@@ -52,9 +52,9 @@ namespace Bix.Core
             var typeInfo = typeof(ModelBase).GetTypeInfo();
             return
                 source != null &&
-                typeInfo.IsAssignableFrom(source) &&
-                !typeInfo.IsAssignableFrom(source) &&
-                !typeInfo.IsAbstract;
+                typeof(ModelBase).GetTypeInfo().IsAssignableFrom(source) &&
+                !typeof(IAggregateRoot).GetTypeInfo().IsAssignableFrom(source) &&
+                !source.GetTypeInfo().IsAbstract;
         }
 
         /// <summary>
@@ -94,6 +94,13 @@ namespace Bix.Core
                 select p;
         }
 
+        [Obsolete("Replaced by GetChildModelCollectionProperties()")]
+        public static IEnumerable<ValueTuple<PropertyInfo, Type>> GetChildModelListProperties(
+            this Type source,
+            ICache cache,
+            CancellationToken cancellationToken = default)
+            => GetChildModelCollectionProperties(source, cache, cancellationToken);
+
         /// <summary>
         /// Gets the properties of a type the represent collections of child model types.
         /// </summary>
@@ -101,35 +108,35 @@ namespace Bix.Core
         /// <param name="cache">Cache to use for avoiding multiple expensive reflection operations</param>
         /// <param name="cancellationToken">Cancellation token for cancelling the operation.</param>
         /// <returns>Collection of properties that are collections of child models</returns>
-        public static IEnumerable<ValueTuple<PropertyInfo, Type>> GetChildModelListProperties(
+        public static IEnumerable<ValueTuple<PropertyInfo, Type>> GetChildModelCollectionProperties(
             this Type source,
             ICache cache,
             CancellationToken cancellationToken = default)
         {
             if (source == null) { throw new ArgumentNullException(nameof(source)); }
 
-            var cacheKey = $"GetChildModelListProperties_{source.FullName}";
+            var cacheKey = $"GetChildModelCollectionProperties_{source.FullName}";
 
             if (!cache.TryGet(
                 cacheKey,
                 out IEnumerable<ValueTuple<PropertyInfo, Type>> cachedValue))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                cachedValue = source.DoGetChildModelListProperties().ToList();
+                cachedValue = source.DoGetChildModelCollectionProperties().ToList();
                 cache.Set(cacheKey, cachedValue);
             }
 
             return cachedValue;
         }
 
-        private static IEnumerable<ValueTuple<PropertyInfo, Type>> DoGetChildModelListProperties(this Type source)
+        private static IEnumerable<ValueTuple<PropertyInfo, Type>> DoGetChildModelCollectionProperties(this Type source)
         {
             if (source == null) { yield break; }
 
             foreach (var property in
                 source.GetTypeInfo().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
             {
-                if (property.IsChildModelListProperty(out Type childModelType))
+                if (property.IsChildModelCollectionProperty(out Type childModelType))
                 {
                     yield return ValueTuple.Create(property, childModelType);
                 }
@@ -150,38 +157,65 @@ namespace Bix.Core
                 source.PropertyType.IsNonAggregateRootModelType();
         }
 
+        [Obsolete("Replaced by IsChildModelCollectionProperty")]
+        public static bool IsChildModelListProperty(this PropertyInfo source, out Type childModelType) => IsChildModelCollectionProperty(source, out childModelType);
+
         /// <summary>
         /// Examines a property to determine if it is a collection of child models
         /// </summary>
         /// <param name="source">Property to examine</param>
         /// <param name="childModelType">Populated with the child model type if the property is a collection, else <c>null</c>.</param>
         /// <returns><c>true</c> if the property holds a collection child models, else <c>false</c></returns>
-        public static bool IsChildModelListProperty(this PropertyInfo source, out Type childModelType)
+        public static bool IsChildModelCollectionProperty(this PropertyInfo source, out Type childModelType)
         {
-            var isChildModelEnumerationProperty =
-                source != null &&
-                source.CanRead &&
-                source.CanWrite &&
-                source.PropertyType.IsConstructedGenericType &&
-                typeof(List<>).Equals(source.PropertyType.GetGenericTypeDefinition());
-
-            if (!isChildModelEnumerationProperty)
+            if(source == null || !source.CanRead)
             {
                 childModelType = null;
                 return false;
             }
 
-            var genericArguments = source.PropertyType.GetTypeInfo().GetGenericArguments();
-
-            if (genericArguments.Length != 1)
+            if(source.PropertyType.IsArray)
             {
-                childModelType = null;
-                return false;
+                if (source.PropertyType.GetArrayRank() != 1)
+                {
+                    childModelType = null;
+                    return false;
+                }
+
+                childModelType = source.PropertyType.GetElementType();
+            }
+            else
+            {
+                var collectionInterface = source.PropertyType.GetInterfaces().FirstOrDefault(
+                    it => it.IsGenericType && it.GetGenericTypeDefinition() == typeof(ICollection<>));
+
+                if (collectionInterface == null &&
+                    source.PropertyType.IsGenericType &&
+                    source.PropertyType.GetGenericTypeDefinition() == typeof(ICollection<>))
+                {
+                    collectionInterface = source.PropertyType;
+                }
+
+                if (collectionInterface == null)
+                {
+                    childModelType = null;
+                    return false;
+                }
+
+                var genericArguments = collectionInterface.GetGenericArguments();
+
+                if (genericArguments.Length != 1)
+                {
+                    childModelType = null;
+                    return false;
+                }
+
+                childModelType = genericArguments[0];
             }
 
-            childModelType = genericArguments[0];
+            Contract.Assert(childModelType != null);
 
-            if (!typeof(ModelBase).GetTypeInfo().IsAssignableFrom(childModelType))
+            if (!childModelType.IsNonAggregateRootModelType())
             {
                 childModelType = null;
                 return false;
@@ -239,7 +273,7 @@ namespace Bix.Core
             ICache cache,
             CancellationToken cancellationToken)
         {
-            foreach (var childEnumPropertyAndType in model.GetType().GetChildModelListProperties(cache, cancellationToken))
+            foreach (var childEnumPropertyAndType in model.GetType().GetChildModelCollectionProperties(cache, cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var childModelList = childEnumPropertyAndType.Item1.GetValue(model) as IEnumerable<ModelBase>;

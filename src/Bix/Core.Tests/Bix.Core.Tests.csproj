@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.0;net462;net472</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;net462;net472</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <RootNamespace>Bix.Core</RootNamespace>
     <Platforms>AnyCPU;x64</Platforms>

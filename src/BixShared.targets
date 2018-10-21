@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
     <PackageTags>bix business-mix restful webapi aspnetcore</PackageTags>
-    <Version>2.0.2</Version>
+    <Version>2.0.3</Version>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
