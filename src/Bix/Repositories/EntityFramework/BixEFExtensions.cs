@@ -65,8 +65,7 @@ namespace Bix.Repositories.EntityFramework
                 foreach (var childModelProperty in model.GetType().GetChildModelProperties(cache, cancellationToken))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    var childModel = childModelProperty.GetValue(model) as ModelBase;
-                    if (childModel == null)
+                    if (!(childModelProperty.GetValue(model) is ModelBase childModel))
                     {
                         childModel = (ModelBase)childModelProperty.PropertyType.GetConstructor(new Type[0]).Invoke(new object[0]);
                         childModelProperty.SetValue(model, childModel);
@@ -80,11 +79,10 @@ namespace Bix.Repositories.EntityFramework
                     }
                 }
 
-                foreach (var childEnumPropertyAndType in model.GetType().GetChildModelListProperties(cache, cancellationToken))
+                foreach (var childEnumPropertyAndType in model.GetType().GetChildModelCollectionProperties(cache, cancellationToken))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    var childModelList = childEnumPropertyAndType.Item1.GetValue(model) as IEnumerable<ModelBase>;
-                    if (childModelList == null) { continue; }
+                    if (!(childEnumPropertyAndType.Item1.GetValue(model) is IEnumerable<ModelBase> childModelList)) { continue; }
 
                     foreach (var childModel in childModelList.Where(cm => cm != null))
                     {
