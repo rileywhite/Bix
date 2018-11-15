@@ -15,6 +15,7 @@
 /***************************************************************************/
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Bix.Core
@@ -27,7 +28,7 @@ namespace Bix.Core
         /// <summary>
         /// Creates a new <see cref="DictionaryCache"/> with the newly created backing store
         /// </summary>
-        public DictionaryCache() : this(new Dictionary<string, object>()) { }
+        public DictionaryCache() : this(new ConcurrentDictionary<string, object>()) { }
 
         /// <summary>
         /// Creates a new <see cref="DictionaryCache"/> with the given backing store
