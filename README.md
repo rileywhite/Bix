@@ -1,4 +1,4 @@
-![Build Status](https://ci.appveyor.com/api/projects/status/github/bix?svg=true)
+![Build Status](https://ci.appveyor.com/api/projects/status/github/rileywhite/bix?svg=true)
 
 Bix is a framework for business applications using aspnetcore and entityframeworkcore.
 
