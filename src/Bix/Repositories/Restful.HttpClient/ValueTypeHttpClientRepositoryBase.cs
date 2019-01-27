@@ -29,7 +29,7 @@ namespace Bix.Repositories.Restful.HttpClient
 {
     public abstract class ValueTypeHttpClientRepositoryBase<TIdentity, TNaturalKey, TItem>
         : HttpClientRepositoryBase<TIdentity, TItem>, IValueTypeRepository<TIdentity, TNaturalKey, TItem>
-        where TItem : class, IAggregateRoot, IHasIdentity<TIdentity>, IHasNaturalKey<TNaturalKey>
+        where TItem : class, IAggregateRoot, IValueTypeModel<TIdentity, TNaturalKey>
     {
         public ValueTypeHttpClientRepositoryBase(
             IHttpClientConfiguration config,
@@ -73,7 +73,7 @@ namespace Bix.Repositories.Restful.HttpClient
 
     public abstract class ValueTypeHttpClientRepositoryBase<TNaturalKey, TItem>
         : ValueTypeHttpClientRepositoryBase<TNaturalKey, TNaturalKey, TItem>, IValueTypeRepository<TNaturalKey, TItem>
-        where TItem : class, IAggregateRoot, IHasIdentity<TNaturalKey>, IHasNaturalKey<TNaturalKey>
+        where TItem : class, IAggregateRoot, IValueTypeModel<TNaturalKey>
     {
         public ValueTypeHttpClientRepositoryBase(
             IHttpClientConfiguration config,

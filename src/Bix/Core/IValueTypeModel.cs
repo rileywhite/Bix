@@ -14,28 +14,20 @@
 // limitations under the License.
 /***************************************************************************/
 
-using Newtonsoft.Json;
 using System;
 
 namespace Bix.Core
 {
     /// <summary>
-    /// Base for types that can be stored in a <see cref="IRepository{TIdentity, TItem}"/>.
+    /// Contract for a model with an assigned key and a natural key.
     /// </summary>
-    /// <typeparam name="TIdentity">Type of identifier for this model</typeparam>
-    public abstract class ModelBase<TIdentity> : IModel<TIdentity>
-    {
-        /// <summary>
-        /// Gets whether this is an aggregate root, meaning that it is the root
-        /// of a graph of models through which the graph can be created, saved, updated,
-        /// or deleted.
-        /// </summary>
-        [JsonIgnore]
-        bool IModel.IsAggregateRoot => this.GetType().IsAggregateRootModelType();
+    /// <typeparam name="TIdentity">Type of the model's ID</typeparam>
+    /// <typeparam name="TNaturalKey">Type of the model's natrual key</typeparam>
+    public interface IValueTypeModel<TIdentity, TNaturalKey> : IModel<TIdentity>, IHasNaturalKey<TNaturalKey> { }
 
-        /// <summary>
-        /// Identity that uniquely identifies a model stored within a repository.
-        /// </summary>
-        public abstract TIdentity Identity { get; }
-    }
+    /// <summary>
+    /// Contract for a model with a natural key.
+    /// </summary>
+    /// <typeparam name="TNaturalKey">Type of the model's natrual key</typeparam>
+    public interface IValueTypeModel<TNaturalKey> : IValueTypeModel<TNaturalKey, TNaturalKey> { }
 }

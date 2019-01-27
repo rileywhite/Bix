@@ -21,12 +21,10 @@ namespace Bix.Core
     /// <summary>
     /// Base type for a model with an assigned key and a natural key.
     /// </summary>
-    /// <typeparam name="TModel">Type of the model</typeparam>
     /// <typeparam name="TIdentity">Type of the model's ID</typeparam>
     /// <typeparam name="TNaturalKey">Type of the model's natrual key</typeparam>
-    public abstract class ValueTypeModelBase<TModel, TIdentity, TNaturalKey>
-        : ModelBase<TModel, TIdentity>, IHasNaturalKey<TNaturalKey>
-        where TModel : ValueTypeModelBase<TModel, TIdentity, TNaturalKey>, new()
+    public abstract class ValueTypeModelBase<TIdentity, TNaturalKey>
+        : ModelBase<TIdentity>, IValueTypeModel<TIdentity, TNaturalKey>
     {
         /// <summary>
         /// Gets the model's natrual key
@@ -37,11 +35,9 @@ namespace Bix.Core
     /// <summary>
     /// Base type for a model with a natural key.
     /// </summary>
-    /// <typeparam name="TModel">Type of the model</typeparam>
     /// <typeparam name="TNaturalKey">Type of the model's natrual key</typeparam>
-    public abstract class ValueTypeModelBase<TModel, TNaturalKey>
-        : ValueTypeModelBase<TModel, TNaturalKey, TNaturalKey>
-        where TModel : ValueTypeModelBase<TModel, TNaturalKey>, new()
+    public abstract class ValueTypeModelBase<TNaturalKey>
+        : ValueTypeModelBase<TNaturalKey, TNaturalKey>, IValueTypeModel<TNaturalKey>
     {
         /// <summary>
         /// Same as <see cref="IHasNaturalKey{TNaturalKey}.NaturalKey"/>

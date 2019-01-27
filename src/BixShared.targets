@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
     <PackageTags>bix business-mix restful webapi aspnetcore</PackageTags>
-    <Version>2.0.5</Version>
+    <Version>2.1.0</Version>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
 	<PackageOutputPath>$(SolutionDir)..\packages\</PackageOutputPath>
@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'!='Release'">
-	<Timestamp>$([System.DateTime]::Now.ToString("yyyyMMddHHmm"))</Timestamp>
+	<Timestamp Condition="'$(Timestamp)'==''">$([System.DateTime]::Now.ToString("yyyyMMddHHmm"))</Timestamp>
     <Version>$(Version)-dev.$(Timestamp)</Version>
   </PropertyGroup>
   

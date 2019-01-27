@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 namespace Bix.Repositories.Restful.WebApi
 {
     public abstract class ItemControllerBase<TIdentity, TItem, TRepository> : BixControllerBase
-        where TItem : class, IHasIdentity<TIdentity>, IAggregateRoot
+        where TItem : class, IModel<TIdentity>, IAggregateRoot
         where TRepository : IRepository<TIdentity, TItem>
     {
         protected ILogger Logger { get; }

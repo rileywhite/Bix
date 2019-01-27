@@ -27,7 +27,7 @@ namespace Bix.Core
     /// <typeparam name="TIdentity">Type of unique identifiers used by the <see cref="IAggregateRoot"/> models.</typeparam>
     /// <typeparam name="TItem">Type of the <see cref="IAggregateRoot"/> that can be operated on by the repository.</typeparam>
     public interface IRepository<TIdentity, TItem>
-        where TItem : class, IAggregateRoot, IHasIdentity<TIdentity>
+        where TItem : class, IAggregateRoot, IModel<TIdentity>
     {
         /// <summary>
         /// Retrieves all items in the repository.

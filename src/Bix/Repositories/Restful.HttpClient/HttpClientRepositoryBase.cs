@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 namespace Bix.Repositories.Restful.HttpClient
 {
     public abstract class HttpClientRepositoryBase<TIdentity, TItem> : IRepository<TIdentity, TItem>
-        where TItem : class, IAggregateRoot, IHasIdentity<TIdentity>
+        where TItem : class, IAggregateRoot, IModel<TIdentity>
     {
         protected IHttpClientConfiguration Config { get; }
         protected IAuthenticationHeaderGenerator AuthenticationHeaderGenerator { get; }

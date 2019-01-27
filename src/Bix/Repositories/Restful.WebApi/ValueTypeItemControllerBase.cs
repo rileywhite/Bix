@@ -25,7 +25,7 @@ namespace Bix.Repositories.Restful.WebApi
 {
     public abstract class ValueTypeItemControllerBase<TIdentity, TNaturalKey, TItem, TRepository>
         : ItemControllerBase<TIdentity, TItem, TRepository>
-        where TItem : class, IHasIdentity<TIdentity>, IHasNaturalKey<TNaturalKey>, IAggregateRoot
+        where TItem : class, IValueTypeModel<TIdentity, TNaturalKey>, IAggregateRoot
         where TRepository : IValueTypeRepository<TIdentity, TNaturalKey, TItem>
     {
         public ValueTypeItemControllerBase(ILogger logger, TRepository repository)
@@ -60,7 +60,7 @@ namespace Bix.Repositories.Restful.WebApi
 
     public abstract class ValueTypeItemControllerBase<TNaturalKey, TItem, TRepository>
         : ValueTypeItemControllerBase<TNaturalKey, TNaturalKey, TItem, TRepository>
-        where TItem : class, IHasIdentity<TNaturalKey>, IHasNaturalKey<TNaturalKey>, IAggregateRoot
+        where TItem : class, IValueTypeModel<TNaturalKey>, IAggregateRoot
         where TRepository : IValueTypeRepository<TNaturalKey, TItem>
     {
         public ValueTypeItemControllerBase(ILogger logger, TRepository repository)

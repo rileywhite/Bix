@@ -30,7 +30,7 @@ using System.Linq.Expressions;
 namespace Bix.Repositories.EntityFramework
 {
     public abstract class EntityFrameworkRepositoryBase<TIdentity, TModel, TDbContext> : IRepository<TIdentity, TModel>
-        where TModel : ModelBase<TModel, TIdentity>, IAggregateRoot, IHasIdentity<TIdentity>, new()
+        where TModel : class, IModel<TIdentity>, IAggregateRoot
         where TDbContext : DbContext
     {
         protected IHttpContextAccessor HttpContextAccessor { get; }
@@ -91,7 +91,10 @@ namespace Bix.Repositories.EntityFramework
             try
             {
                 var foundItem = await this.Items.FirstAsync(i => identity.Equals(i.Identity), cancellationToken);
-                await this.Context.EnsureChildModelsArePopulated(foundItem, this.Cache, cancellationToken);
+                if (this.PopulateChildModelsOnGet)
+                {
+                    await this.Context.EnsureChildModelsArePopulated(foundItem, this.Cache, cancellationToken);
+                }
                 await this.OnAfterRetrieveAsync(foundItem, cancellationToken);
                 return foundItem;
             }

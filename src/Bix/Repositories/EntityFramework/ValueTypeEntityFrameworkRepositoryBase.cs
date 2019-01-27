@@ -27,7 +27,7 @@ namespace Bix.Repositories.EntityFramework
 {
     public abstract class ValueTypeEntityFrameworkRepositoryBase<TIdentity, TNaturalKey, TModel, TDbContext>
         : EntityFrameworkRepositoryBase<TIdentity, TModel, TDbContext>, IValueTypeRepository<TIdentity, TNaturalKey, TModel>
-        where TModel : ValueTypeModelBase<TModel, TIdentity, TNaturalKey>, IAggregateRoot, IHasIdentity<TIdentity>, IHasNaturalKey<TNaturalKey>, new()
+        where TModel : class, IValueTypeModel<TIdentity, TNaturalKey>, IAggregateRoot
         where TDbContext : DbContext
     {
         public ValueTypeEntityFrameworkRepositoryBase(
@@ -54,7 +54,10 @@ namespace Bix.Repositories.EntityFramework
                 var existingItem = await this.Items.FirstOrDefaultAsync(i => i.NaturalKey.Equals(item.NaturalKey));
                 if (existingItem != null)
                 {
-                    await this.Context.EnsureChildModelsArePopulated(existingItem, this.Cache, cancellationToken);
+                    if (this.PopulateChildModelsOnGet)
+                    {
+                        await this.Context.EnsureChildModelsArePopulated(existingItem, this.Cache, cancellationToken);
+                    }
                     await this.OnAfterRetrieveAsync(existingItem, cancellationToken);
                     return existingItem;
                 }
@@ -72,7 +75,7 @@ namespace Bix.Repositories.EntityFramework
 
     public abstract class ValueTypeEntityFrameworkRepositoryBase<TNaturalKey, TModel, TDbContext>
         : ValueTypeEntityFrameworkRepositoryBase<TNaturalKey, TNaturalKey, TModel, TDbContext>, IValueTypeRepository<TNaturalKey, TModel>
-        where TModel : ValueTypeModelBase<TModel, TNaturalKey>, IAggregateRoot, IHasIdentity<TNaturalKey>, IHasNaturalKey<TNaturalKey>, new()
+        where TModel : class, IValueTypeModel<TNaturalKey>, IAggregateRoot
         where TDbContext : DbContext
     {
         public ValueTypeEntityFrameworkRepositoryBase(
