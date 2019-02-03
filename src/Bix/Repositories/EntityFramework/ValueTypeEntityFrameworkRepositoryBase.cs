@@ -51,18 +51,18 @@ namespace Bix.Repositories.EntityFramework
         {
             try
             {
-                var existingItem = await this.Items.FirstOrDefaultAsync(i => i.NaturalKey.Equals(item.NaturalKey));
+                var existingItem = await this.Items.FirstOrDefaultAsync(i => i.NaturalKey.Equals(item.NaturalKey)).ConfigureAwait(false);
                 if (existingItem != null)
                 {
                     if (this.PopulateChildModelsOnGet)
                     {
-                        await this.Context.EnsureChildModelsArePopulated(existingItem, this.Cache, cancellationToken);
+                        await this.Context.EnsureChildModelsArePopulated(existingItem, this.Cache, cancellationToken).ConfigureAwait(false);
                     }
-                    await this.OnAfterRetrieveAsync(existingItem, cancellationToken);
+                    await this.OnAfterRetrieveAsync(existingItem, cancellationToken).ConfigureAwait(false);
                     return existingItem;
                 }
 
-                return await this.AddAsync(item, cancellationToken);
+                return await this.AddAsync(item, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

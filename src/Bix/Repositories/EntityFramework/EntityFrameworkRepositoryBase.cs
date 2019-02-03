@@ -73,10 +73,10 @@ namespace Bix.Repositories.EntityFramework
             {
                 if (this.PopulateChildModelsOnGet)
                 {
-                    await this.Context.EnsureChildModelsArePopulated(this.Items, this.Cache, cancellationToken);
+                    await this.Context.EnsureChildModelsArePopulated(this.Items, this.Cache, cancellationToken).ConfigureAwait(false);
                 }
-                await this.OnAfterRetrieveAsync(this.Items, cancellationToken);
-                return await Task.Run(() => this.Items, cancellationToken);
+                await this.OnAfterRetrieveAsync(this.Items, cancellationToken).ConfigureAwait(false);
+                return await Task.Run(() => this.Items, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -90,12 +90,12 @@ namespace Bix.Repositories.EntityFramework
         {
             try
             {
-                var foundItem = await this.Items.FirstAsync(i => identity.Equals(i.Identity), cancellationToken);
+                var foundItem = await this.Items.FirstAsync(i => identity.Equals(i.Identity), cancellationToken).ConfigureAwait(false);
                 if (this.PopulateChildModelsOnGet)
                 {
-                    await this.Context.EnsureChildModelsArePopulated(foundItem, this.Cache, cancellationToken);
+                    await this.Context.EnsureChildModelsArePopulated(foundItem, this.Cache, cancellationToken).ConfigureAwait(false);
                 }
-                await this.OnAfterRetrieveAsync(foundItem, cancellationToken);
+                await this.OnAfterRetrieveAsync(foundItem, cancellationToken).ConfigureAwait(false);
                 return foundItem;
             }
             catch (Exception ex)
@@ -112,10 +112,10 @@ namespace Bix.Repositories.EntityFramework
             {
                 this.Context.TrackAddWithEntityDetection(item, this.Cache, cancellationToken);
 
-                item = await this.OnBeforeAddAsync(item, cancellationToken);
-                await this.Context.SaveChangesAsync(cancellationToken);
+                item = await this.OnBeforeAddAsync(item, cancellationToken).ConfigureAwait(false);
+                await this.Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                return await this.OnAfterAddAsync(await this.FindAsync(item.Identity, cancellationToken), cancellationToken);
+                return await this.OnAfterAddAsync(await this.FindAsync(item.Identity, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -129,15 +129,15 @@ namespace Bix.Repositories.EntityFramework
         {
             try
             {
-                var item = await this.FindAsync(identity, cancellationToken);
+                var item = await this.FindAsync(identity, cancellationToken).ConfigureAwait(false);
                 if (item == null) { return; }
 
-                item = await this.OnBeforeRemoveAsync(item, cancellationToken);
+                item = await this.OnBeforeRemoveAsync(item, cancellationToken).ConfigureAwait(false);
 
-                await Task.Run(() => this.Context.Remove(item));
-                await this.Context.SaveChangesAsync(cancellationToken);
+                await Task.Run(() => this.Context.Remove(item)).ConfigureAwait(false);
+                await this.Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                await this.OnAfterRemoveAsync(identity, cancellationToken);
+                await this.OnAfterRemoveAsync(identity, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -153,10 +153,10 @@ namespace Bix.Repositories.EntityFramework
             {
                 this.Context.TrackUpdateWithEntityDetection(item, this.Cache, cancellationToken);
 
-                item = await this.OnBeforeUpdateAsync(item, cancellationToken);
-                await this.Context.SaveChangesAsync(cancellationToken);
+                item = await this.OnBeforeUpdateAsync(item, cancellationToken).ConfigureAwait(false);
+                await this.Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                return await this.OnAfterUpdateAsync(await this.FindAsync(item.Identity, cancellationToken), cancellationToken);
+                return await this.OnAfterUpdateAsync(await this.FindAsync(item.Identity, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -168,7 +168,7 @@ namespace Bix.Repositories.EntityFramework
 
         public async Task<ModelMetadata> GetMetadataAsync(TIdentity identity, CancellationToken cancellationToken = default)
         {
-            var item = await this.FindAsync(identity, cancellationToken);
+            var item = await this.FindAsync(identity, cancellationToken).ConfigureAwait(false);
             if (item == null) { return null; }
 
             var entry = this.Context.Entry(item);

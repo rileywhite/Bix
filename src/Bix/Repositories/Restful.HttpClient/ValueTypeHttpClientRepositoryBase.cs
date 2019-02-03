@@ -49,13 +49,13 @@ namespace Bix.Repositories.Restful.HttpClient
                         item.ToJson(),
                         this.AuthenticationHeaderGenerator,
                         this.Logger,
-                        cancellationToken);
+                        cancellationToken).ConfigureAwait(false);
 
                     if (!response.IsSuccessStatusCode)
                     {
                         throw new RestfulRepositoryHttpClientException("Unsuccessful service call response") { ErrorResponse = response };
                     }
-                    using (var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync()))
+                    using (var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync().ConfigureAwait(false)))
                     using (var jsonTextReader = new JsonTextReader(streamReader))
                     {
                         cancellationToken.ThrowIfCancellationRequested();

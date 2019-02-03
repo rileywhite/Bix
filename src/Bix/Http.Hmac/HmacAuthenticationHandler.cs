@@ -83,7 +83,7 @@ namespace Bix.Http.Hmac
             }
 
             var includeBodyInHash = this.Request.ContentLength.HasValue && this.Request.ContentLength.Value > 0;
-            var requestBody = includeBodyInHash ? await ReadRequestBody(this.Request) : string.Empty;
+            var requestBody = includeBodyInHash ? await ReadRequestBody(this.Request).ConfigureAwait(false) : string.Empty;
 
             var hash = HmacHashGenerator.Generate(
                 parameter,
@@ -118,7 +118,7 @@ namespace Bix.Http.Hmac
             {
                 // This is safe since Dispose(false), invoked by the StreamReader finalizer,
                 // does not close the underlying stream.
-                return await new StreamReader(request.Body).ReadToEndAsync();
+                return await new StreamReader(request.Body).ReadToEndAsync().ConfigureAwait(false);
             }
             finally
             {

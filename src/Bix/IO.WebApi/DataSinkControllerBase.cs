@@ -136,7 +136,7 @@ namespace Bix.IO.WebApi
             if (segmentStart == 0 && segmentLength == targetFile.Length)
             {
                 Logger.LogInformation($"No difference was found for a full data stream with partition {partition} and ID {streamStatus.Descriptor.Id}. Signaling upload completed.");
-                await this.SignalUploadCompleted(partition, streamStatus.Descriptor.Id, targetFile, cancellationToken);
+                await this.SignalUploadCompleted(partition, streamStatus.Descriptor.Id, targetFile, cancellationToken).ConfigureAwait(false);
             }
             else
             {
@@ -205,7 +205,7 @@ namespace Bix.IO.WebApi
             using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(targetFile.FullName))
             using (var targetStream = memoryMappedFile.CreateViewStream(startAt, length.Value, MemoryMappedFileAccess.Write))
             {
-                await this.Request.Body.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken);
+                await this.Request.Body.CopyToAsync(targetStream, this.IOBufferSize, cancellationToken).ConfigureAwait(false);
                 actualWrittenBytes = targetStream.Position;
             }
 
@@ -222,7 +222,7 @@ namespace Bix.IO.WebApi
             {
                 // last of the data was sent
                 Logger.LogInformation($"Signaling completion after data transfer for {targetFilePath} with partition {partition} and ID {id}.");
-                await this.SignalUploadCompleted(partition, id, targetFile, cancellationToken);
+                await this.SignalUploadCompleted(partition, id, targetFile, cancellationToken).ConfigureAwait(false);
             }
 
             return this.Ok();
@@ -240,7 +240,7 @@ namespace Bix.IO.WebApi
         private async Task SignalUploadCompleted(string partition, string id, FileInfo tempFileInfo, CancellationToken cancellationToken = default)
         {
             this.Logger?.LogDebug("Signaling Upload Completed for partition {Partition}, ID {Id}, and temp file {TempFilePath}", partition, id, tempFileInfo.FullName);
-            await this.OnUploadCompleted(partition, id, tempFileInfo, cancellationToken);
+            await this.OnUploadCompleted(partition, id, tempFileInfo, cancellationToken).ConfigureAwait(false);
 
             this.Logger?.LogDebug("Attempting delete of temp uplaod file {TempFilePath}", tempFileInfo.FullName);
             if (tempFileInfo.Exists) { try { tempFileInfo.Delete(); } catch { /* Ignore */ } }

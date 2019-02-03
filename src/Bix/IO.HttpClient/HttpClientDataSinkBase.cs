@@ -81,13 +81,13 @@ namespace Bix.IO.HttpClient
                         streamStatus.ToJson(),
                         this.AuthenticationHeaderGenerator,
                         this.Logger,
-                        cancellationToken);
+                        cancellationToken).ConfigureAwait(false);
 
                     if (!response.IsSuccessStatusCode)
                     {
                         throw new DataSinkHttpClientException("Unsuccessful service call response") { ErrorResponse = response };
                     }
-                    using (var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync()))
+                    using (var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync().ConfigureAwait(false)))
                     using (var jsonTextReader = new JsonTextReader(streamReader))
                     {
                         cancellationToken.ThrowIfCancellationRequested();
@@ -145,7 +145,7 @@ namespace Bix.IO.HttpClient
                         this.IOBufferSize,
                         this.AuthenticationHeaderGenerator,
                         this.Logger,
-                        cancellationToken);
+                        cancellationToken).ConfigureAwait(false);
 
                     EnsureSuccessfulDataTransfer(response);
                 }

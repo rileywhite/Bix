@@ -43,7 +43,7 @@ namespace Bix.Repositories.Restful.WebApi
             {
                 return this.BadRequest();
             }
-            return this.Ok(await this.Repository.FindOrAddAsync(item));
+            return this.Ok(await this.Repository.FindOrAddAsync(item).ConfigureAwait(false));
         }
 
         [HttpPatch]
@@ -54,7 +54,7 @@ namespace Bix.Repositories.Restful.WebApi
             {
                 return this.BadRequest();
             }
-            return this.Ok(await this.Repository.FindOrAddAsync(item));
+            return this.Ok(await this.Repository.FindOrAddAsync(item).ConfigureAwait(false));
         }
     }
 
