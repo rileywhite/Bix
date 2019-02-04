@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Copyright 2013-2018 Riley White
+// Copyright 2013-2019 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,28 +28,28 @@ namespace Bix.Core
         #region IsAggregateRootModelType Tests
 
         [Fact]
-        public void IsAggregateRootModelType_true_for_IAggregateRoot_ModelBase()
+        public void IsAggregateRootModelType_true_for_IAggregateRoot_Model()
         {
-            var mock = new Mock<ModelBase>().As<IAggregateRoot>();
+            var mock = new Mock<IModel>().As<IAggregateRoot>();
             Assert.True(mock.Object.GetType().IsAggregateRootModelType());
         }
 
         [Fact]
-        public void IsAggregateRootModelType_false_for_IAggregateRoot_non_ModelBase()
+        public void IsAggregateRootModelType_false_for_IAggregateRoot_non_Model()
         {
             var mock = new Mock<object>().As<IAggregateRoot>();
             Assert.False(mock.Object.GetType().IsAggregateRootModelType());
         }
 
         [Fact]
-        public void IsAggregateRootModelType_false_for_non_IAggregateRoot_ModelBase()
+        public void IsAggregateRootModelType_false_for_non_IAggregateRoot_Model()
         {
-            var mock = new Mock<ModelBase>();
+            var mock = new Mock<IModel>();
             Assert.False(mock.Object.GetType().IsAggregateRootModelType());
         }
 
         [Fact]
-        public void IsAggregateRootModelType_false_for_non_IAggregateRoot_non_ModelBase()
+        public void IsAggregateRootModelType_false_for_non_IAggregateRoot_non_Model()
         {
             var mock = new Mock<object>();
             Assert.False(mock.Object.GetType().IsAggregateRootModelType());
@@ -60,28 +60,28 @@ namespace Bix.Core
         #region IsNonAggregateRootModelType Tests
 
         [Fact]
-        public void IsNonAggregateRootModelType_false_for_IAggregateRoot_ModelBase()
+        public void IsNonAggregateRootModelType_false_for_IAggregateRoot_Model()
         {
-            var mock = new Mock<ModelBase>().As<IAggregateRoot>();
+            var mock = new Mock<IModel>().As<IAggregateRoot>();
             Assert.False(mock.Object.GetType().IsNonAggregateRootModelType());
         }
 
         [Fact]
-        public void IsNonAggregateRootModelType_false_for_IAggregateRoot_non_ModelBase()
+        public void IsNonAggregateRootModelType_false_for_IAggregateRoot_non_Model()
         {
             var mock = new Mock<object>().As<IAggregateRoot>();
             Assert.False(mock.Object.GetType().IsNonAggregateRootModelType());
         }
 
         [Fact]
-        public void IsNonAggregateRootModelType_true_for_non_IAggregateRoot_ModelBase()
+        public void IsNonAggregateRootModelType_true_for_non_IAggregateRoot_Model()
         {
-            var mock = new Mock<ModelBase>();
+            var mock = new Mock<IModel>();
             Assert.True(mock.Object.GetType().IsNonAggregateRootModelType());
         }
 
         [Fact]
-        public void IsNonAggregateRootModelType_false_for_non_IAggregateRoot_non_ModelBase()
+        public void IsNonAggregateRootModelType_false_for_non_IAggregateRoot_non_Model()
         {
             var mock = new Mock<object>();
             Assert.False(mock.Object.GetType().IsNonAggregateRootModelType());
@@ -94,7 +94,7 @@ namespace Bix.Core
         [Fact]
         public void IsChildModelProperty_false_for_read_write_property_that_is_an_aggregate_root()
         {
-            var mock = new Mock<ModelBase>().As<IAggregateRoot>();
+            var mock = new Mock<IModel>().As<IAggregateRoot>();
             var property = Mock.Of<PropertyInfo>(p => p.CanRead == true && p.CanWrite == true && p.PropertyType == mock.Object.GetType());
             Assert.False(property.IsChildModelProperty());
         }
@@ -102,7 +102,7 @@ namespace Bix.Core
         [Fact]
         public void IsChildModelProperty_true_for_read_write_property_that_is_a_non_aggregate_root_model()
         {
-            var mock = new Mock<ModelBase>();
+            var mock = new Mock<IModel>();
             var property = Mock.Of<PropertyInfo>(p => p.CanRead == true && p.CanWrite == true && p.PropertyType == mock.Object.GetType());
             Assert.True(property.IsChildModelProperty());
         }
@@ -110,7 +110,7 @@ namespace Bix.Core
         [Fact]
         public void IsChildModelProperty_false_for_read_only_child_model()
         {
-            var mock = new Mock<ModelBase>();
+            var mock = new Mock<IModel>();
             var property = Mock.Of<PropertyInfo>(p => p.CanRead == true && p.CanWrite == false && p.PropertyType == mock.Object.GetType());
             Assert.False(property.IsChildModelProperty());
         }
@@ -118,7 +118,7 @@ namespace Bix.Core
         [Fact]
         public void IsChildModelProperty_false_for_write_only_child_model()
         {
-            var mock = new Mock<ModelBase>();
+            var mock = new Mock<IModel>();
             var property = Mock.Of<PropertyInfo>(p => p.CanRead == false && p.CanWrite == true && p.PropertyType == mock.Object.GetType());
             Assert.False(property.IsChildModelProperty());
         }
@@ -130,7 +130,7 @@ namespace Bix.Core
         [Fact]
         public void IsChildModelCollectionProperty_true_for_read_write_CollectionT_property_that_is_a_non_aggregate_root_model()
         {
-            var mock = new Mock<ModelBase>();
+            var mock = new Mock<IModel>();
             var type = typeof(Collection<>).MakeGenericType(mock.Object.GetType());
             var property = Mock.Of<PropertyInfo>(p => p.CanRead == true && p.CanWrite == true && p.PropertyType == type);
 
@@ -141,7 +141,7 @@ namespace Bix.Core
         [Fact]
         public void IsChildModelCollectionProperty_true_for_read_write_array_property_that_is_a_non_aggregate_root_model()
         {
-            var mock = new Mock<ModelBase>();
+            var mock = new Mock<IModel>();
             var type = mock.Object.GetType().MakeArrayType(1);
             var property = Mock.Of<PropertyInfo>(p => p.CanRead == true && p.CanWrite == true && p.PropertyType == type);
 
@@ -152,7 +152,7 @@ namespace Bix.Core
         [Fact]
         public void IsChildModelCollectionProperty_true_for_read_write_ICollectionT_property_that_is_a_non_aggregate_root_model()
         {
-            var mock = new Mock<ModelBase>();
+            var mock = new Mock<IModel>();
             var type = typeof(ICollection<>).MakeGenericType(mock.Object.GetType());
             var property = Mock.Of<PropertyInfo>(p => p.CanRead == true && p.CanWrite == true && p.PropertyType == type);
 
@@ -163,7 +163,7 @@ namespace Bix.Core
         [Fact]
         public void IsChildModelCollectionProperty_true_for_read_only_ListT_property_that_is_a_non_aggregate_root_model()
         {
-            var mock = new Mock<ModelBase>();
+            var mock = new Mock<IModel>();
             var type = typeof(List<>).MakeGenericType(mock.Object.GetType());
             var property = Mock.Of<PropertyInfo>(p => p.CanRead == true && p.CanWrite == false && p.PropertyType == type);
 
@@ -174,7 +174,7 @@ namespace Bix.Core
         [Fact]
         public void IsChildModelCollectionProperty_false_for_write_only_ListT_property_that_is_a_non_aggregate_root_model()
         {
-            var mock = new Mock<ModelBase>();
+            var mock = new Mock<IModel>();
             var type = typeof(List<>).MakeGenericType(mock.Object.GetType());
             var property = Mock.Of<PropertyInfo>(p => p.CanRead == false && p.CanWrite == true && p.PropertyType == type);
 
@@ -185,7 +185,7 @@ namespace Bix.Core
         [Fact]
         public void IsChildModelCollectionProperty_false_for_read_write_ListT_property_that_is_an_aggregate_root_model()
         {
-            var mock = new Mock<ModelBase>().As<IAggregateRoot>();
+            var mock = new Mock<IModel>().As<IAggregateRoot>();
             var type = typeof(List<>).MakeGenericType(mock.Object.GetType());
             var property = Mock.Of<PropertyInfo>(p => p.CanRead == true && p.CanWrite == true && p.PropertyType == type);
 

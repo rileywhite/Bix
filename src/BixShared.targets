@@ -5,12 +5,12 @@
     <Authors>Riley White</Authors>
     <Company>Briollen</Company>
     <Product>Bix</Product>
-    <Copyright>Copyright 2013-2018 Riley White</Copyright>
+    <Copyright>Copyright 2013-2019 Riley White</Copyright>
     <PackageLicenseUrl>https://github.com/rileywhite/Bix/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
     <PackageTags>bix business-mix restful webapi aspnetcore</PackageTags>
-    <Version>2.0.5</Version>
+    <Version>2.1.0</Version>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
 	<PackageOutputPath>$(SolutionDir)..\packages\</PackageOutputPath>
@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'!='Release'">
-	<Timestamp>$([System.DateTime]::Now.ToString("yyyyMMddHHmm"))</Timestamp>
+	<Timestamp Condition="'$(Timestamp)'==''">$([System.DateTime]::Now.ToString("yyyyMMddHHmm"))</Timestamp>
     <Version>$(Version)-dev.$(Timestamp)</Version>
   </PropertyGroup>
   

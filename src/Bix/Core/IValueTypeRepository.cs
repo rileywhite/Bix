@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Copyright 2013-2018 Riley White
+// Copyright 2013-2019 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ namespace Bix.Core
     /// <typeparam name="TNaturalKey">Type of the natural key</typeparam>
     /// <typeparam name="TItem">Type of the stored item</typeparam>
     public interface IValueTypeRepository<TIdentity, TNaturalKey, TItem> : IRepository<TIdentity, TItem>
-        where TItem : class, IAggregateRoot, IHasIdentity<TIdentity>, IHasNaturalKey<TNaturalKey>
+        where TItem : class, IAggregateRoot, IValueTypeModel<TIdentity, TNaturalKey>
     {
         /// <summary>
         /// Given an item with a populated natural key, finds the existing version or adds the given value.
@@ -45,5 +45,5 @@ namespace Bix.Core
     /// <typeparam name="TNaturalKey">Type of the natural key.</typeparam>
     /// <typeparam name="TItem">Type of the stored item</typeparam>
     public interface IValueTypeRepository<TNaturalKey, TItem> : IValueTypeRepository<TNaturalKey, TNaturalKey, TItem>
-        where TItem : class, IAggregateRoot, IHasIdentity<TNaturalKey>, IHasNaturalKey<TNaturalKey> { }
+        where TItem : class, IAggregateRoot, IValueTypeModel<TNaturalKey> { }
 }

@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Copyright 2013-2018 Riley White
+// Copyright 2013-2019 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ namespace Bix.Repositories.EntityFramework
 {
     public abstract class ValueTypeEntityFrameworkRepositoryBase<TIdentity, TNaturalKey, TModel, TDbContext>
         : EntityFrameworkRepositoryBase<TIdentity, TModel, TDbContext>, IValueTypeRepository<TIdentity, TNaturalKey, TModel>
-        where TModel : ValueTypeModelBase<TModel, TIdentity, TNaturalKey>, IAggregateRoot, IHasIdentity<TIdentity>, IHasNaturalKey<TNaturalKey>, new()
+        where TModel : class, IValueTypeModel<TIdentity, TNaturalKey>, IAggregateRoot
         where TDbContext : DbContext
     {
         public ValueTypeEntityFrameworkRepositoryBase(
@@ -51,15 +51,18 @@ namespace Bix.Repositories.EntityFramework
         {
             try
             {
-                var existingItem = await this.Items.FirstOrDefaultAsync(i => i.NaturalKey.Equals(item.NaturalKey));
+                var existingItem = await this.Items.FirstOrDefaultAsync(i => i.NaturalKey.Equals(item.NaturalKey)).ConfigureAwait(false);
                 if (existingItem != null)
                 {
-                    await this.Context.EnsureChildModelsArePopulated(existingItem, this.Cache, cancellationToken);
-                    await this.OnAfterRetrieveAsync(existingItem, cancellationToken);
+                    if (this.PopulateChildModelsOnGet)
+                    {
+                        await this.Context.EnsureChildModelsArePopulated(existingItem, this.Cache, cancellationToken).ConfigureAwait(false);
+                    }
+                    await this.OnAfterRetrieveAsync(existingItem, cancellationToken).ConfigureAwait(false);
                     return existingItem;
                 }
 
-                return await this.AddAsync(item, cancellationToken);
+                return await this.AddAsync(item, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -72,7 +75,7 @@ namespace Bix.Repositories.EntityFramework
 
     public abstract class ValueTypeEntityFrameworkRepositoryBase<TNaturalKey, TModel, TDbContext>
         : ValueTypeEntityFrameworkRepositoryBase<TNaturalKey, TNaturalKey, TModel, TDbContext>, IValueTypeRepository<TNaturalKey, TModel>
-        where TModel : ValueTypeModelBase<TModel, TNaturalKey>, IAggregateRoot, IHasIdentity<TNaturalKey>, IHasNaturalKey<TNaturalKey>, new()
+        where TModel : class, IValueTypeModel<TNaturalKey>, IAggregateRoot
         where TDbContext : DbContext
     {
         public ValueTypeEntityFrameworkRepositoryBase(

@@ -14,28 +14,31 @@
 // limitations under the License.
 /***************************************************************************/
 
-using Newtonsoft.Json;
 using System;
 
 namespace Bix.Core
 {
     /// <summary>
-    /// Base for types that can be stored in a <see cref="IRepository{TIdentity, TItem}"/>.
+    /// Contract for types that can be stored within an <see cref="IRepository{TIdentity, TItem}"/>
     /// </summary>
-    /// <typeparam name="TIdentity">Type of identifier for this model</typeparam>
-    public abstract class ModelBase<TIdentity> : IModel<TIdentity>
+    /// <remarks>
+    /// Do not implement this interface directly. Instead implement <see cref="IModel{TModel, TIdentity}"/>.
+    /// This interface is primarily for ease of access in cases where the actual type doesn't matter. Normally this is used
+    /// internally by repositories.
+    /// </remarks>
+    public interface IModel
     {
         /// <summary>
         /// Gets whether this is an aggregate root, meaning that it is the root
         /// of a graph of models through which the graph can be created, saved, updated,
         /// or deleted.
         /// </summary>
-        [JsonIgnore]
-        bool IModel.IsAggregateRoot => this.GetType().IsAggregateRootModelType();
-
-        /// <summary>
-        /// Identity that uniquely identifies a model stored within a repository.
-        /// </summary>
-        public abstract TIdentity Identity { get; }
+        bool IsAggregateRoot { get; }
     }
+
+    /// <summary>
+    /// Contract for types that can be stored in a <see cref="IRepository{TIdentity, TItem}"/>.
+    /// </summary>
+    /// <typeparam name="TIdentity">Type of identifier for a <typeparamref name="TModel"/></typeparam>
+    public interface IModel<TIdentity> : IModel, IHasIdentity<TIdentity> { }
 }

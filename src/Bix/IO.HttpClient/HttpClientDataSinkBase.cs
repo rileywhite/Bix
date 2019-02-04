@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Copyright 2013-2018 Riley White
+// Copyright 2013-2019 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -81,13 +81,13 @@ namespace Bix.IO.HttpClient
                         streamStatus.ToJson(),
                         this.AuthenticationHeaderGenerator,
                         this.Logger,
-                        cancellationToken);
+                        cancellationToken).ConfigureAwait(false);
 
                     if (!response.IsSuccessStatusCode)
                     {
                         throw new DataSinkHttpClientException("Unsuccessful service call response") { ErrorResponse = response };
                     }
-                    using (var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync()))
+                    using (var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync().ConfigureAwait(false)))
                     using (var jsonTextReader = new JsonTextReader(streamReader))
                     {
                         cancellationToken.ThrowIfCancellationRequested();
@@ -145,7 +145,7 @@ namespace Bix.IO.HttpClient
                         this.IOBufferSize,
                         this.AuthenticationHeaderGenerator,
                         this.Logger,
-                        cancellationToken);
+                        cancellationToken).ConfigureAwait(false);
 
                     EnsureSuccessfulDataTransfer(response);
                 }

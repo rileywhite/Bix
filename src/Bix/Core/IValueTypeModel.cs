@@ -19,14 +19,15 @@ using System;
 namespace Bix.Core
 {
     /// <summary>
-    /// Allows a type to declare a unique identity
+    /// Contract for a model with an assigned key and a natural key.
     /// </summary>
-    /// <typeparam name="TIdentity">Type of the identity</typeparam>
-    public interface IHasIdentity<TIdentity>
-    {
-        /// <summary>
-        /// Gets the unique identity of an instance
-        /// </summary>
-        TIdentity Identity { get; }
-    }
+    /// <typeparam name="TIdentity">Type of the model's ID</typeparam>
+    /// <typeparam name="TNaturalKey">Type of the model's natrual key</typeparam>
+    public interface IValueTypeModel<TIdentity, TNaturalKey> : IModel<TIdentity>, IHasNaturalKey<TNaturalKey> { }
+
+    /// <summary>
+    /// Contract for a model with a natural key.
+    /// </summary>
+    /// <typeparam name="TNaturalKey">Type of the model's natrual key</typeparam>
+    public interface IValueTypeModel<TNaturalKey> : IValueTypeModel<TNaturalKey, TNaturalKey> { }
 }

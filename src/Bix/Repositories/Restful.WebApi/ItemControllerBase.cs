@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Copyright 2013-2018 Riley White
+// Copyright 2013-2019 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 namespace Bix.Repositories.Restful.WebApi
 {
     public abstract class ItemControllerBase<TIdentity, TItem, TRepository> : BixControllerBase
-        where TItem : class, IHasIdentity<TIdentity>, IAggregateRoot
+        where TItem : class, IModel<TIdentity>, IAggregateRoot
         where TRepository : IRepository<TIdentity, TItem>
     {
         protected ILogger Logger { get; }
@@ -51,7 +51,7 @@ namespace Bix.Repositories.Restful.WebApi
             {
                 return this.BadRequest();
             }
-            var createdItem = await this.Repository.AddAsync(item, cancellationToken);
+            var createdItem = await this.Repository.AddAsync(item, cancellationToken).ConfigureAwait(false);
             return this.CreatedAtRoute(new { id = createdItem.Identity }, createdItem);
         }
 
@@ -59,7 +59,7 @@ namespace Bix.Repositories.Restful.WebApi
         public async Task<IActionResult> GetById(TIdentity identity, CancellationToken cancellationToken)
         {
             this.Logger?.LogDebug("Processing {Verb} request for {Identity} at {Uri}", this.Request.Method, identity?.ToJson() ?? "{}", this.Request.Path);
-            var item = await this.Repository.FindAsync(identity, cancellationToken);
+            var item = await this.Repository.FindAsync(identity, cancellationToken).ConfigureAwait(false);
             if (item == null)
             {
                 return this.NotFound();
@@ -75,21 +75,21 @@ namespace Bix.Repositories.Restful.WebApi
             {
                 return this.BadRequest();
             }
-            return this.Ok(await this.Repository.UpdateAsync(item, cancellationToken));
+            return this.Ok(await this.Repository.UpdateAsync(item, cancellationToken).ConfigureAwait(false));
         }
 
         [HttpDelete("{identity}")]
         public async Task<IActionResult> Delete(TIdentity identity, CancellationToken cancellationToken)
         {
             this.Logger?.LogDebug("Processing {Verb} request for {Identity} at {Uri}", this.Request.Method, identity?.ToJson() ?? "{}", this.Request.Path);
-            var foundItem = await this.Repository.FindAsync(identity, cancellationToken);
+            var foundItem = await this.Repository.FindAsync(identity, cancellationToken).ConfigureAwait(false);
             if (foundItem == null)
             {
                 return this.NotFound();
             }
             try
             {
-                await this.Repository.RemoveAsync(identity, cancellationToken);
+                await this.Repository.RemoveAsync(identity, cancellationToken).ConfigureAwait(false);
                 return this.NoContent();
             }
             catch (Exception ex)
@@ -104,7 +104,7 @@ namespace Bix.Repositories.Restful.WebApi
             this.Logger?.LogDebug("Processing {Verb} request for {Identity} at {Uri}", this.Request.Method, identity?.ToJson() ?? "{}", this.Request.Path);
             if (identity == null) { return this.BadRequest(); }
 
-            var metadata = await this.Repository.GetMetadataAsync(identity, cancellationToken);
+            var metadata = await this.Repository.GetMetadataAsync(identity, cancellationToken).ConfigureAwait(false);
             if (metadata == null) { return this.NotFound(); }
 
             return this.Ok(metadata);

@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Copyright 2013-2018 Riley White
+// Copyright 2013-2019 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ namespace Bix.Http.Client
             CancellationToken cancellationToken = default)
         {
             return await client.SendAsync(
-                new HttpRequestMessage(new HttpMethod("PATCH"), requestUri) { Content = content }, cancellationToken);
+                new HttpRequestMessage(new HttpMethod("PATCH"), requestUri) { Content = content }, cancellationToken).ConfigureAwait(false);
         }
 
         public static async Task<HttpResponseMessage> PatchAsync(
@@ -40,7 +40,7 @@ namespace Bix.Http.Client
             string jsonContent,
             CancellationToken cancellationToken = default)
         {
-            return await client.PatchAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken);
+            return await client.PatchAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken).ConfigureAwait(false);
         }
     }
 }

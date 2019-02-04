@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Copyright 2013-2018 Riley White
+// Copyright 2013-2019 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,16 +46,16 @@ namespace Bix.Repositories.EntityFramework
             this TAggregateRoot source,
             ICache cache,
             CancellationToken cancellationToken)
-            where TAggregateRoot : ModelBase, IAggregateRoot
+            where TAggregateRoot : IModel, IAggregateRoot
         {
             if (source == null) { return false; }
 
             var isChanged = false;
 
-            var modelsToProcess = new Stack<ModelBase>();
+            var modelsToProcess = new Stack<IModel>();
             modelsToProcess.Push(source);
 
-            var allModels = new HashSet<ModelBase> { source };
+            var allModels = new HashSet<IModel> { source };
 
             while (modelsToProcess.Any())
             {
@@ -65,9 +65,9 @@ namespace Bix.Repositories.EntityFramework
                 foreach (var childModelProperty in model.GetType().GetChildModelProperties(cache, cancellationToken))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    if (!(childModelProperty.GetValue(model) is ModelBase childModel))
+                    if (!(childModelProperty.GetValue(model) is IModel childModel))
                     {
-                        childModel = (ModelBase)childModelProperty.PropertyType.GetConstructor(new Type[0]).Invoke(new object[0]);
+                        childModel = (IModel)childModelProperty.PropertyType.GetConstructor(new Type[0]).Invoke(new object[0]);
                         childModelProperty.SetValue(model, childModel);
                         isChanged = true;
                     }
@@ -82,7 +82,7 @@ namespace Bix.Repositories.EntityFramework
                 foreach (var childEnumPropertyAndType in model.GetType().GetChildModelCollectionProperties(cache, cancellationToken))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    if (!(childEnumPropertyAndType.Item1.GetValue(model) is IEnumerable<ModelBase> childModelList)) { continue; }
+                    if (!(childEnumPropertyAndType.Item1.GetValue(model) is IEnumerable<IModel> childModelList)) { continue; }
 
                     foreach (var childModel in childModelList.Where(cm => cm != null))
                     {
@@ -104,7 +104,7 @@ namespace Bix.Repositories.EntityFramework
             TAggregateRoot aggregateRoot,
             ICache cache,
             CancellationToken cancellationToken)
-            where TAggregateRoot : ModelBase, IAggregateRoot
+            where TAggregateRoot : IModel, IAggregateRoot
         {
             if (aggregateRoot.TryPopulateMissingChildModels(cache, cancellationToken))
             {
@@ -118,7 +118,7 @@ namespace Bix.Repositories.EntityFramework
             TAggregateRoot model,
             ICache cache,
             CancellationToken cancellationToken)
-            where TAggregateRoot : ModelBase, IAggregateRoot
+            where TAggregateRoot : IModel, IAggregateRoot
         {
             source.MarkAllAggregatedModelsAsModified(model, cache, cancellationToken);
 
@@ -135,7 +135,7 @@ namespace Bix.Repositories.EntityFramework
             TAggregateRoot model,
             ICache cache,
             CancellationToken cancellationToken)
-            where TAggregateRoot : ModelBase, IAggregateRoot
+            where TAggregateRoot : IModel, IAggregateRoot
         {
             source.MarkAllAggregatedModelsAsModified(model, cache, cancellationToken);
 
@@ -152,7 +152,7 @@ namespace Bix.Repositories.EntityFramework
             TAggregateRoot model,
             ICache cache,
             CancellationToken cancellationToken)
-            where TAggregateRoot : ModelBase, IAggregateRoot
+            where TAggregateRoot : IModel, IAggregateRoot
         {
             foreach (var containedModel in model.CollectModelsInReverseDependencyOrder(cache, cancellationToken))
             {
@@ -176,7 +176,7 @@ namespace Bix.Repositories.EntityFramework
             IQueryable<TAggregateRoot> aggregateRoots,
             ICache cache,
             CancellationToken cancellationToken)
-            where TAggregateRoot : ModelBase, IAggregateRoot
+            where TAggregateRoot : IModel, IAggregateRoot
         {
             var isChanged = false;
             foreach (var aggregateRoot in aggregateRoots)

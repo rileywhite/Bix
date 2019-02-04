@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Copyright 2013-2018 Riley White
+// Copyright 2013-2019 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ using System.Threading.Tasks;
 namespace Bix.Repositories.Restful.WebApi
 {
     public abstract class ItemsControllerBase<TIdentity, TItem, TRepository> : BixControllerBase
-        where TItem : class, IHasIdentity<TIdentity>, IAggregateRoot
+        where TItem : class, IModel<TIdentity>, IAggregateRoot
         where TRepository : IRepository<TIdentity, TItem>
     {
         protected ILogger Logger { get; }
@@ -48,7 +48,7 @@ namespace Bix.Repositories.Restful.WebApi
         public async Task<IEnumerable<TItem>> GetAll(CancellationToken cancellationToken)
         {
             this.Logger?.LogDebug("Processing {Verb} request at {Uri}", this.Request.Method, this.Request.Path);
-            return await this.Repository.GetAllAsync(cancellationToken);
+            return await this.Repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Copyright 2013-2018 Riley White
+// Copyright 2013-2019 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ namespace Bix.Http.Client
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri);
             cancellationToken.ThrowIfCancellationRequested();
             logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "GET", requestUri);
-            return await client.GetStreamAsync(requestUri);
+            return await client.GetStreamAsync(requestUri).ConfigureAwait(false);
         }
 
         public static async Task<HttpResponseMessage> PostWithAuthenticationAsync(
@@ -53,7 +53,7 @@ namespace Bix.Http.Client
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
             logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "POST", requestUri);
-            return await client.PostAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken);
+            return await client.PostAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken).ConfigureAwait(false);
         }
 
         public static async Task<HttpResponseMessage> DeleteWithAuthenticationAsync(
@@ -66,7 +66,7 @@ namespace Bix.Http.Client
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri);
             logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "DELETE", requestUri);
-            return await client.DeleteAsync(requestUri, cancellationToken);
+            return await client.DeleteAsync(requestUri, cancellationToken).ConfigureAwait(false);
         }
 
         public static async Task<HttpResponseMessage> PutWithAuthenticationAsync(
@@ -80,7 +80,7 @@ namespace Bix.Http.Client
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
             logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "PUT", requestUri);
-            return await client.PutAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken);
+            return await client.PutAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken).ConfigureAwait(false);
         }
 
         public static async Task<HttpResponseMessage> PatchWithAuthenticationAsync(
@@ -94,7 +94,7 @@ namespace Bix.Http.Client
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
             logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "PATCH", requestUri);
-            return await client.PatchAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken);
+            return await client.PatchAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken).ConfigureAwait(false);
         }
 
         public static async Task<HttpResponseMessage> PatchWithAuthenticationAsync(
@@ -113,7 +113,7 @@ namespace Bix.Http.Client
                 81920,
                 authenticationHeaderGenerator,
                 logger,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
         }
 
         public static async Task<HttpResponseMessage> PatchWithAuthenticationAsync(
@@ -147,7 +147,7 @@ namespace Bix.Http.Client
                             TransferEncodingChunked = true,
                         }
                     },
-                    cancellationToken);
+                    cancellationToken).ConfigureAwait(false);
             };
         }
     }

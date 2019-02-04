@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Copyright 2013-2018 Riley White
+// Copyright 2013-2019 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,13 +31,15 @@ namespace Bix.Core
         /// <param name="beforeRetryCallback">Runs each before each retry after first failure. Will be passed the failure exception and the number of ms before the next retry. Delay occurs after callback completes.</param>
         /// <param name="ceilingPowerOf2Delay"></param>
         /// <param name="maxTries">Max number of retries. 0 for infinite.</param>
+        /// <param name="continueOnCapturedContext"><c>true</c> if async calls should keep the original calling context</param>
         /// <returns>A task that wraps the given task in an expenential backoff retry loop</returns>
         /// <remarks>A <see cref="TaskCanceledException"/> will halt the retries. All other exceptions will result in continuing with the requested retries.</remarks>
         public static async Task WrapWithExponentialBackoff(
             this Func<Task> source,
             Action<Exception, int> beforeRetryCallback = null,
             uint maxTries = 16,
-            uint ceilingPowerOf2Delay = 10)
+            uint ceilingPowerOf2Delay = 10,
+            bool continueOnCapturedContext = false)
         {
             uint tryCount = 0;
 
@@ -49,8 +51,8 @@ namespace Bix.Core
                 try
                 {
                     ++tryCount;
-                    if (exponentialBackoffTime > 0) { await Task.Delay(exponentialBackoffTime); }
-                    await source();
+                    if (exponentialBackoffTime > 0) { await Task.Delay(exponentialBackoffTime).ConfigureAwait(continueOnCapturedContext); }
+                    await source().ConfigureAwait(continueOnCapturedContext);
                     return;
                 }
                 catch (Exception ex)
@@ -73,6 +75,7 @@ namespace Bix.Core
         /// <param name="beforeRetryCallback">Runs each before each retry after first failure. Will be passed the failure exception and the number of ms before the next retry. Delay occurs after callback completes.</param>
         /// <param name="ceilingPowerOf2Delay"></param>
         /// <param name="maxTries">Max number of retries. 0 for infinite.</param>
+        /// <param name="continueOnCapturedContext"><c>true</c> if async calls should keep the original calling context</param>
         /// <returns>A task that wraps the given task in an expenential backoff retry loop</returns>
         /// <remarks>A <see cref="TaskCanceledException"/> will halt the retries. All other exceptions will result in continuing with the requested retries.</remarks>
         /// <returns>A task that wraps the given task in an expenential backoff retry loop</returns>
@@ -80,7 +83,8 @@ namespace Bix.Core
             this Func<Task<T>> source,
             Action<Exception, int> beforeRetryCallback = null,
             uint maxTries = 16,
-            uint ceilingPowerOf2Delay = 10)
+            uint ceilingPowerOf2Delay = 10,
+            bool continueOnCapturedContext = false)
         {
             uint tryCount = 0;
 
@@ -93,8 +97,8 @@ namespace Bix.Core
                 try
                 {
                     if (maxTries > 0) { ++tryCount; }
-                    if (exponentialBackoffTime > 0) { await Task.Delay(exponentialBackoffTime); }
-                    return await source();
+                    if (exponentialBackoffTime > 0) { await Task.Delay(exponentialBackoffTime).ConfigureAwait(continueOnCapturedContext); }
+                    return await source().ConfigureAwait(continueOnCapturedContext);
                 }
                 catch (Exception ex)
                 {

@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Copyright 2013-2018 Riley White
+// Copyright 2013-2019 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ using System.Threading;
 namespace Bix.Core
 {
     /// <summary>
-    /// Behaviors available to enhance usability of <see cref="ModelBase"/> types
+    /// Behaviors available to enhance usability of <see cref="IModel"/> types
     /// </summary>
     public static class ModelExtensions
     {
@@ -37,7 +37,7 @@ namespace Bix.Core
         {
             return
                 source != null &&
-                typeof(ModelBase).GetTypeInfo().IsAssignableFrom(source) &&
+                typeof(IModel).GetTypeInfo().IsAssignableFrom(source) &&
                 typeof(IAggregateRoot).GetTypeInfo().IsAssignableFrom(source) &&
                 !source.GetTypeInfo().IsAbstract;
         }
@@ -49,10 +49,10 @@ namespace Bix.Core
         /// <returns><c>true</c> if a type is a model but not an aggregate root, else <c>false</c>.</returns>
         public static bool IsNonAggregateRootModelType(this Type source)
         {
-            var typeInfo = typeof(ModelBase).GetTypeInfo();
+            var typeInfo = typeof(IModel).GetTypeInfo();
             return
                 source != null &&
-                typeof(ModelBase).GetTypeInfo().IsAssignableFrom(source) &&
+                typeof(IModel).GetTypeInfo().IsAssignableFrom(source) &&
                 !typeof(IAggregateRoot).GetTypeInfo().IsAssignableFrom(source) &&
                 !source.GetTypeInfo().IsAbstract;
         }
@@ -238,20 +238,20 @@ namespace Bix.Core
         /// <param name="cache">Cache containing previously determined dependencies between model types</param>
         /// <param name="cancellationToken">Tracks cancellation for the operation</param>
         /// <returns>Models contained in the aggregate ordered in reverse dependency order so that children come before parents</returns>
-        public static IEnumerable<ModelBase> CollectModelsInReverseDependencyOrder<TAggregateRoot>(
+        public static IEnumerable<IModel> CollectModelsInReverseDependencyOrder<TAggregateRoot>(
             this TAggregateRoot source,
             ICache cache,
             CancellationToken cancellationToken = default)
-            where TAggregateRoot : ModelBase, IAggregateRoot
+            where TAggregateRoot : IModel, IAggregateRoot
         {
             if (source == null) { yield break; }
 
-            var modelsToProcess = new Queue<ModelBase>(); // use a queue for breadth-first traversal (dfs probably wouldn't make a difference, though)
+            var modelsToProcess = new Queue<IModel>(); // use a queue for breadth-first traversal (dfs probably wouldn't make a difference, though)
             modelsToProcess.Enqueue(source);
 
-            var modelDupeChecker = new HashSet<ModelBase> { source };
+            var modelDupeChecker = new HashSet<IModel> { source };
 
-            var allModelsStackedByDependency = new Stack<ModelBase>();
+            var allModelsStackedByDependency = new Stack<IModel>();
             allModelsStackedByDependency.Push(source);
 
             while (modelsToProcess.Any())
@@ -266,17 +266,17 @@ namespace Bix.Core
         }
 
         private static void CollectEnumeratedChildModels(
-            Stack<ModelBase> allModelsStackedByDependency,
-            HashSet<ModelBase> modelDupeChecker,
-            Queue<ModelBase> modelsToProcess,
-            ModelBase model,
+            Stack<IModel> allModelsStackedByDependency,
+            HashSet<IModel> modelDupeChecker,
+            Queue<IModel> modelsToProcess,
+            IModel model,
             ICache cache,
             CancellationToken cancellationToken)
         {
             foreach (var childEnumPropertyAndType in model.GetType().GetChildModelCollectionProperties(cache, cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var childModelList = childEnumPropertyAndType.Item1.GetValue(model) as IEnumerable<ModelBase>;
+                var childModelList = childEnumPropertyAndType.Item1.GetValue(model) as IEnumerable<IModel>;
                 if (childModelList == null) { continue; }
 
                 foreach (var childModel in childModelList.Where(cm => cm != null))
@@ -293,17 +293,17 @@ namespace Bix.Core
         }
 
         private static void CollectDirectChildModels(
-            Stack<ModelBase> allModelsStackedByDependency,
-            HashSet<ModelBase> modelDupeChecker,
-            Queue<ModelBase> modelsToProcess,
-            ModelBase model,
+            Stack<IModel> allModelsStackedByDependency,
+            HashSet<IModel> modelDupeChecker,
+            Queue<IModel> modelsToProcess,
+            IModel model,
             ICache cache,
             CancellationToken cancellationToken)
         {
             foreach (var childModelProperty in model.GetType().GetChildModelProperties(cache, cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var childModel = childModelProperty.GetValue(model) as ModelBase;
+                var childModel = childModelProperty.GetValue(model) as IModel;
                 if (childModel == null) { continue; }
 
                 if (!modelDupeChecker.Contains(childModel))
