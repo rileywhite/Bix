@@ -36,8 +36,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.0.0-pre-05" />
-    <PackageReference Include="Nito.AsyncEx.Interop.WaitHandles" Version="5.0.0-pre-05" />
+    <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.0.0" />
+    <PackageReference Include="Nito.AsyncEx.Interop.WaitHandles" Version="5.0.0" />
     <PackageReference Include="System.Diagnostics.Contracts" Version="4.3.0" />
     <PackageReference Include="System.Security.Cryptography.Primitives" Version="4.3.0" />
   </ItemGroup>
