@@ -6,7 +6,7 @@
     <RootNamespace>Bix.Core</RootNamespace>
     <Platforms>AnyCPU;x64</Platforms>
     <LangVersion>latest</LangVersion>
-    <NoWarn>$(NoWarn);NU5015</NoWarn>
+    <NoWarn>$(NoWarn);NU5105</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
