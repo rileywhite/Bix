@@ -23,8 +23,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using System.Collections;
 using System.Linq.Expressions;
 
 namespace Bix.Repositories.EntityFramework
@@ -39,6 +37,16 @@ namespace Bix.Repositories.EntityFramework
         public IAuditingColumns AuditingColumns { get; }
         protected TDbContext Context { get; }
 
+        /// <summary>
+        /// Gets the Items source for the repository.
+        /// </summary>
+        /// <remarks>
+        /// EntityFramework may begin eager loading data from the database if this
+        /// property is decorated with calls to
+        /// <see cref="EntityFrameworkQueryableExtensions.Include{TEntity, TProperty}(IQueryable{TEntity}, Expression{Func{TEntity, TProperty}})"/>
+        /// or similar. It's better to use <see cref="OnAfterRetrieveAsync(IQueryable{TModel}, CancellationToken)"/> to decorate
+        /// items after a filter has been applied.
+        /// </remarks>
         protected abstract IQueryable<TModel> Items { get; }
 
         public EntityFrameworkRepositoryBase(
@@ -71,12 +79,12 @@ namespace Bix.Repositories.EntityFramework
         {
             try
             {
+                var items = await this.OnAfterRetrieveAsync(this.Items, cancellationToken).ConfigureAwait(false);
                 if (this.PopulateChildModelsOnGet)
                 {
-                    await this.Context.EnsureChildModelsArePopulated(this.Items, this.Cache, cancellationToken).ConfigureAwait(false);
+                    await this.Context.EnsureChildModelsArePopulated(items, this.Cache, cancellationToken).ConfigureAwait(false);
                 }
-                await this.OnAfterRetrieveAsync(this.Items, cancellationToken).ConfigureAwait(false);
-                return await Task.Run(() => this.Items, cancellationToken).ConfigureAwait(false);
+                return items;
             }
             catch (Exception ex)
             {
@@ -90,12 +98,12 @@ namespace Bix.Repositories.EntityFramework
         {
             try
             {
-                var foundItem = await this.Items.FirstAsync(i => identity.Equals(i.Identity), cancellationToken).ConfigureAwait(false);
+                var foundItemQueryable = await this.OnAfterRetrieveAsync(this.Items.Where(i => identity.Equals(i.Identity)), cancellationToken).ConfigureAwait(false);
+                var foundItem = await foundItemQueryable.FirstAsync().ConfigureAwait(false);
                 if (this.PopulateChildModelsOnGet)
                 {
                     await this.Context.EnsureChildModelsArePopulated(foundItem, this.Cache, cancellationToken).ConfigureAwait(false);
                 }
-                await this.OnAfterRetrieveAsync(foundItem, cancellationToken).ConfigureAwait(false);
                 return foundItem;
             }
             catch (Exception ex)
@@ -193,95 +201,32 @@ namespace Bix.Repositories.EntityFramework
 
         #endregion
 
-        #region Class to provide async enumerable wrapper of a single item (remove when yield return become async compatible)
-
-        private class SingleItemAsyncEnumerableWrapper<T> : IAsyncEnumerable<T>, IEnumerable<T>
-        {
-            public SingleItemAsyncEnumerableWrapper(T item)
-            {
-                this.Item = item;
-            }
-
-            public T Item { get; }
-
-            public Type ElementType => typeof(T);
-
-            public Expression Expression => throw new NotImplementedException();
-
-            public IQueryProvider Provider => throw new NotImplementedException();
-
-            public IAsyncEnumerator<T> GetEnumerator()
-            {
-                return new SingleItemAsyncEnumerator(this.Item);
-            }
-
-            IEnumerator<T> IEnumerable<T>.GetEnumerator()
-            {
-                return new SingleItemAsyncEnumerator(this.Item);
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return new SingleItemAsyncEnumerator(this.Item);
-            }
-
-            private class SingleItemAsyncEnumerator : IAsyncEnumerator<T>, IEnumerator<T>, IEnumerator
-            {
-                public SingleItemAsyncEnumerator(T item)
-                {
-                    this.Current = item;
-                }
-
-                private bool HasReturnedItem { get; set; }
-                public T Current { get; }
-
-                object IEnumerator.Current => throw new NotImplementedException();
-
-                public void Dispose() { }
-
-                Task<bool> IAsyncEnumerator<T>.MoveNext(CancellationToken cancellationToken)
-                {
-                    return Task.FromResult(this.MoveNext());
-                }
-
-                public bool MoveNext()
-                {
-                    if (this.HasReturnedItem)
-                    {
-                        return false;
-                    }
-
-                    this.HasReturnedItem = true;
-                    return true;
-                }
-
-                public void Reset()
-                {
-                    this.HasReturnedItem = false;
-                }
-            }
-        }
-
-        #endregion
-
         #region Customization Hooks
 
-        protected virtual Task OnAfterRetrieveAsync(TModel item, CancellationToken cancellationToken)
-        {
-            return this.OnAfterRetrieveAsync(new SingleItemAsyncEnumerableWrapper<TModel>(item).AsQueryable(), cancellationToken);
-        }
-
-        protected virtual Task OnAfterRetrieveAsync(IQueryable<TModel> items, CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
+        /// <summary>
+        /// Post-processing and decoration for retrived items.
+        /// </summary>
+        /// <param name="items">Items retrieved from the repository so far.</param>
+        /// <param name="cancellationToken">For cancelling the operation.</param>
+        /// <returns>Updated set of items.</returns>
+        /// <remarks>
+        /// This is a good place to decorate filtered items, for example using
+        /// <see cref="EntityFrameworkQueryableExtensions.Include{TEntity, TProperty}(IQueryable{TEntity}, Expression{Func{TEntity, TProperty}})"/>
+        /// or similar.
+        /// 
+        /// EntityFramework may begin eager loading data from the database if the <see cref="Items"/>
+        /// property is decorated with such calls, which can kill performance.
+        /// 
+        /// The default implemenation simply returns <paramref name="items"/>.
+        /// </remarks>
+        protected virtual Task<IQueryable<TModel>> OnAfterRetrieveAsync(IQueryable<TModel> items, CancellationToken cancellationToken) => Task.FromResult(items);
 
         protected virtual Task<TModel> OnBeforeAddAsync(TModel item, CancellationToken cancellationToken)
         {
             this.Context.AuditChanges(this.HttpContextAccessor.HttpContext, this.AuditingColumns);
             return Task.FromResult(item);
         }
-        protected virtual Task<TModel> OnAfterAddAsync(TModel item, CancellationToken cancellationToken) { return Task.FromResult(item); }
+        protected virtual Task<TModel> OnAfterAddAsync(TModel item, CancellationToken cancellationToken) => Task.FromResult(item);
 
         protected virtual Task<TModel> OnBeforeUpdateAsync(TModel item, CancellationToken cancellationToken)
         {
@@ -289,9 +234,9 @@ namespace Bix.Repositories.EntityFramework
             return Task.FromResult(item);
         }
 
-        protected virtual Task<TModel> OnAfterUpdateAsync(TModel item, CancellationToken cancellationToken) { return Task.FromResult(item); }
-        protected virtual Task<TModel> OnBeforeRemoveAsync(TModel item, CancellationToken cancellationToken) { return Task.FromResult(item); }
-        protected virtual Task OnAfterRemoveAsync(TIdentity identity, CancellationToken cancellationToken) { return Task.CompletedTask; }
+        protected virtual Task<TModel> OnAfterUpdateAsync(TModel item, CancellationToken cancellationToken) => Task.FromResult(item);
+        protected virtual Task<TModel> OnBeforeRemoveAsync(TModel item, CancellationToken cancellationToken) => Task.FromResult(item);
+        protected virtual Task OnAfterRemoveAsync(TIdentity identity, CancellationToken cancellationToken) => Task.CompletedTask;
 
         #endregion
     }
