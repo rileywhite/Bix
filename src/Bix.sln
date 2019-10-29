@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bix.IO.WebApi", "Bix\IO.Web
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{51348D7B-4E39-4E41-A5BD-2AFC562F0478}"
 	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
+		..\appveyor.yml = ..\appveyor.yml
 		BixShared.targets = BixShared.targets
 	EndProjectSection
 EndProject
