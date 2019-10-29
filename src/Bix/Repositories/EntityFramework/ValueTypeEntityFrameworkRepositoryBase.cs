@@ -20,6 +20,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -51,14 +52,14 @@ namespace Bix.Repositories.EntityFramework
         {
             try
             {
-                var existingItem = await this.Items.FirstOrDefaultAsync(i => i.NaturalKey.Equals(item.NaturalKey)).ConfigureAwait(false);
-                if (existingItem != null)
+                var existingItemQueryable = await this.OnAfterRetrieveAsync(this.Items.Where(i => i.NaturalKey.Equals(item.NaturalKey)), cancellationToken).ConfigureAwait(false);
+                if (existingItemQueryable.Any())
                 {
+                    var existingItem = await existingItemQueryable.FirstOrDefaultAsync().ConfigureAwait(false);
                     if (this.PopulateChildModelsOnGet)
                     {
                         await this.Context.EnsureChildModelsArePopulated(existingItem, this.Cache, cancellationToken).ConfigureAwait(false);
                     }
-                    await this.OnAfterRetrieveAsync(existingItem, cancellationToken).ConfigureAwait(false);
                     return existingItem;
                 }
 
