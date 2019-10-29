@@ -6,15 +6,16 @@
     <Company>Briollen</Company>
     <Product>Bix</Product>
     <Copyright>Copyright 2013-2019 Riley White</Copyright>
-    <PackageLicenseUrl>https://github.com/rileywhite/Bix/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
     <PackageTags>bix business-mix restful webapi aspnetcore</PackageTags>
-    <Version>2.1.0</Version>
+    <Version>3.0.0-alpha1</Version>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-	<PackageOutputPath>$(SolutionDir)..\packages\</PackageOutputPath>
+    <PackageOutputPath>$(SolutionDir)..\packages\</PackageOutputPath>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <NoWarn>$(NoWarn);NU5015</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'!='Release'">
