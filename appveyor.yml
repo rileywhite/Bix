@@ -6,15 +6,21 @@ before_build:
 - cmd: nuget restore src\Bix.sln
 build:
   verbosity: minimal
-artifacts:
-- path: '**\*.nupkg'
-  name: Bix Packages
-  on:
-    branch: master
-deploy:
-- provider: NuGet
-  api_key:
-    secure: GrDnIO6vODmya/PkBk8B7AbXIjFEjhcdTlnGL46nQ0OTR7qtkFbfVLTnEc6R2j9G
-  artifact: Bix Packages
-  on:
-    branch: master
+
+for:
+-
+  branches:
+    only:
+      - master
+
+    artifacts:
+    - path: '**\*.nupkg'
+      name: Bix Packages
+
+    deploy:
+    - provider: NuGet
+      api_key:
+        secure: GrDnIO6vODmya/PkBk8B7AbXIjFEjhcdTlnGL46nQ0OTR7qtkFbfVLTnEc6R2j9G
+      artifact: Bix Packages
+      on:
+        branch: master
