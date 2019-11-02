@@ -10,17 +10,12 @@
     <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
     <PackageTags>bix business-mix restful webapi aspnetcore</PackageTags>
-    <Version>3.0.0-beta.1</Version>
+    <Version>3.0.0-beta.1-build.123</Version><FileVersion>3.0.0.123</FileVersion>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageOutputPath>$(SolutionDir)..\packages\</PackageOutputPath>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <NoWarn>$(NoWarn);NU5105</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)'!='Release'">
-	<Timestamp Condition="'$(Timestamp)'==''">$([System.DateTime]::Now.ToString("yyyyMMddHHmm"))</Timestamp>
-    <Version>$(Version)-dev.$(Timestamp)</Version>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
