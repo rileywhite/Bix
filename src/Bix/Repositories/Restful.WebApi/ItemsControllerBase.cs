@@ -16,7 +16,6 @@
 
 using Bix.Core;
 using Bix.WebApi.Core;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -46,7 +45,6 @@ namespace Bix.Repositories.Restful.WebApi
         }
 
         [HttpGet]
-        [EnableQuery]
         public async Task<IQueryable<TItem>> GetAll(CancellationToken cancellationToken)
         {
             this.Logger?.LogDebug("Processing {Verb} request at {Uri}", this.Request.Method, this.Request.Path);
