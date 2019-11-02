@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
     <PackageTags>bix business-mix restful webapi aspnetcore</PackageTags>
-    <Version>3.0.0.0-alpha2</Version>
+    <Version>3.0.0-beta.1</Version>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageOutputPath>$(SolutionDir)..\packages\</PackageOutputPath>
