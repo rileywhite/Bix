@@ -31,10 +31,6 @@
     <PackageReference Include="Autofac.Extras.Moq" Version="4.3.0" />
     <PackageReference Include="AutoFixture" Version="4.11.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Moq" Version="4.13.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="xunit" Version="2.4.1" />
