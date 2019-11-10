@@ -63,6 +63,12 @@ namespace Bix.IO.WebApi
         protected ILogger Logger { get; }
 
         /// <summary>
+        /// Gets the directory path where uploaded files are stored during download.
+        /// Defaults to <see cref="Path.GetTempPath()"/>.
+        /// </summary>
+        protected virtual string GetUploadTempPath() => Path.GetTempPath();
+
+        /// <summary>
         /// Bumps, or signals creation/completion/status update request, based on the stream's current state.
         /// </summary>
         /// <param name="streamStatus">Stream status with the source data filled in with info on the stream being signaled</param>
@@ -83,7 +89,7 @@ namespace Bix.IO.WebApi
 
             var partition = this.HttpContextAccessor.HttpContext?.User?.Identity?.Name;
 
-            var targetFilePath = GetTargetFilePath(partition, streamStatus.Descriptor.Id);
+            var targetFilePath = this.GetTargetFilePath(partition, streamStatus.Descriptor.Id);
 
             if (!Directory.Exists(Path.GetDirectoryName(targetFilePath)))
             {
@@ -146,7 +152,7 @@ namespace Bix.IO.WebApi
             return this.Ok(streamStatus);
         }
 
-        private static string GetTargetFilePath(string partition, string id)
+        private string GetTargetFilePath(string partition, string id)
         {
             if (string.IsNullOrWhiteSpace(partition)) { partition = "DefaultPartition"; };
 
@@ -155,7 +161,7 @@ namespace Bix.IO.WebApi
             partition = string.Join("_", partition.Split(Path.GetInvalidFileNameChars()));
 
             return Path.Combine(
-                Path.GetTempPath(),
+                this.GetUploadTempPath(),
                 "BixDataUpload",
                 partition,
                 id);
@@ -186,7 +192,7 @@ namespace Bix.IO.WebApi
         {
             this.Logger?.LogDebug("Processing {Verb} request for {Id}, {startAt}, {length} at {Uri}", this.Request.Method, id, startAt, length, this.Request.Path);
             var partition = this.HttpContextAccessor.HttpContext?.User?.Identity?.Name;
-            var targetFilePath = GetTargetFilePath(partition, id);
+            var targetFilePath = this.GetTargetFilePath(partition, id);
             var targetFile = new FileInfo(targetFilePath);
 
             var bytesLeft = targetFile.Length - startAt;
