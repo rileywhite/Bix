@@ -5,12 +5,12 @@
     <Authors>Riley White</Authors>
     <Company>Briollen</Company>
     <Product>Bix</Product>
-    <Copyright>Copyright 2013-2019 Riley White</Copyright>
+    <Copyright>Copyright 2013-2021 Riley White</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
     <PackageTags>bix business-mix restful webapi aspnetcore</PackageTags>
-    <Version>3.0.1</Version>
+    <Version>3.1.0</Version>
     <NoWarn>$(NoWarn);NU5105</NoWarn>
   
     <!-- Microsoft.SourceLink Configuration  -->
@@ -23,7 +23,7 @@
   
   <!-- Reference Github SourceLink package for all projects  -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19554-01" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
