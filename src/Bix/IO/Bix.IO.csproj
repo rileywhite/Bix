@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netstandard2.0;net462;net472</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net462;net472;net48</TargetFrameworks>
     <Platforms>AnyCPU;x64</Platforms>
     <LangVersion>latest</LangVersion>
     <Description>IO tooling for fast network data transfer for Bix</Description>
@@ -32,8 +32,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.0.0" />
-    <PackageReference Include="Nito.AsyncEx.Interop.WaitHandles" Version="5.0.0" />
+    <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.0" />
+    <PackageReference Include="Nito.AsyncEx.Interop.WaitHandles" Version="5.1.0" />
     <PackageReference Include="System.Diagnostics.Contracts" Version="4.3.0" />
     <PackageReference Include="System.Security.Cryptography.Primitives" Version="4.3.0" />
   </ItemGroup>

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netstandard2.0;net462;net472</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net462;net472;net48</TargetFrameworks>
     <Platforms>AnyCPU;x64</Platforms>
     <LangVersion>latest</LangVersion>
     <Description>Entity Framework Core repository framework for Bix</Description>
@@ -29,7 +29,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.11" />
   </ItemGroup>
 
   <ItemGroup>

@@ -31,8 +31,10 @@ namespace Bix.Core
             var fixture = new Fixture();
             var key = fixture.Create<string>();
             var value = fixture.Create<object>();
-            var store = new Dictionary<string, object>();
-            store.Add(key, value);
+            var store = new Dictionary<string, object>
+            {
+                { key, value }
+            };
             var cache = new DictionaryCache(store);
 
             // act
