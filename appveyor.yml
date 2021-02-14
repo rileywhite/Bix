@@ -20,4 +20,4 @@ deploy:
     secure: gygw0/PM/jbFlFrYrIXNm6QiFAReIBOxMvKVM4EAkhcg++LPYF67FiMF2EBy6LZi
   artifact: Bix Packages
   on:
-    branch: master
+    branch: main
