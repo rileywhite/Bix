@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
     <PackageTags>bix business-mix restful webapi aspnetcore</PackageTags>
-    <Version>4.0.0-dev.1</Version>
+    <Version>4.0.0-dev.2</Version>
     <NoWarn>$(NoWarn);NU5105</NoWarn>
   
     <!-- Microsoft.SourceLink Configuration  -->
