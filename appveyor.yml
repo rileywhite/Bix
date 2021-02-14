@@ -1,5 +1,8 @@
 image: Visual Studio 2019
 
+environment:
+  VisualStudioVersion: 16
+
 configuration: Release
 platform: Any CPU
 
