@@ -52,9 +52,10 @@ namespace Bix.Repositories.EntityFramework
         {
             try
             {
-                // TODO: use linq expression for filtering for perf
-                var existingItemQueryable = await this.OnAfterRetrieveAsync(
-                    this.Items.AsEnumerable().Where(i => i.NaturalKey.Equals(item.NaturalKey)).AsQueryable(), cancellationToken).ConfigureAwait(false);
+                // TODO: use linq expression instead of AsEnumerable()...AsQueryable for filtering for perf
+                var existingItemQueryable = (await this.OnAfterRetrieveAsync(
+                    this.Items.AsEnumerable().Where(i => i.NaturalKey.Equals(item.NaturalKey)).AsQueryable(), cancellationToken).ConfigureAwait(false))
+                    .AsQueryable();
                 if (existingItemQueryable.Any())
                 {
                     var existingItem = await existingItemQueryable.FirstOrDefaultAsync().ConfigureAwait(false);
