@@ -98,9 +98,10 @@ namespace Bix.Repositories.EntityFramework
         {
             try
             {
-                // TODO: use linq expression for filtering for perf
-                var foundItemQueryable = await this.OnAfterRetrieveAsync(
-                    this.Items.AsEnumerable().Where(i => identity.Equals(i.Identity)).AsQueryable(), cancellationToken).ConfigureAwait(false);
+                // TODO: use linq expression instead of AsEnumerable()...AsQueryable for filtering for perf
+                var foundItemQueryable = (await this.OnAfterRetrieveAsync(
+                    this.Items.AsEnumerable().Where(i => identity.Equals(i.Identity)).AsQueryable(), cancellationToken).ConfigureAwait(false))
+                    .AsQueryable();
                 var foundItem = await foundItemQueryable.FirstAsync().ConfigureAwait(false);
                 if (this.PopulateChildModelsOnGet)
                 {
