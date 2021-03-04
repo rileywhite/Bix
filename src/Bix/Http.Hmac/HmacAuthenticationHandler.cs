@@ -113,7 +113,7 @@ namespace Bix.Http.Hmac
 
         private static async Task<string> ReadRequestBody(HttpRequest request)
         {
-            request.EnableRewind();
+            request.EnableBuffering();
             try
             {
                 // This is safe since Dispose(false), invoked by the StreamReader finalizer,
