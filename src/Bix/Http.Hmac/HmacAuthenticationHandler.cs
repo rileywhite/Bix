@@ -18,7 +18,6 @@ using Bix.Core;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
@@ -42,6 +41,8 @@ namespace Bix.Http.Hmac
     {
         public const string HmacSchemeName = "hmac";
 
+        private new ILogger<HmacAuthenticationHandler> Logger { get; }
+
         public HmacAuthenticationHandler(
             IOptionsMonitor<HmacAuthenticationSchemeOptions> options,
             ILoggerFactory logger,
@@ -52,6 +53,7 @@ namespace Bix.Http.Hmac
         {
             Contract.Requires(applicationSecretStore != null);
             Contract.Ensures(this.ApplicationSecretStore != null);
+            this.Logger = logger.CreateLogger<HmacAuthenticationHandler>();
 
             this.ApplicationSecretStore = applicationSecretStore;
         }
@@ -64,25 +66,25 @@ namespace Bix.Http.Hmac
 
             if (!authorizationHeader.Any())
             {
-                this.Logger.LogInformation("Failing authentication for application: {Reason}", "No authorization header found");
+                this.Logger.LogWarning("Failing authentication for application: {Reason}", "No authorization header found");
                 return AuthenticateResult.Fail("No authorization header found");
             }
 
             if (!this.TryGetHmacAuthenticationParameter(authorizationHeader[0] ?? string.Empty, out var parameter))
             {
-                this.Logger.LogInformation("Failing authentication: {Reason}", "Invalid HMAC authentication parameter");
+                this.Logger.LogWarning("Failing authentication: {Reason}", "Invalid HMAC authentication parameter");
                 return AuthenticateResult.Fail("Invalid HMAC authentication parameter");
             }
 
             if (!this.ApplicationSecretStore.TryGetValue(parameter.ApplicationKey, out var applicationSecret))
             {
-                this.Logger.LogInformation("Failing authentication: {Reason}. Parameters: {Parameters}", "No secret found for application key", parameter.CloneWithoutHash().ToJson());
+                this.Logger.LogWarning("Failing authentication: {Reason}. Parameters: {Parameters}", "No secret found for application key", parameter.ToJson());
                 return AuthenticateResult.Fail("No secret found for application key");
             }
 
             if (!IsRequestFresh(parameter, out var freshnessIndicator))
             {
-                this.Logger.LogInformation("Failing authentication: {Reason}. Parameters: {Parameters}. Freshness Indicator: {FreshnessIndicator}", "HMAC authentication request is not fresh", parameter.CloneWithoutHash().ToJson(), freshnessIndicator.ToJson());
+                this.Logger.LogWarning("Failing authentication: {Reason}. Parameters: {Parameters}. Freshness Indicator: {FreshnessIndicator}", "HMAC authentication request is not fresh", parameter.ToJson(), freshnessIndicator.ToJson());
                 return AuthenticateResult.Fail("HMAC authentication request is not fresh");
             }
 
@@ -97,7 +99,7 @@ namespace Bix.Http.Hmac
 
             if (hash != parameter.Hash)
             {
-                this.Logger.LogInformation("Failing authentication: {Reason}. Parameters: {Parameters}. Includes body: {IncludeBodyInHash}.", "HMAC request hashes do not match", parameter.CloneWithoutHash().ToJson(), includeBodyInHash);
+                this.Logger.LogWarning("Failing authentication: {Reason}. Parameters: {Parameters}. Includes body: {IncludeBodyInHash}.", "HMAC request hashes do not match", parameter.ToJson(), includeBodyInHash);
                 return AuthenticateResult.Fail("HMAC request hashes do not match");
             }
 
