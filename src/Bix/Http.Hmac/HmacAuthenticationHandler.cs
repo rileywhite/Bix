@@ -64,21 +64,25 @@ namespace Bix.Http.Hmac
 
             if (!authorizationHeader.Any())
             {
+                this.Logger.LogInformation("Failing authentication for application: {Reason}", "No authorization header found");
                 return AuthenticateResult.Fail("No authorization header found");
             }
 
             if (!this.TryGetHmacAuthenticationParameter(authorizationHeader[0] ?? string.Empty, out var parameter))
             {
+                this.Logger.LogInformation("Failing authentication: {Reason}", "Invalid HMAC authentication parameter");
                 return AuthenticateResult.Fail("Invalid HMAC authentication parameter");
             }
 
             if (!this.ApplicationSecretStore.TryGetValue(parameter.ApplicationKey, out var applicationSecret))
             {
+                this.Logger.LogInformation("Failing authentication: {Reason}. Parameters: {Parameters}", "No secret found for application key", parameter.CloneWithoutHash().ToJson());
                 return AuthenticateResult.Fail("No secret found for application key");
             }
 
-            if (!IsRequestFresh(parameter))
+            if (!IsRequestFresh(parameter, out var freshnessIndicator))
             {
+                this.Logger.LogInformation("Failing authentication: {Reason}. Parameters: {Parameters}. Freshness Indicator: {FreshnessIndicator}", "HMAC authentication request is not fresh", parameter.CloneWithoutHash().ToJson(), freshnessIndicator.ToJson());
                 return AuthenticateResult.Fail("HMAC authentication request is not fresh");
             }
 
@@ -93,6 +97,7 @@ namespace Bix.Http.Hmac
 
             if (hash != parameter.Hash)
             {
+                this.Logger.LogInformation("Failing authentication: {Reason}. Parameters: {Parameters}. Includes body: {IncludeBodyInHash}.", "HMAC request hashes do not match", parameter.CloneWithoutHash().ToJson(), includeBodyInHash);
                 return AuthenticateResult.Fail("HMAC request hashes do not match");
             }
 
@@ -155,15 +160,25 @@ namespace Bix.Http.Hmac
             }
         }
 
-        private static bool IsRequestFresh(HmacAuthenticationParameter parameter)
+        private static bool IsRequestFresh(HmacAuthenticationParameter parameter, out Tuple<ParseResult<Instant>, Instant, Duration> freshnessIndicators)
         {
-            var parseResult = InstantPattern.General.Parse(parameter.Time);
-            if (!parseResult.Success) { return false; }
+            var now = NodaTime.SystemClock.Instance.GetCurrentInstant();
 
-            var offset = NodaTime.SystemClock.Instance.GetCurrentInstant() - parseResult.Value;
+            var parseResult = InstantPattern.General.Parse(parameter.Time);
+            if (!parseResult.Success)
+            {
+                freshnessIndicators = Tuple.Create(parseResult, now, Duration.MaxValue);
+                return false; 
+            }
+
+            var offset = now - parseResult.Value;
             if (offset < Duration.Zero) { offset = Duration.Negate(offset); }
 
-            return offset < Duration.FromMinutes(15);
+            var isRequestFresh = offset < Duration.FromMinutes(15);
+
+            freshnessIndicators = Tuple.Create(parseResult, now, offset);
+
+            return isRequestFresh;
         }
     }
 }

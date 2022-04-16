@@ -17,7 +17,7 @@ artifacts:
 deploy:
 - provider: NuGet
   api_key:
-    secure: gygw0/PM/jbFlFrYrIXNm6QiFAReIBOxMvKVM4EAkhcg++LPYF67FiMF2EBy6LZi
+    secure: 0WJJyoL3KDd4D3PoaKD08XGwqWNjCbH2YM/gfFQNC79sWWrpWyV16DWPjEXELgZl
   artifact: Bix Packages
   on:
     branch: main
