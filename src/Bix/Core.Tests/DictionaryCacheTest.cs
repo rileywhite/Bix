@@ -14,6 +14,7 @@
 // limitations under the License.
 /***************************************************************************/
 
+using Autofac;
 using Autofac.Extras.Moq;
 using AutoFixture;
 using System;
@@ -50,8 +51,7 @@ namespace Bix.Core
             using (var mock = AutoMock.GetStrict())
             {
                 // arrange
-                var store = new Dictionary<string, object>();
-                mock.Provide<IDictionary<string, object>>(store);
+                mock.Mock<IDictionary<string, object>>();
                 var cache = mock.Create<DictionaryCache>();
                 var fixture = new Fixture();
 
@@ -62,34 +62,12 @@ namespace Bix.Core
         }
 
         [Fact]
-        public void SetAddsToTheInnerDictionary()
-        {
-            using (var mock = AutoMock.GetStrict())
-            {
-                // arrange
-                var store = new Dictionary<string, object>();
-                mock.Provide<IDictionary<string, object>>(store);
-                var cache = mock.Create<DictionaryCache>();
-                var fixture = new Fixture();
-                var key = fixture.Create<string>();
-                var value = fixture.Create<object>();
-
-                // act
-                cache.Set(key, value);
-
-                // assert
-                Assert.Same(value, store[key]);
-            }
-        }
-
-        [Fact]
         public void GetPullsFromTheInnerDictionary()
         {
-            using (var mock = AutoMock.GetStrict())
+            var store = new Dictionary<string, object>();
+            using (var mock = AutoMock.GetStrict(builder => builder.RegisterInstance<IDictionary<string, object>>(store)))
             {
                 // arrange
-                var store = new Dictionary<string, object>();
-                mock.Provide<IDictionary<string, object>>(store);
                 var cache = mock.Create<DictionaryCache>();
                 var fixture = new Fixture();
                 var key = fixture.Create<string>();
@@ -110,8 +88,7 @@ namespace Bix.Core
             using (var mock = AutoMock.GetStrict())
             {
                 // arrange
-                var store = new Dictionary<string, object>();
-                mock.Provide<IDictionary<string, object>>(store);
+                mock.Mock<IDictionary<string, object>>();
                 var cache = mock.Create<DictionaryCache>();
                 var fixture = new Fixture();
                 var key = fixture.Create<string>();

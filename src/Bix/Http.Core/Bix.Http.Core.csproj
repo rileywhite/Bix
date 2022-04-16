@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net462;net472;net48</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net462;net472;net48;netstandard2.1</TargetFrameworks>
     <Platforms>AnyCPU;x64</Platforms>
     <LangVersion>latest</LangVersion>
     <Description>Http tools for Bix</Description>
@@ -41,11 +41,15 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="NodaTime" Version="3.0.5" />
+    <PackageReference Include="NodaTime" Version="3.0.10" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Core\Bix.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.1.1" />
   </ItemGroup>
 
 </Project>
