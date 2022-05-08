@@ -23,13 +23,15 @@ using Microsoft.Extensions.Options;
 using NodaTime;
 using NodaTime.Text;
 using System;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Text.Encodings.Web;
-using System.Diagnostics.Contracts;
+using Microsoft.Extensions.Primitives;
 
 namespace Bix.Http.Hmac
 {
@@ -40,6 +42,7 @@ namespace Bix.Http.Hmac
     public class HmacAuthenticationHandler : AuthenticationHandler<HmacAuthenticationSchemeOptions>
     {
         public const string HmacSchemeName = "hmac";
+        public const string TrustedNetworkSchemeName = "trusted_network";
 
         private new ILogger<HmacAuthenticationHandler> Logger { get; }
 
@@ -64,13 +67,27 @@ namespace Bix.Http.Hmac
         {
             var authorizationHeader = this.Request.Headers["Authorization"];
 
+            var remoteIPAddress = this.Context.Connection.RemoteIpAddress;
+            foreach (var trustedNetwork in this.Options.TrustedNetworks ?? Enumerable.Empty<IPNetwork>())
+            {
+                if (trustedNetwork.Contains(remoteIPAddress))
+                {
+                    this.Logger.LogInformation("Trusting request from {TrustedRemoteIPAddress}", remoteIPAddress.ToJson());
+                    return CreateTrustedNetworkAuthenticationResult(authorizationHeader, remoteIPAddress, trustedNetwork);
+                }
+            }
+
+            this.Logger.LogInformation(
+                "Request came from untrusted IP Address: {UntrustedRemoteIPAddress}. Continuing with auth check.",
+                remoteIPAddress.ToJson());
+
             if (!authorizationHeader.Any())
             {
                 this.Logger.LogWarning("Failing authentication for application: {Reason}", "No authorization header found");
                 return AuthenticateResult.Fail("No authorization header found");
             }
 
-            if (!this.TryGetHmacAuthenticationParameter(authorizationHeader[0] ?? string.Empty, out var parameter))
+            if (!TryGetHmacAuthenticationParameter(this.Logger, authorizationHeader[0] ?? string.Empty, out var parameter))
             {
                 this.Logger.LogWarning("Failing authentication: {Reason}", "Invalid HMAC authentication parameter");
                 return AuthenticateResult.Fail("Invalid HMAC authentication parameter");
@@ -133,7 +150,8 @@ namespace Bix.Http.Hmac
             }
         }
 
-        private bool TryGetHmacAuthenticationParameter(
+        private static bool TryGetHmacAuthenticationParameter(
+            ILogger logger,
             string authorizationHeaderValue,
             out HmacAuthenticationParameter parameter)
         {
@@ -155,7 +173,7 @@ namespace Bix.Http.Hmac
             }
             catch (Exception ex)
             {
-                this.Logger.LogWarning(ex, "Bad HMAC authentication header {AuthorizationHeaderValue}", authorizationHeaderValue);
+                logger.LogWarning(ex, "Bad HMAC authentication header {AuthorizationHeaderValue}", authorizationHeaderValue);
 
                 parameter = null;
                 return false;
@@ -181,6 +199,29 @@ namespace Bix.Http.Hmac
             freshnessIndicators = Tuple.Create(parseResult, now, offset);
 
             return isRequestFresh;
+        }
+
+        private static AuthenticateResult CreateTrustedNetworkAuthenticationResult(
+            ILogger logger,
+            StringValues authorizationHeader,
+            IPAddress remoteIPAddress,
+            IPNetwork trustedNetwork)
+        {
+            ClaimsPrincipal user;
+            if (authorizationHeader.Any() && TryGetHmacAuthenticationParameter(logger, authorizationHeader[0] ?? string.Empty, out var parameter))
+            {
+                user = new ClaimsPrincipal(new GenericIdentity(parameter.AuthenticatedUser, TrustedNetworkSchemeName));
+            }
+            else
+            {
+                user = new ClaimsPrincipal(new GenericIdentity("Unknown Trusted Network User", TrustedNetworkSchemeName));
+            }
+
+            var properties = new AuthenticationProperties();
+            properties.Items["RemoteIPAddress"] = remoteIPAddress.ToJson();
+            properties.Items["TrustedNetwork"] = trustedNetwork.ToJson();
+
+            return AuthenticateResult.Success(new AuthenticationTicket(user, properties, HmacSchemeName));
         }
     }
 }
