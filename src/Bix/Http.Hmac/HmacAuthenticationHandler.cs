@@ -73,7 +73,7 @@ namespace Bix.Http.Hmac
                 if (trustedNetwork.Contains(remoteIPAddress))
                 {
                     this.Logger.LogInformation("Trusting request from {TrustedRemoteIPAddress}", remoteIPAddress.ToJson());
-                    return CreateTrustedNetworkAuthenticationResult(authorizationHeader, remoteIPAddress, trustedNetwork);
+                    return CreateTrustedNetworkAuthenticationResult(this.Logger, authorizationHeader, remoteIPAddress, trustedNetwork);
                 }
             }
 
