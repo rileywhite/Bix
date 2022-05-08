@@ -16,10 +16,14 @@
 
 using Microsoft.AspNetCore.Authentication;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 
 namespace Bix.Http.Hmac
 {
     public class HmacAuthenticationSchemeOptions : AuthenticationSchemeOptions
     {
+        public IEnumerable<IPNetwork> TrustedNetworks { get; } = Enumerable.Empty<IPNetwork>();
     }
 }
