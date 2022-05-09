@@ -24,6 +24,6 @@ namespace Bix.Http.Hmac
 {
     public class HmacAuthenticationSchemeOptions : AuthenticationSchemeOptions
     {
-        public IEnumerable<IPNetwork> TrustedNetworks { get; } = Enumerable.Empty<IPNetwork>();
+        public IEnumerable<IPNetwork> TrustedNetworks { get; set; } = Enumerable.Empty<IPNetwork>();
     }
 }
