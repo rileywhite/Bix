@@ -34,14 +34,14 @@ namespace Bix.IO.WebApi
     /// Base type for controllers that accept streaming data of a known size.
     /// </summary>
     [DisableRequestSizeLimit]
-    public abstract class DataSinkControllerBase : BixControllerBase
+    public abstract class UnauthenticatedDataSinkControllerBase : UnauthenticatedBixControllerBase
     {
         /// <summary>
         /// Creates a new <see cref="DataSinkControllerBase"/>
         /// </summary>
         /// <param name="httpContextAccessor">For accessing info about the current HTTP request</param>
         /// <param name="logger">Logger to which log entries will be written</param>
-        public DataSinkControllerBase(IHttpContextAccessor httpContextAccessor, ILogger logger)
+        public UnauthenticatedDataSinkControllerBase(IHttpContextAccessor httpContextAccessor, ILogger logger)
         {
             Contract.Requires(httpContextAccessor != null);
             Contract.Requires(logger != null);
