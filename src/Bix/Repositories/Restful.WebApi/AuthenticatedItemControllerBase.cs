@@ -25,14 +25,14 @@ using System.Threading.Tasks;
 
 namespace Bix.Repositories.Restful.WebApi
 {
-    public abstract class ItemControllerBase<TIdentity, TItem, TRepository> : BixControllerBase
+    public abstract class AuthenticatedItemControllerBase<TIdentity, TItem, TRepository> : AuthenticatedBixControllerBase
         where TItem : class, IModel<TIdentity>, IAggregateRoot
         where TRepository : IRepository<TIdentity, TItem>
     {
         protected ILogger Logger { get; }
         protected TRepository Repository { get; }
 
-        public ItemControllerBase(ILogger logger, TRepository repository)
+        public AuthenticatedItemControllerBase(ILogger logger, TRepository repository)
         {
             Contract.Requires(logger != null);
             Contract.Requires(repository != null);
