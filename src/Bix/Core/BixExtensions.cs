@@ -35,6 +35,13 @@ namespace Bix.Core
         {
             if (source == null) { throw new ArgumentNullException(nameof(source)); }
 
+            if (jsonSerializerSettings == null)
+            {
+                jsonSerializerSettings = new JsonSerializerSettings();
+            }
+            jsonSerializerSettings.Converters.Add(new IPAddressConverter());
+            jsonSerializerSettings.Converters.Add(new IPEndPointConverter());
+
             return JsonConvert.SerializeObject(source, jsonSerializerSettings);
         }
 
@@ -50,6 +57,13 @@ namespace Bix.Core
         {
             if (source == null) { throw new ArgumentNullException(nameof(source)); }
 
+            if (jsonSerializerSettings == null)
+            {
+                jsonSerializerSettings = new JsonSerializerSettings();
+            }
+            jsonSerializerSettings.Converters.Add(new IPAddressConverter());
+            jsonSerializerSettings.Converters.Add(new IPEndPointConverter());
+
             return JsonConvert.DeserializeObject<T>(source, jsonSerializerSettings);
         }
 
@@ -63,10 +77,17 @@ namespace Bix.Core
         /// <returns><c>true</c> if deserialization is successful, else <c>false</c></returns>
         public static bool TryConvertFromJson<T>(this string source, out T @object, JsonSerializerSettings jsonSerializerSettings = null)
         {
+            if (jsonSerializerSettings == null)
+            {
+                jsonSerializerSettings = new JsonSerializerSettings();
+            }
+            jsonSerializerSettings.Converters.Add(new IPAddressConverter());
+            jsonSerializerSettings.Converters.Add(new IPEndPointConverter());
+
             try { @object = source.ConvertFromJson<T>(jsonSerializerSettings); }
             catch
             {
-                @object = default(T);
+                @object = default;
                 return false;
             }
 
