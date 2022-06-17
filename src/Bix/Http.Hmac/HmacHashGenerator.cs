@@ -47,9 +47,8 @@ namespace Bix.Http.Hmac
             var slashSlashIndex = endpointUri.IndexOf("//");
             if (slashSlashIndex >= 0)
             {
-                endpointUri = endpointUri.Substring(slashSlashIndex);
+                endpointUri = endpointUri.Substring(slashSlashIndex + 1);
             }
-            endpointUri = endpointUri.Substring(slashSlashIndex + 1);
 
             var parameterContainer = new
             {
