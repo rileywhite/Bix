@@ -107,16 +107,22 @@ namespace Bix.Http.Hmac
 
             var includeBodyInHash = this.Request.ContentLength.HasValue && this.Request.ContentLength.Value > 0;
             var requestBody = includeBodyInHash ? await ReadRequestBody(this.Request).ConfigureAwait(false) : string.Empty;
+            var displayUrl = this.Request.GetDisplayUrl();
 
             var hash = HmacHashGenerator.Generate(
                 parameter,
                 applicationSecret,
-                this.Request.GetDisplayUrl(),
+                displayUrl,
                 requestBody);
 
             if (hash != parameter.Hash)
             {
-                this.Logger.LogWarning("Failing authentication: {Reason}. Parameters: {Parameters}. Includes body: {IncludeBodyInHash}.", "HMAC request hashes do not match", parameter.ToJson(), includeBodyInHash);
+                this.Logger.LogWarning(
+                    "Failing authentication: {Reason}. DisplayUrl: {DisplayUrl}. Parameters: {Parameters}. Includes body: {IncludeBodyInHash}.",
+                    "HMAC request hashes do not match",
+                    displayUrl,
+                    parameter.ToJson(),
+                    includeBodyInHash);
                 return AuthenticateResult.Fail("HMAC request hashes do not match");
             }
 
