@@ -30,9 +30,30 @@ namespace Bix.Http.Hmac
             string endpointUri,
             string jsonContent = null)
         {
+            if (endpointUri == null)
+            {
+                throw new ArgumentNullException(nameof(endpointUri));
+            }
+
+            if (endpointUri == string.Empty)
+            {
+                throw new ArgumentException("Cannot be empty", nameof(endpointUri));
+            }
+
+            // normalize any URL encoded characters
+            endpointUri = WebUtility.UrlDecode(endpointUri);
+
+            // exclude the endpointUri scheme if it exists because reverse proxies will sometimes changing the scheme
+            var slashSlashIndex = endpointUri.IndexOf("//");
+            if (slashSlashIndex >= 0)
+            {
+                endpointUri = endpointUri.Substring(slashSlashIndex);
+            }
+            endpointUri = endpointUri.Substring(slashSlashIndex + 1);
+
             var parameterContainer = new
             {
-                EndpointUri = WebUtility.UrlDecode(endpointUri),
+                EndpointUri = endpointUri,
                 JsonContent = jsonContent ?? string.Empty,
                 Parameter = parameter.CloneWithoutHash(),
             };
