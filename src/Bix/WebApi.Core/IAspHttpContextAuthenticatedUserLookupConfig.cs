@@ -16,13 +16,19 @@
 
 using System;
 
-namespace Bix.Repositories.EntityFramework
+namespace Bix.WebApi.Core
 {
-    public interface IAuditingColumns
+    /// <summary>
+    /// When implemented by a concrete type, can be passed into the constructor of
+    /// a <see cref="AspHttpContextAuthenticatedUserLookup"/> to provide
+    /// a username to be used by the Application to perform actions that are not associated
+    /// with an active incoming request, such as startup, shutdown, etc.
+    /// </summary>
+    public interface IAspHttpContextAuthenticatedUserLookupConfig
     {
-        string CreatedByColumnName { get; }
-        string CreatedAtColumnName { get; }
-        string UpdatedByColumnName { get; }
-        string UpdatedAtColumnName { get; }
+        /// <summary>
+        /// Name of the User that represents the currently running application
+        /// </summary>
+        string ApplicationUserName { get; }
     }
 }

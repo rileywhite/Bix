@@ -1,5 +1,5 @@
 ﻿/***************************************************************************/
-// Copyright 2013-2019 Riley White
+// Copyright 2013-2022 Riley White
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,20 +15,28 @@
 /***************************************************************************/
 
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Bix.WebApi.Core
 {
-    /// <summary>
-    /// When implemented by a concrete type, can be passed into the constructor of
-    /// a <see cref="AspHttpContextContextAuthenticatedUserLookup"/> to provide
-    /// a username to be used by the Application to perform actions that are not associated
-    /// with an active incoming request, such as startup, shutdown, etc.
-    /// </summary>
-    public interface IAspHttpContextContextAuthenticatedUserLookupConfig
+    internal class StaticAspHttpContextAuthenticatedUserLookupConfig : IAspHttpContextAuthenticatedUserLookupConfig
     {
-        /// <summary>
-        /// Name of the User that represents the currently running application
-        /// </summary>
-        string ApplicationUserName { get; }
+        public StaticAspHttpContextAuthenticatedUserLookupConfig(string applicationUserName)
+        {
+            if (applicationUserName == null)
+            {
+                throw new ArgumentNullException(nameof(applicationUserName));
+            }
+
+            if (string.IsNullOrWhiteSpace(ApplicationUserName))
+            {
+                throw new ArgumentException("Cannot be empty", nameof(applicationUserName));
+            }
+
+            this.ApplicationUserName = applicationUserName;
+        }
+        
+        public string ApplicationUserName { get; }
     }
 }
