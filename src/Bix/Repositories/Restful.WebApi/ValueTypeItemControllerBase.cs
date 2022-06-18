@@ -57,12 +57,12 @@ namespace Bix.Repositories.Restful.WebApi
         }
     }
 
-    public abstract class AuthenticatedValueTypeItemControllerBase<TNaturalKey, TItem, TRepository>
+    public abstract class ValueTypeItemControllerBase<TNaturalKey, TItem, TRepository>
         : ValueTypeItemControllerBase<TNaturalKey, TNaturalKey, TItem, TRepository>
         where TItem : class, IValueTypeModel<TNaturalKey>, IAggregateRoot
         where TRepository : IValueTypeRepository<TNaturalKey, TItem>
     {
-        public AuthenticatedValueTypeItemControllerBase(ILogger logger, TRepository repository)
+        public ValueTypeItemControllerBase(ILogger logger, TRepository repository)
             : base(logger, repository)
         {
             Contract.Requires(repository != null);
