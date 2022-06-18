@@ -15,7 +15,7 @@
 /***************************************************************************/
 
 using Bix.Http.Core;
-using Serilog;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -38,7 +38,7 @@ namespace Bix.Http.Client
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri);
             cancellationToken.ThrowIfCancellationRequested();
-            logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "GET", requestUri);
+            logger?.LogDebug("Added auth header to {Verb} call to {RequestUri}", "GET", requestUri);
             return await client.GetStreamAsync(requestUri).ConfigureAwait(false);
         }
 
@@ -52,7 +52,7 @@ namespace Bix.Http.Client
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
-            logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "POST", requestUri);
+            logger?.LogDebug("Added auth header to {Verb} call to {RequestUri}", "POST", requestUri);
             return await client.PostAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken).ConfigureAwait(false);
         }
 
@@ -65,7 +65,7 @@ namespace Bix.Http.Client
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri);
-            logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "DELETE", requestUri);
+            logger?.LogDebug("Added auth header to {Verb} call to {RequestUri}", "DELETE", requestUri);
             return await client.DeleteAsync(requestUri, cancellationToken).ConfigureAwait(false);
         }
 
@@ -79,7 +79,7 @@ namespace Bix.Http.Client
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
-            logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "PUT", requestUri);
+            logger?.LogDebug("Added auth header to {Verb} call to {RequestUri}", "PUT", requestUri);
             return await client.PutAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken).ConfigureAwait(false);
         }
 
@@ -93,7 +93,7 @@ namespace Bix.Http.Client
         {
             client.DefaultRequestHeaders.Authorization =
                 authenticationHeaderGenerator.GenerateAuthenticationHeader(requestUri, jsonContent);
-            logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "PATCH", requestUri);
+            logger?.LogDebug("Added auth header to {Verb} call to {RequestUri}", "PATCH", requestUri);
             return await client.PatchAsync(requestUri, new StringContent(jsonContent, Encoding.UTF8, "application/json"), cancellationToken).ConfigureAwait(false);
         }
 
@@ -137,7 +137,7 @@ namespace Bix.Http.Client
                     }
             })
             {
-                logger?.Debug("Added auth header to {Verb} call to {RequestUri}", "PATCH", requestUri);
+                logger?.LogDebug("Added auth header to {Verb} call to {RequestUri}", "PATCH", requestUri);
                 return await client.SendAsync(
                     new HttpRequestMessage(new HttpMethod("PATCH"), requestUri)
                     {

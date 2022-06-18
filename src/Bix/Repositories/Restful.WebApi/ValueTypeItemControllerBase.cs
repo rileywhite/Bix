@@ -23,15 +23,14 @@ using System.Threading.Tasks;
 
 namespace Bix.Repositories.Restful.WebApi
 {
-    public abstract class AuthenticatedValueTypeItemControllerBase<TIdentity, TNaturalKey, TItem, TRepository>
-        : AuthenticatedItemControllerBase<TIdentity, TItem, TRepository>
+    public abstract class ValueTypeItemControllerBase<TIdentity, TNaturalKey, TItem, TRepository>
+        : ItemControllerBase<TIdentity, TItem, TRepository>
         where TItem : class, IValueTypeModel<TIdentity, TNaturalKey>, IAggregateRoot
         where TRepository : IValueTypeRepository<TIdentity, TNaturalKey, TItem>
     {
-        public AuthenticatedValueTypeItemControllerBase(ILogger logger, TRepository repository)
+        public ValueTypeItemControllerBase(ILogger logger, TRepository repository)
             : base(logger, repository)
         {
-            Contract.Requires(logger != null);
             Contract.Requires(repository != null);
         }
 
@@ -59,14 +58,13 @@ namespace Bix.Repositories.Restful.WebApi
     }
 
     public abstract class AuthenticatedValueTypeItemControllerBase<TNaturalKey, TItem, TRepository>
-        : AuthenticatedValueTypeItemControllerBase<TNaturalKey, TNaturalKey, TItem, TRepository>
+        : ValueTypeItemControllerBase<TNaturalKey, TNaturalKey, TItem, TRepository>
         where TItem : class, IValueTypeModel<TNaturalKey>, IAggregateRoot
         where TRepository : IValueTypeRepository<TNaturalKey, TItem>
     {
         public AuthenticatedValueTypeItemControllerBase(ILogger logger, TRepository repository)
             : base(logger, repository)
         {
-            Contract.Requires(logger != null);
             Contract.Requires(repository != null);
         }
     }

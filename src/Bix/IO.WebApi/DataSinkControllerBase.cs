@@ -34,19 +34,17 @@ namespace Bix.IO.WebApi
     /// Base type for controllers that accept streaming data of a known size.
     /// </summary>
     [DisableRequestSizeLimit]
-    public abstract class UnauthenticatedDataSinkControllerBase : UnauthenticatedBixControllerBase
+    public abstract class DataSinkControllerBase : BixControllerBase
     {
         /// <summary>
         /// Creates a new <see cref="DataSinkControllerBase"/>
         /// </summary>
         /// <param name="httpContextAccessor">For accessing info about the current HTTP request</param>
         /// <param name="logger">Logger to which log entries will be written</param>
-        public UnauthenticatedDataSinkControllerBase(IHttpContextAccessor httpContextAccessor, ILogger logger)
+        public DataSinkControllerBase(IHttpContextAccessor httpContextAccessor, ILogger<DataSinkControllerBase> logger = null)
         {
             Contract.Requires(httpContextAccessor != null);
-            Contract.Requires(logger != null);
             Contract.Ensures(this.HttpContextAccessor != null);
-            Contract.Ensures(this.Logger != null);
 
             this.HttpContextAccessor = httpContextAccessor;
             this.Logger = logger;
@@ -60,7 +58,7 @@ namespace Bix.IO.WebApi
         /// <summary>
         /// Gets the current logger
         /// </summary>
-        protected ILogger Logger { get; }
+        protected ILogger<DataSinkControllerBase> Logger { get; }
 
         /// <summary>
         /// Gets the directory path where uploaded files are stored during download.
@@ -102,7 +100,7 @@ namespace Bix.IO.WebApi
                 {
                     case long l when l < streamStatus.Descriptor.Length:
                         // more efficient than SetLength since the file isn't filled with 0s
-                        Logger.LogInformation($"Setting length of file {targetFilePath} with partition {partition} and ID {streamStatus.Descriptor.Id} to {streamStatus.Descriptor.Length}.");
+                        Logger?.LogInformation($"Setting length of file {targetFilePath} with partition {partition} and ID {streamStatus.Descriptor.Id} to {streamStatus.Descriptor.Length}.");
                         targetStream.Position = streamStatus.Descriptor.Length - 1;
                         targetStream.WriteByte(0);
                         targetStream.Position = 0;
@@ -110,7 +108,7 @@ namespace Bix.IO.WebApi
 
                     case long l when l > streamStatus.Descriptor.Length:
                         // truncate the file
-                        Logger.LogWarning($"Truncating length of file {targetFilePath} with partition {partition} and ID {streamStatus.Descriptor.Id} to {streamStatus.Descriptor.Length}.");
+                        Logger?.LogWarning($"Truncating length of file {targetFilePath} with partition {partition} and ID {streamStatus.Descriptor.Id} to {streamStatus.Descriptor.Length}.");
                         targetStream.SetLength(streamStatus.Descriptor.Length);
                         break;
                 }
@@ -128,7 +126,7 @@ namespace Bix.IO.WebApi
                 new HashAlgorithmName(streamStatus.Descriptor.HashName),
                 out var diffSubsegmentHashes))
             {
-                Logger.LogDebug($"Difference was found for the data stream with partition {partition}, ID {streamStatus.Descriptor.Id}, segment start {segmentStart}, and segment length {segmentLength}.");
+                Logger?.LogDebug($"Difference was found for the data stream with partition {partition}, ID {streamStatus.Descriptor.Id}, segment start {segmentStart}, and segment length {segmentLength}.");
                 streamStatus.SegmentHashes = diffSubsegmentHashes;
                 return this.Ok(streamStatus);
             }
@@ -141,12 +139,12 @@ namespace Bix.IO.WebApi
             // check if we were comparing the full file, and if so, indicate file upload completeness
             if (segmentStart == 0 && segmentLength == targetFile.Length)
             {
-                Logger.LogInformation($"No difference was found for a full data stream with partition {partition} and ID {streamStatus.Descriptor.Id}. Signaling upload completed.");
+                Logger?.LogInformation($"No difference was found for a full data stream with partition {partition} and ID {streamStatus.Descriptor.Id}. Signaling upload completed.");
                 await this.SignalUploadCompleted(partition, streamStatus.Descriptor.Id, targetFile, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                Logger.LogInformation($"No difference was found for a partial data stream with partition {partition}, ID {streamStatus.Descriptor.Id}, segment start {segmentStart}, and segment length {segmentLength}.");
+                Logger?.LogInformation($"No difference was found for a partial data stream with partition {partition}, ID {streamStatus.Descriptor.Id}, segment start {segmentStart}, and segment length {segmentLength}.");
             }
 
             return this.Ok(streamStatus);
@@ -200,11 +198,11 @@ namespace Bix.IO.WebApi
             if (length.Value > bytesLeft)
             {
                 // too much data sent
-                this.Logger.LogWarning($"Expected no more than {bytesLeft} bytes, but {length.Value} bytes were indicated.");
+                this.Logger?.LogWarning($"Expected no more than {bytesLeft} bytes, but {length.Value} bytes were indicated.");
                 return this.BadRequest();
             }
 
-            Logger.LogInformation($"Starting to write {length.Value} expected bytes to {targetFilePath} with partition {partition} and ID {id}.");
+            Logger?.LogInformation($"Starting to write {length.Value} expected bytes to {targetFilePath} with partition {partition} and ID {id}.");
 
             var actualWrittenBytes = 0L;
 
@@ -217,17 +215,17 @@ namespace Bix.IO.WebApi
 
             if (actualWrittenBytes != length.Value)
             {
-                Logger.LogWarning($"Wrote {length.Value} bytes to {targetFilePath} with partition {partition} and ID {id}. This was fewer than expected. Specify a length parameter to avoid allocating unneeded memory in the service.");
+                Logger?.LogWarning($"Wrote {length.Value} bytes to {targetFilePath} with partition {partition} and ID {id}. This was fewer than expected. Specify a length parameter to avoid allocating unneeded memory in the service.");
             }
             else
             {
-                Logger.LogInformation($"Wrote {length.Value} bytes to {targetFilePath} with partition {partition} and ID {id}.");
+                Logger?.LogInformation($"Wrote {length.Value} bytes to {targetFilePath} with partition {partition} and ID {id}.");
             }
 
             if (actualWrittenBytes == bytesLeft)
             {
                 // last of the data was sent
-                Logger.LogInformation($"Signaling completion after data transfer for {targetFilePath} with partition {partition} and ID {id}.");
+                Logger?.LogInformation($"Signaling completion after data transfer for {targetFilePath} with partition {partition} and ID {id}.");
                 await this.SignalUploadCompleted(partition, id, targetFile, cancellationToken).ConfigureAwait(false);
             }
 

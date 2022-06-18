@@ -57,11 +57,9 @@ namespace Bix.Repositories.EntityFramework
             TDbContext context)
         {
             Contract.Requires(httpContextAccessor != null);
-            Contract.Requires(logger != null);
             Contract.Requires(cache != null);
             Contract.Requires(context != null);
             Contract.Requires(auditingColumns != null);
-            Contract.Ensures(this.Logger != null);
             Contract.Ensures(this.Context != null);
 
             this.HttpContextAccessor = httpContextAccessor;
@@ -89,7 +87,7 @@ namespace Bix.Repositories.EntityFramework
             catch (Exception ex)
             {
                 var ve = new EntityFrameworkRepositoryException("Failure to GetAllAsync", ex);
-                this.Logger.LogError("LogInstance {LogInstance}, Exception {Exception}", ve.LogInstance, ex);
+                this.Logger?.LogError("LogInstance {LogInstance}, Exception {Exception}", ve.LogInstance, ex);
                 throw ve;
             }
         }
@@ -111,7 +109,7 @@ namespace Bix.Repositories.EntityFramework
             catch (Exception ex)
             {
                 var ve = new EntityFrameworkRepositoryException("Failure to FindAsync", ex);
-                this.Logger.LogError("LogInstance {LogInstance}, Key {Key}, Exception {Exception}", ve.LogInstance, identity, ex);
+                this.Logger?.LogError("LogInstance {LogInstance}, Key {Key}, Exception {Exception}", ve.LogInstance, identity, ex);
                 throw ve;
             }
         }
@@ -130,7 +128,7 @@ namespace Bix.Repositories.EntityFramework
             catch (Exception ex)
             {
                 var ve = new EntityFrameworkRepositoryException("Failure to AddAsync", ex);
-                this.Logger.LogError("LogInstance {LogInstance}, Item {Item}, Exception {Exception}", ve.LogInstance, item.ToJson(), ex);
+                this.Logger?.LogError("LogInstance {LogInstance}, Item {Item}, Exception {Exception}", ve.LogInstance, item.ToJson(), ex);
                 throw ve;
             }
         }
@@ -152,7 +150,7 @@ namespace Bix.Repositories.EntityFramework
             catch (Exception ex)
             {
                 var ve = new EntityFrameworkRepositoryException("Failure to RemoveAsync", ex);
-                this.Logger.LogError("LogInstance {LogInstance}, Key {Key}, Exception {Exception}", ve.LogInstance, identity, ex);
+                this.Logger?.LogError("LogInstance {LogInstance}, Key {Key}, Exception {Exception}", ve.LogInstance, identity, ex);
                 throw ve;
             }
         }
@@ -171,7 +169,7 @@ namespace Bix.Repositories.EntityFramework
             catch (Exception ex)
             {
                 var ve = new EntityFrameworkRepositoryException("Failure to UpdateAsync", ex);
-                this.Logger.LogError("LogInstance {LogInstance}, Item {Item}, Exception {Exception}", ve.LogInstance, item.ToJson(), ex);
+                this.Logger?.LogError("LogInstance {LogInstance}, Item {Item}, Exception {Exception}", ve.LogInstance, item.ToJson(), ex);
                 throw ve;
             }
         }

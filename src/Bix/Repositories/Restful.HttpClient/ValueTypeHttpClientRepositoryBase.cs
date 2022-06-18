@@ -17,8 +17,8 @@
 using Bix.Core;
 using Bix.Http.Client;
 using Bix.Http.Core;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Serilog;
 using System;
 using System.IO;
 using snh = System.Net.Http;
@@ -34,12 +34,11 @@ namespace Bix.Repositories.Restful.HttpClient
         public ValueTypeHttpClientRepositoryBase(
             IHttpClientConfiguration config,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
-            ILogger logger)
+            ILogger<ValueTypeHttpClientRepositoryBase<TIdentity, TNaturalKey, TItem>> logger = null)
             : base(config, authenticationHeaderGenerator, logger) { }
 
         public async Task<TItem> FindOrAddAsync(TItem item, CancellationToken cancellationToken = default)
         {
-            var key = item.NaturalKey;
             try
             {
                 using (var client = new snh.HttpClient())
@@ -65,7 +64,7 @@ namespace Bix.Repositories.Restful.HttpClient
             }
             catch (Exception ex)
             {
-                this.Logger.Error(ex, "Failure to FindOrAddAsync. Item {Item}", item.ToJson());
+                this.Logger?.LogError(ex, "Failure to FindOrAddAsync. Item {Item}", item.ToJson());
                 throw;
             }
         }
@@ -78,7 +77,7 @@ namespace Bix.Repositories.Restful.HttpClient
         public ValueTypeHttpClientRepositoryBase(
             IHttpClientConfiguration config,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
-            ILogger logger)
+            ILogger<ValueTypeHttpClientRepositoryBase<TNaturalKey, TItem>> logger = null)
             : base(config, authenticationHeaderGenerator, logger) { }
     }
 }
