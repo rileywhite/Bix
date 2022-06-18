@@ -51,17 +51,22 @@ namespace Bix.Http.Hmac
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
-            IApplicationSecretStore applicationSecretStore)
+            IApplicationSecretStore applicationSecretStore,
+            IClaimsProvider claimsProvider)
             : base(options, logger, encoder, clock)
         {
             Contract.Requires(applicationSecretStore != null);
             Contract.Ensures(this.ApplicationSecretStore != null);
+
             this.Logger = logger.CreateLogger<HmacAuthenticationHandler>();
 
             this.ApplicationSecretStore = applicationSecretStore;
+            this.ClaimsProvider = claimsProvider;
         }
 
         private IApplicationSecretStore ApplicationSecretStore { get; }
+
+        private IClaimsProvider ClaimsProvider { get; }
 
         protected async override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
@@ -126,12 +131,35 @@ namespace Bix.Http.Hmac
                 return AuthenticateResult.Fail("HMAC request hashes do not match");
             }
 
-            var user = new ClaimsPrincipal(new GenericIdentity(parameter.AuthenticatedUser, HmacSchemeName));
+            this.Logger.LogWarning(
+                "HMAC authentication looks good. Building claims principal for User: {User}, ApplicationKey: {Application}, Time: {Time}.",
+                parameter.AuthenticatedUser,
+                parameter.ApplicationKey,
+                parameter.Time);
 
             var properties = new AuthenticationProperties();
             properties.Items[nameof(HmacAuthenticationParameter.ApplicationKey)] = parameter.ApplicationKey;
             properties.Items[nameof(HmacAuthenticationParameter.AuthenticatedUser)] = parameter.AuthenticatedUser;
             properties.Items[nameof(HmacAuthenticationParameter.Time)] = parameter.Time;
+
+            ClaimsIdentity identity = new GenericIdentity(parameter.AuthenticatedUser, HmacSchemeName);
+
+            if (this.ClaimsProvider == null)
+            {
+                this.Logger.LogWarning("The claims provider is null. Proceeding without attaching claims to identity.");
+            }
+            else
+            {
+                this.Logger.LogWarning("Attaching claims to identity.");
+                this.ClaimsProvider.AddClaimsTo(identity, properties);
+
+                if (identity.Claims.Any()) { this.Logger.LogWarning("Claims were successfully attached."); }
+                else { this.Logger.LogWarning("No claims were attached by the claims provider."); }
+            }
+
+            var user = new ClaimsPrincipal(identity);
+
+            this.Logger.LogWarning("Returning success with claims principal.");
 
             return AuthenticateResult.Success(new AuthenticationTicket(user, properties, HmacSchemeName));
         }
