@@ -40,11 +40,9 @@ namespace Bix.Repositories.EntityFramework
             : base(httpContextAccessor, logger, cache, auditingColumns, context)
         {
             Contract.Requires(httpContextAccessor != null);
-            Contract.Requires(logger != null);
             Contract.Requires(cache != null);
             Contract.Requires(auditingColumns != null);
             Contract.Requires(context != null);
-            Contract.Ensures(this.Logger != null);
             Contract.Ensures(this.Context != null);
         }
 
@@ -70,7 +68,7 @@ namespace Bix.Repositories.EntityFramework
             catch (Exception ex)
             {
                 var ve = new EntityFrameworkRepositoryException("Failure to FindOrAddAsync", ex);
-                this.Logger.LogError("LogInstance {LogInstance}, Item {Item}, Exception {Exception}", ve.LogInstance, item.ToJson(), ex);
+                this.Logger?.LogError("LogInstance {LogInstance}, Item {Item}, Exception {Exception}", ve.LogInstance, item.ToJson(), ex);
                 throw ve;
             }
         }
@@ -90,11 +88,9 @@ namespace Bix.Repositories.EntityFramework
             : base(httpContextAccessor, logger, cache, auditingColumns, context)
         {
             Contract.Requires(httpContextAccessor != null);
-            Contract.Requires(logger != null);
             Contract.Requires(cache != null);
             Contract.Requires(auditingColumns != null);
             Contract.Requires(context != null);
-            Contract.Ensures(this.Logger != null);
             Contract.Ensures(this.Context != null);
         }
     }

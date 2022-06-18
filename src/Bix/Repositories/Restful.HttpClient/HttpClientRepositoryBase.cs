@@ -17,8 +17,8 @@
 using Bix.Core;
 using Bix.Http.Core;
 using Bix.Http.Client;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +34,7 @@ namespace Bix.Repositories.Restful.HttpClient
     {
         protected IHttpClientConfiguration Config { get; }
         protected IAuthenticationHeaderGenerator AuthenticationHeaderGenerator { get; }
-        protected ILogger Logger { get; }
+        protected ILogger<HttpClientRepositoryBase<TIdentity, TItem>> Logger { get; }
 
         protected abstract string ItemsControllerPath { get; }
         protected abstract string ItemControllerPath { get; }
@@ -42,7 +42,7 @@ namespace Bix.Repositories.Restful.HttpClient
         public HttpClientRepositoryBase(
             IHttpClientConfiguration config,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
-            ILogger logger)
+            ILogger<HttpClientRepositoryBase<TIdentity, TItem>> logger = null)
         {
             this.Config = config;
             this.AuthenticationHeaderGenerator = authenticationHeaderGenerator;
@@ -68,7 +68,7 @@ namespace Bix.Repositories.Restful.HttpClient
             }
             catch (Exception ex)
             {
-                this.Logger.Error(ex, "Failure to GetAllAsync");
+                this.Logger?.LogError(ex, "Failure to GetAllAsync");
                 throw;
             }
         }
@@ -92,7 +92,7 @@ namespace Bix.Repositories.Restful.HttpClient
             }
             catch (Exception ex)
             {
-                this.Logger.Error(ex, "Failure to FindAsync. Identity {Identity}", identity);
+                this.Logger?.LogError(ex, "Failure to FindAsync. Identity {Identity}", identity);
                 throw;
             }
         }
@@ -124,7 +124,7 @@ namespace Bix.Repositories.Restful.HttpClient
             }
             catch (Exception ex)
             {
-                this.Logger.Error(ex, "Failure to AddAsync. Item {Item}", item.ToJson());
+                this.Logger?.LogError(ex, "Failure to AddAsync. Item {Item}", item.ToJson());
                 throw;
             }
         }
@@ -149,7 +149,7 @@ namespace Bix.Repositories.Restful.HttpClient
             }
             catch (Exception ex)
             {
-                this.Logger.Error(ex, "Failure to RemoveAsync. Identity {Identity}", identity);
+                this.Logger?.LogError(ex, "Failure to RemoveAsync. Identity {Identity}", identity);
                 throw;
             }
         }
@@ -183,7 +183,7 @@ namespace Bix.Repositories.Restful.HttpClient
             }
             catch (Exception ex)
             {
-                this.Logger.Error(ex, "Failure to UpdateAsync. Item {Identity}", updated.ToJson());
+                this.Logger?.LogError(ex, "Failure to UpdateAsync. Item {Identity}", updated.ToJson());
                 throw;
             }
         }
@@ -207,7 +207,7 @@ namespace Bix.Repositories.Restful.HttpClient
             }
             catch (Exception ex)
             {
-                this.Logger.Error(ex, "Failure to GetMetadata. Identity {Identity}", identity);
+                this.Logger?.LogError(ex, "Failure to GetMetadata. Identity {Identity}", identity);
                 throw;
             }
         }

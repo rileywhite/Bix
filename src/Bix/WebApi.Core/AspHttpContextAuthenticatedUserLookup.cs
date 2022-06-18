@@ -57,10 +57,10 @@ namespace Bix.WebApi.Core
         /// <returns>Currently authenticated user</returns>
         public string GetAuthenticatedUser()
         {
-            var name =  this.HttpContextAccessor?.HttpContext?.User?.Identity?.Name;
+            var name = this.HttpContextAccessor?.HttpContext?.User?.Identity?.Name;
             if (string.IsNullOrEmpty(name) && this.Config != null)
             {
-                name = name ?? this.Config.ApplicationUserName;
+                name ??= this.Config.ApplicationUserName;
             }
             return name ?? string.Empty;
         }

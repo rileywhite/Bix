@@ -17,8 +17,8 @@
 using Bix.Core;
 using Bix.Http.Client;
 using Bix.Http.Core;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Serilog;
 using System;
 using System.IO;
 using snh = System.Net.Http;
@@ -37,19 +37,17 @@ namespace Bix.IO.HttpClient
     {
         protected IHttpClientConfiguration Config { get; }
         protected IAuthenticationHeaderGenerator AuthenticationHeaderGenerator { get; }
-        protected ILogger Logger { get; }
+        protected ILogger<HttpClientDataSinkBase> Logger { get; }
 
         public HttpClientDataSinkBase(
             IHttpClientConfiguration config,
             IAuthenticationHeaderGenerator authenticationHeaderGenerator,
-            ILogger logger)
+            ILogger<HttpClientDataSinkBase> logger = null)
         {
             Contract.Requires(config != null);
             Contract.Requires(authenticationHeaderGenerator != null);
-            Contract.Requires(logger != null);
             Contract.Ensures(this.Config != null);
             Contract.Ensures(this.AuthenticationHeaderGenerator != null);
-            Contract.Ensures(this.Logger != null);
 
             this.Config = config;
             this.AuthenticationHeaderGenerator = authenticationHeaderGenerator;
@@ -97,7 +95,7 @@ namespace Bix.IO.HttpClient
             }
             catch (Exception ex)
             {
-                this.Logger.Error(ex, "Failure to BumpAsync");
+                this.Logger?.LogError(ex, "Failure to BumpAsync");
                 throw;
             }
         }
@@ -152,7 +150,7 @@ namespace Bix.IO.HttpClient
             }
             catch (Exception ex)
             {
-                this.Logger.Error(ex, "Failure to SendDataAsync");
+                this.Logger?.LogError(ex, "Failure to SendDataAsync");
                 throw;
             }
         }

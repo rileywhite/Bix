@@ -31,7 +31,6 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Text.Encodings.Web;
-using Microsoft.Extensions.Primitives;
 
 namespace Bix.Http.Hmac
 {
@@ -48,17 +47,17 @@ namespace Bix.Http.Hmac
 
         public HmacAuthenticationHandler(
             IOptionsMonitor<HmacAuthenticationSchemeOptions> options,
-            ILoggerFactory logger,
+            ILoggerFactory loggerFactory,
             UrlEncoder encoder,
             ISystemClock clock,
             IApplicationSecretStore applicationSecretStore,
             IClaimsProvider claimsProvider)
-            : base(options, logger, encoder, clock)
+            : base(options, loggerFactory, encoder, clock)
         {
             Contract.Requires(applicationSecretStore != null);
             Contract.Ensures(this.ApplicationSecretStore != null);
 
-            this.Logger = logger.CreateLogger<HmacAuthenticationHandler>();
+            this.Logger = loggerFactory?.CreateLogger<HmacAuthenticationHandler>();
 
             this.ApplicationSecretStore = applicationSecretStore;
             this.ClaimsProvider = claimsProvider;
@@ -73,40 +72,44 @@ namespace Bix.Http.Hmac
             var authorizationHeader = this.Request.Headers["Authorization"];
 
             var remoteIPAddress = this.Context.Connection.RemoteIpAddress;
-            foreach (var trustedNetwork in this.Options.TrustedNetworks ?? Enumerable.Empty<IPNetwork>())
-            {
-                if (trustedNetwork.Contains(remoteIPAddress))
-                {
-                    this.Logger.LogInformation("Trusting request from {TrustedRemoteIPAddress}", remoteIPAddress.ToJson());
-                    return CreateTrustedNetworkAuthenticationResult(this.Logger, authorizationHeader, remoteIPAddress, trustedNetwork);
-                }
-            }
-
-            this.Logger.LogInformation(
-                "Request came from untrusted IP Address: {UntrustedRemoteIPAddress}. Continuing with auth check.",
+            this.Logger?.LogDebug(
+                "Request came from remote IP Address: {RemoteIPAddress}. Continuing with auth check.",
                 remoteIPAddress.ToJson());
 
             if (!authorizationHeader.Any())
             {
-                this.Logger.LogWarning("Failing authentication for application: {Reason}", "No authorization header found");
+                this.Logger?.LogWarning(
+                    "Failing authentication from IP {RemoteIPAddress} for application: {Reason}",
+                    remoteIPAddress.ToJson(),
+                    "No authorization header found");
                 return AuthenticateResult.Fail("No authorization header found");
             }
 
-            if (!TryGetHmacAuthenticationParameter(this.Logger, authorizationHeader[0] ?? string.Empty, out var parameter))
+            if (!TryGetHmacAuthenticationParameter(this.Logger, remoteIPAddress, authorizationHeader[0] ?? string.Empty, out var parameter))
             {
-                this.Logger.LogWarning("Failing authentication: {Reason}", "Invalid HMAC authentication parameter");
+                this.Logger?.LogWarning("Failing authentication from IP {RemoteIPAddress}: {Reason}",
+                    remoteIPAddress.ToJson(),
+                    "Invalid HMAC authentication parameter");
                 return AuthenticateResult.Fail("Invalid HMAC authentication parameter");
             }
 
             if (!this.ApplicationSecretStore.TryGetValue(parameter.ApplicationKey, out var applicationSecret))
             {
-                this.Logger.LogWarning("Failing authentication: {Reason}. Parameters: {Parameters}", "No secret found for application key", parameter.ToJson());
+                this.Logger?.LogWarning("Failing authentication from IP {RemoteIPAddress}: {Reason}. Parameters: {Parameters}",
+                    remoteIPAddress.ToJson(),
+                    "No secret found for application key",
+                    parameter.ToJson());
                 return AuthenticateResult.Fail("No secret found for application key");
             }
 
             if (!IsRequestFresh(parameter, out var freshnessIndicator))
             {
-                this.Logger.LogWarning("Failing authentication: {Reason}. Parameters: {Parameters}. Freshness Indicator: {FreshnessIndicator}", "HMAC authentication request is not fresh", parameter.ToJson(), freshnessIndicator.ToJson());
+                this.Logger?.LogWarning(
+                    "Failing authentication from IP {RemoteIPAddress}: {Reason}. Parameters: {Parameters}. Freshness Indicator: {FreshnessIndicator}",
+                    remoteIPAddress.ToJson(),
+                    "HMAC authentication request is not fresh",
+                    parameter.ToJson(),
+                    freshnessIndicator.ToJson());
                 return AuthenticateResult.Fail("HMAC authentication request is not fresh");
             }
 
@@ -122,8 +125,9 @@ namespace Bix.Http.Hmac
 
             if (hash != parameter.Hash)
             {
-                this.Logger.LogWarning(
-                    "Failing authentication: {Reason}. DisplayUrl: {DisplayUrl}. Parameters: {Parameters}. Includes body: {IncludeBodyInHash}.",
+                this.Logger?.LogWarning(
+                    "Failing authentication from IP {RemoteIPAddress}: {Reason}. DisplayUrl: {DisplayUrl}. Parameters: {Parameters}. Includes body: {IncludeBodyInHash}.",
+                    remoteIPAddress.ToJson(),
                     "HMAC request hashes do not match",
                     displayUrl,
                     parameter.ToJson(),
@@ -131,8 +135,9 @@ namespace Bix.Http.Hmac
                 return AuthenticateResult.Fail("HMAC request hashes do not match");
             }
 
-            this.Logger.LogWarning(
-                "HMAC authentication looks good. Building claims principal for User: {User}, ApplicationKey: {Application}, Time: {Time}.",
+            this.Logger?.LogDebug(
+                "HMAC authentication from IP {RemoteIPAddress} looks good. Building claims principal for User: {User}, ApplicationKey: {Application}, Time: {Time}.",
+                remoteIPAddress.ToJson(),
                 parameter.AuthenticatedUser,
                 parameter.ApplicationKey,
                 parameter.Time);
@@ -146,20 +151,20 @@ namespace Bix.Http.Hmac
 
             if (this.ClaimsProvider == null)
             {
-                this.Logger.LogWarning("The claims provider is null. Proceeding without attaching claims to identity.");
+                this.Logger?.LogWarning("The claims provider is null. Proceeding without attaching claims to identity.");
             }
             else
             {
-                this.Logger.LogWarning("Attaching claims to identity.");
+                this.Logger?.LogDebug("Attaching claims to identity.");
                 this.ClaimsProvider.AddClaimsTo(identity, properties);
 
-                if (identity.Claims.Any()) { this.Logger.LogWarning("Claims were successfully attached."); }
-                else { this.Logger.LogWarning("No claims were attached by the claims provider."); }
+                if (identity.Claims.Any()) { this.Logger?.LogDebug("Claims were successfully attached."); }
+                else { this.Logger?.LogWarning("No claims were attached by the claims provider."); }
             }
 
             var user = new ClaimsPrincipal(identity);
 
-            this.Logger.LogWarning("Returning success with claims principal.");
+            this.Logger?.LogDebug("Returning success with claims principal.");
 
             return AuthenticateResult.Success(new AuthenticationTicket(user, properties, HmacSchemeName));
         }
@@ -186,6 +191,7 @@ namespace Bix.Http.Hmac
 
         private static bool TryGetHmacAuthenticationParameter(
             ILogger logger,
+            IPAddress remoteIPAddress,
             string authorizationHeaderValue,
             out HmacAuthenticationParameter parameter)
         {
@@ -207,7 +213,11 @@ namespace Bix.Http.Hmac
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Bad HMAC authentication header {AuthorizationHeaderValue}", authorizationHeaderValue);
+                logger?.LogWarning(
+                    ex,
+                    "Bad HMAC authentication header from IP {RemoteIPAddress}: {AuthorizationHeaderValue}",
+                    remoteIPAddress.ToJson(),
+                    authorizationHeaderValue);
 
                 parameter = null;
                 return false;
@@ -233,29 +243,6 @@ namespace Bix.Http.Hmac
             freshnessIndicators = Tuple.Create(parseResult, now, offset);
 
             return isRequestFresh;
-        }
-
-        private static AuthenticateResult CreateTrustedNetworkAuthenticationResult(
-            ILogger logger,
-            StringValues authorizationHeader,
-            IPAddress remoteIPAddress,
-            IPNetwork trustedNetwork)
-        {
-            ClaimsPrincipal user;
-            if (authorizationHeader.Any() && TryGetHmacAuthenticationParameter(logger, authorizationHeader[0] ?? string.Empty, out var parameter))
-            {
-                user = new ClaimsPrincipal(new GenericIdentity(parameter.AuthenticatedUser, TrustedNetworkSchemeName));
-            }
-            else
-            {
-                user = new ClaimsPrincipal(new GenericIdentity("Unknown Trusted Network User", TrustedNetworkSchemeName));
-            }
-
-            var properties = new AuthenticationProperties();
-            properties.Items["RemoteIPAddress"] = remoteIPAddress.ToJson();
-            properties.Items["TrustedNetwork"] = trustedNetwork.ToJson();
-
-            return AuthenticateResult.Success(new AuthenticationTicket(user, properties, HmacSchemeName));
         }
     }
 }
