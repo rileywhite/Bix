@@ -53,7 +53,7 @@ namespace Bix.Http.Hmac
             var parameterContainer = new
             {
                 EndpointUri = endpointUri,
-                JsonContent = jsonContent ?? string.Empty,
+                JsonContent = parameter.ForceExcludeBody ? string.Empty : jsonContent ?? string.Empty,
                 Parameter = parameter.CloneWithoutHash(),
             };
 

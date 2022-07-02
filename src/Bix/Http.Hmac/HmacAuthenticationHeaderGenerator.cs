@@ -44,6 +44,7 @@ namespace Bix.Http.Hmac
             {
                 ApplicationKey = this.ApplicationSecrets.ApplicationKey,
                 AuthenticatedUser = this.UserLookup.GetAuthenticatedUser(),
+                ForceExcludeBody = jsonContent == null,
                 Time = InstantPattern.General.Format(this.Clock.GetCurrentInstant()),
             };
 
