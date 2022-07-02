@@ -31,6 +31,7 @@ namespace Bix.Http.Hmac
             set => this.authenticatedUser = value;
         }
 
+        public bool ForceExcludeBody { get; set; }
         public string Time { get; set; }
         public string Hash { get; set; }
 
@@ -40,6 +41,7 @@ namespace Bix.Http.Hmac
             {
                 ApplicationKey = this.ApplicationKey,
                 AuthenticatedUser = this.AuthenticatedUser,
+                ForceExcludeBody = this.ForceExcludeBody,
                 Time = this.Time,
             };
         }

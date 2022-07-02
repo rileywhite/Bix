@@ -113,7 +113,7 @@ namespace Bix.Http.Hmac
                 return AuthenticateResult.Fail("HMAC authentication request is not fresh");
             }
 
-            var includeBodyInHash = this.Request.ContentLength.HasValue && this.Request.ContentLength.Value > 0;
+            var includeBodyInHash = !parameter.ForceExcludeBody && this.Request.ContentLength.HasValue && this.Request.ContentLength.Value > 0;
             var requestBody = includeBodyInHash ? await ReadRequestBody(this.Request).ConfigureAwait(false) : string.Empty;
             var displayUrl = this.Request.GetDisplayUrl();
 
