@@ -10,14 +10,11 @@ before_build:
 build:
   verbosity: minimal
 
-artifacts:
-- path: '**\*.*nupkg'
-  name: Bix Packages
-
 deploy:
 - provider: NuGet
   api_key:
     secure: 0WJJyoL3KDd4D3PoaKD08XGwqWNjCbH2YM/gfFQNC79sWWrpWyV16DWPjEXELgZl
-  artifact: Bix Packages
+  skip_symbols: false
+  artifact: /.*(\.|\.s)nupkg/
   on:
     branch: main
