@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/rileywhite/Bix</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rileywhite/Bix.git</RepositoryUrl>
     <PackageTags>bix business-mix restful webapi aspnetcore</PackageTags>
-    <Version>4.1.0</Version>
+    <Version>4.1.1-dev.1</Version>
     <NoWarn>$(NoWarn);NU5105</NoWarn>
   
     <!-- Microsoft.SourceLink Configuration  -->
@@ -20,11 +20,6 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(SolutionDir)..\packages\</PackageOutputPath>
   </PropertyGroup>
-  
-  <!-- Reference Github SourceLink package for all projects  -->
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
-  </ItemGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
