@@ -11,7 +11,7 @@ build:
   verbosity: minimal
 
 artifacts:
-- path: "'**\\*.*nupkg'"
+- path: '**\*.*nupkg'
   name: Bix Packages
 
 deploy:
